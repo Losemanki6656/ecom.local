@@ -101,7 +101,8 @@ class OrderController extends Controller
             }else{
                 $order->payment_status = 'unpaid';
             }
-            
+            if($request->payment_option == 'paymo')
+                $order->payment_status = 'paid';
             $order->save();
 
             $subtotal = 0;

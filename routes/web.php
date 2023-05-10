@@ -238,9 +238,13 @@ Route::group(['middleware' => ['user', 'verified', 'unbanned']], function() {
     Route::controller(HomeController::class)->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/profile', 'profile')->name('profile');
+        Route::get('/my-cards', 'myCards')->name('my-cards');
         Route::post('/new-user-verification', 'new_verify')->name('user.new.verify');
         Route::post('/new-user-email', 'update_email')->name('user.change.email');
         Route::post('/user/update-profile', 'userProfileUpdate')->name('user.profile.update');
+        
+        Route::post('/user/add-card', 'add_card')->name('add_card');
+        Route::post('/user/add-card-success', 'add_card_success')->name('add_card_success');
     });
     
     Route::get('/all-notifications', [NotificationController::class, 'index'])->name('all-notifications');
@@ -257,6 +261,8 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function() 
             Route::post('/payment_select', 'store_delivery_info')->name('checkout.store_delivery_info');
             Route::get('/order-confirmed', 'order_confirmed')->name('order_confirmed');
             Route::post('/payment', 'checkout')->name('payment.checkout');
+            Route::post('/paySuccess', 'paySuccess')->name('payment.paySuccess');
+            Route::post('/otpVerify', 'otpVerify')->name('payment.otpVerify');
             Route::post('/get_pick_up_points', 'get_pick_up_points')->name('shipping_info.get_pick_up_points');
             Route::get('/payment-select', 'get_payment_info')->name('checkout.payment_info');
             Route::post('/apply_coupon_code', 'apply_coupon_code')->name('checkout.apply_coupon_code');

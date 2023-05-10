@@ -8,6 +8,7 @@ use Mail;
 use Cache;
 use Cookie;
 use App\Models\Page;
+use App\Models\BindedCard;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\Brand;
@@ -29,6 +30,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Mail\SecondEmailVerifyMailManager;
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
+use Validator;
 
 class HomeController extends Controller
 {
@@ -153,6 +157,235 @@ class HomeController extends Controller
             return view('delivery_boys.profile');
         } else {
             return view('frontend.user.profile');
+        }
+    }
+
+    public function add_card(Request $request)
+    {
+        if (Auth::user()->user_type == 'customer') {
+            
+            
+    	$validator = Validator::make($request->all(), [
+            'cardNum' => 'required|min:15',
+            'exDate' => 'required|min:5'
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'You entered the wrong card number and term ...'
+            ], 422);
+        }
+        
+
+            try {
+
+                $client = new Client();
+                $url = 'https://partner.atmos.uz/token';
+    
+                $response = $client->request('POST', $url, [
+                    'headers' =>  [
+                        'Accept' => 'application/json',
+                    ],
+                    'query' => 'grant_type=client_credentials',
+                    'auth' => [
+                        env('PAYMO_KEY'), 
+                        env('PAYMO_SECRET')
+                    ]
+                ]);
+    
+                // $response = json_decode($response->body(), true);
+    
+                $info = json_decode($response->getBody()->getContents(), true); 
+    
+            } catch (\Exception $e) {
+    
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            try {
+                
+                $expiries = explode('/', $request->exDate);
+
+                $expirationDate = $expiries[1] . $expiries[0];
+
+                $response = Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer '. $info['access_token']
+                ])->post('https://partner.atmos.uz/partner/bind-card/create', [
+                    "card_number" =>  $this->replace($request->cardNum),
+                    "expiry" => $expirationDate
+                ]);
+
+                $response = json_decode($response->body(), true);      
+   
+
+                if($response['result']['code'] == "OK" ) {
+
+                    return response()->json([
+                        'status' => false,
+                        'transaction_id' => $response['transaction_id'],
+                        'phone' => $response['phone']
+                    ]);                
+
+                } else {
+
+                    if($response['result']['code'] == "STPIMS-ERR-133")
+                    {
+                        $cards = BindedCard::where('user_id', auth()->user()->id)->where('pan',$response['data']['pan'])->count();
+                        if(!$cards) {
+                            $bincard = new BindedCard();
+                            $bincard->user_id = auth()->user()->id;
+                            $bincard->card_id = $response['data']['card_id'];
+                            $bincard->pan = $response['data']['pan'];
+                            $bincard->expiry = $response['data']['expiry'];
+                            $bincard->card_holder = $response['data']['card_holder'];
+                            $bincard->balance = $response['data']['balance'];
+                            $bincard->phone = $response['data']['phone'];
+                            $bincard->card_token = $response['data']['card_token'];
+                            $bincard->save();
+                        }
+
+                        return response()->json([
+                            'message' => 'Your Card binded successfully!',
+                            'status' => true
+                        ], 202);
+                    } else {
+                        return response()->json([
+                            'message' => $response['result']['description']
+                        ], 400);
+                    }
+                     
+                }
+                
+    
+            } catch (\Exception $e) {
+    
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            // return response()->json([
+            //     'message' => $response->body()
+            // ],404);
+
+
+            flash(translate('Paymo Setting has been updated successfully'))->warning();
+
+            $status = false;
+            return redirect()->back()->with(compact('status'));
+
+        } else {
+            abort(404);
+        }
+    }
+
+    public function add_card_success(Request $request)
+    {
+        if (Auth::user()->user_type == 'customer') {
+    	
+            try {
+
+                $client = new Client();
+                $url = 'https://partner.atmos.uz/token';
+    
+                $response = $client->request('POST', $url, [
+                    'headers' =>  [
+                        'Accept' => 'application/json',
+                    ],
+                    'query' => 'grant_type=client_credentials',
+                    'auth' => [
+                        env('PAYMO_KEY'), 
+                        env('PAYMO_SECRET')
+                    ]
+                ]);
+    
+                $info = json_decode($response->getBody()->getContents(), true); 
+    
+            } catch (\Exception $e) {
+    
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            try {
+
+                $response = Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer '. $info['access_token']
+                ])->post('https://partner.atmos.uz/partner/bind-card/apply', [
+                    "transaction_id" =>  $request->transaction_id,
+                    "otp" => $request->verify_code
+                ]);
+
+                $response = json_decode($response->body(), true);      
+   
+
+                if($response['result']['code'] == "OK" ) {
+
+                    $cards = BindedCard::where('user_id', auth()->user()->id)->where('pan',$response['data']['pan'])->count();
+                    if(!$cards) {
+                        $bincard = new BindedCard();
+                        $bincard->user_id = auth()->user()->id;
+                        $bincard->card_id = $response['data']['card_id'];
+                        $bincard->pan = $response['data']['pan'];
+                        $bincard->expiry = $response['data']['expiry'];
+                        $bincard->card_holder = $response['data']['card_holder'];
+                        $bincard->balance = $response['data']['balance'];
+                        $bincard->phone = $response['data']['phone'];
+                        $bincard->card_token = $response['data']['card_token'];
+                        $bincard->save();
+                    }
+                    
+                    return response()->json([
+                        'message' => 'Your Card binded successfully!'
+                    ]);                
+
+                } else {
+                        return response()->json([
+                            'message' => $response['result']['description']
+                        ], 400);
+                  
+                     
+                }
+                
+    
+            } catch (\Exception $e) {
+    
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+        } else {
+            abort(404);
+        }
+    }
+
+    public function replace($text)
+    {
+        $sym1 = ["/",' '];
+
+        $sym2 = ['',''];
+
+        return str_replace($sym1, $sym2, $text);
+    }
+
+    public function myCards(Request $request)
+    {
+        if (Auth::user()->user_type == 'customer') {
+            $cards = BindedCard::where('user_id', auth()->user()->id)->get();
+
+            return view('frontend.user.cards', [ 
+                'cards' => $cards,
+                'status' => session('status') ?? true
+            ]);
+
+        } else {
+            abort(404);
         }
     }
 

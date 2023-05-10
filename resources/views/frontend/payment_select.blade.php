@@ -30,7 +30,8 @@
                         </div>
                         <div class="col active">
                             <div class="text-center border border-bottom-6px p-2 text-primary">
-                                <i class="la-3x mb-2 las la-credit-card cart-animate" style="margin-right: -100px; transition: 2s;"></i>
+                                <i class="la-3x mb-2 las la-credit-card cart-animate"
+                                    style="margin-right: -100px; transition: 2s;"></i>
                                 <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('4. Payment') }}</h3>
                             </div>
                         </div>
@@ -56,7 +57,11 @@
                         id="checkout-form">
                         @csrf
                         <input type="hidden" name="owner_id" value="{{ $carts[0]['owner_id'] }}">
-                        
+                      
+                        <input type="hidden" name="BindID" id="bindID" value="{{ $bind }}">
+                        <input type="hidden" name="otp" id="otp" value="">
+                        <input type="hidden" name="trans" id="trans" value="">
+
                         <div class="card rounded-0 border shadow-none">
                             <!-- Additional Info -->
                             <div class="card-header p-4 border-bottom-0">
@@ -65,7 +70,8 @@
                                 </h3>
                             </div>
                             <div class="form-group px-4">
-                                <textarea name="additional_info" rows="5" class="form-control rounded-0" placeholder="{{ translate('Type your text...') }}"></textarea>
+                                <textarea name="additional_info" rows="5" class="form-control rounded-0"
+                                    placeholder="{{ translate('Type your text...') }}"></textarea>
                             </div>
 
                             <div class="card-header p-4 border-bottom-0">
@@ -77,7 +83,7 @@
                             <div class="card-body text-center px-4 pt-0">
                                 <div class="row gutters-10">
                                     <!-- Paypal -->
-                                    @if (get_setting('paypal_payment') == 1)
+                                    {{-- @if (get_setting('paypal_payment') == 1)
                                         <div class="col-6 col-xl-3 col-md-4">
                                             <label class="aiz-megabox d-block mb-3">
                                                 <input value="paypal" class="online_payment" type="radio"
@@ -86,15 +92,14 @@
                                                     <img src="{{ static_asset('assets/img/cards/paypal.png') }}"
                                                         class="img-fit mb-2">
                                                     <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Paypal') }}</span>
+                                                        <span class="d-block fw-600 fs-15">{{ translate('Paypal') }}</span>
                                                     </span>
                                                 </span>
                                             </label>
                                         </div>
-                                    @endif
+                                    @endif --}}
                                     <!--Stripe -->
-                                    @if (get_setting('stripe_payment') == 1)
+                                    {{-- @if (get_setting('stripe_payment') == 1)
                                         <div class="col-6 col-xl-3 col-md-4">
                                             <label class="aiz-megabox d-block mb-3">
                                                 <input value="stripe" class="online_payment" type="radio"
@@ -452,7 +457,7 @@
                                                 </span>
                                             </label>
                                         </div>
-                                    @endif
+                                    @endif --}}
                                     <!-- Cash Payment -->
                                     @if (get_setting('cash_payment') == 1)
                                         @php
@@ -472,7 +477,8 @@
                                             <div class="col-6 col-xl-3 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="cash_on_delivery" class="online_payment"
-                                                        type="radio" name="payment_option" checked>
+                                                        onclick="pay_method('cash_on_delivery')" type="radio"
+                                                        name="payment_option">
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
                                                         <img src="{{ static_asset('assets/img/cards/cod.png') }}"
                                                             class="img-fit mb-2">
@@ -528,8 +534,23 @@
                                             @endforeach
                                         @endif
                                     @endif
+
+                                    <div class="col-6 col-xl-3 col-md-4">
+                                        <label class="aiz-megabox d-block mb-3">
+                                            <input value="paymo" class="online_payment" type="radio"
+                                                onclick="pay_method('paymo')" name="payment_option" checked>
+                                            <span class="d-block aiz-megabox-elem rounded-0 p-3">
+                                                <img src="{{ static_asset('assets/img/cards/paymo.png') }}"
+                                                    class="img-fit mb-2">
+                                                <span class="d-block text-center">
+                                                    <span class="d-block fw-600 fs-15">{{ translate('Paymo') }}</span>
+                                                </span>
+                                            </span>
+                                        </label>
+                                    </div>
+
                                 </div>
-                                
+
                                 <!-- Offline Payment Fields -->
                                 @if (addon_is_activated('offline_payment'))
                                     <div class="d-none mb-3 rounded border bg-white p-3 text-left">
@@ -579,7 +600,8 @@
                                                 {{ translate('Insufficient balance') }}
                                             </button>
                                         @else
-                                            <button type="button" onclick="use_wallet()" class="btn btn-primary fs-14 fw-700 px-5 rounded-0">
+                                            <button type="button" onclick="use_wallet()"
+                                                class="btn btn-primary fs-14 fw-700 px-5 rounded-0">
                                                 {{ translate('Pay with wallet') }}
                                             </button>
                                         @endif
@@ -594,9 +616,12 @@
                                     <span class="aiz-square-check"></span>
                                     <span>{{ translate('I agree to the') }}</span>
                                 </label>
-                                <a href="{{ route('terms') }}" class="fw-700">{{ translate('terms and conditions') }}</a>,
-                                <a href="{{ route('returnpolicy') }}" class="fw-700">{{ translate('return policy') }}</a> &
-                                <a href="{{ route('privacypolicy') }}" class="fw-700">{{ translate('privacy policy') }}</a>
+                                <a href="{{ route('terms') }}"
+                                    class="fw-700">{{ translate('terms and conditions') }}</a>,
+                                <a href="{{ route('returnpolicy') }}"
+                                    class="fw-700">{{ translate('return policy') }}</a> &
+                                <a href="{{ route('privacypolicy') }}"
+                                    class="fw-700">{{ translate('privacy policy') }}</a>
                             </div>
 
                             <div class="row align-items-center pt-3 px-4 mb-4">
@@ -621,13 +646,600 @@
                 <div class="col-lg-4 mt-lg-0 mt-4" id="cart_summary">
                     @include('frontend.partials.cart_summary')
                 </div>
+
+                <div class="modal fade" id="new-payment" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">{{ translate('Select Card') }}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class='window'>
+                                    <div class='order-info'>
+                                        <div class='order-info-content'>
+                                            <h5>Order Summary</h5>
+                                            @php
+                                                $coupon_discount = 0;
+                                            @endphp
+                                            @if (Auth::check() && get_setting('coupon_system') == 1)
+                                                @php
+                                                    $coupon_code = null;
+                                                @endphp
+
+                                                @foreach ($carts as $key => $cartItem)
+                                                    @php
+                                                        $product = \App\Models\Product::find($cartItem['product_id']);
+                                                    @endphp
+                                                    @if ($cartItem->coupon_applied == 1)
+                                                        @php
+                                                            $coupon_code = $cartItem->coupon_code;
+                                                            break;
+                                                        @endphp
+                                                    @endif
+                                                @endforeach
+
+                                                @php
+                                                    $coupon_discount = carts_coupon_discount($coupon_code);
+                                                @endphp
+                                            @endif
+                                            @php $subtotal_for_min_order_amount = 0; @endphp
+                                            @foreach ($carts as $key => $cartItem)
+                                                @php $subtotal_for_min_order_amount += cart_product_price($cartItem, $cartItem->product, false, false) * $cartItem['quantity']; @endphp
+                                            @endforeach
+                                            @php
+                                                $subtotal = 0;
+                                                $tax = 0;
+                                                $shipping = 0;
+                                                $product_shipping_cost = 0;
+                                                $shipping_region = $shipping_info['city'];
+                                            @endphp
+                                            @foreach ($carts as $key => $cartItem)
+                                                @php
+                                                    $product = \App\Models\Product::find($cartItem['product_id']);
+                                                    $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
+                                                    $tax += cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
+                                                    $product_shipping_cost = $cartItem['shipping_cost'];
+                                                    
+                                                    $shipping += $product_shipping_cost;
+                                                    
+                                                    $product_name_with_choice = $product->getTranslation('name');
+                                                    if ($cartItem['variant'] != null) {
+                                                        $product_name_with_choice = $product->getTranslation('name') . ' - ' . $cartItem['variant'];
+                                                    }
+                                                @endphp
+                                            @endforeach
+
+                                            <table class='table'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <span class='thin'>{{ translate('Subtotal') }}</span>
+
+                                                        </td>
+                                                        <td style="max-width: 160px">
+                                                            <div class='price'>{{ single_price($subtotal) }}</div>
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <span class='thin'>{{ translate('Tax') }}</span>
+
+                                                        </td>
+                                                        <td style="max-width: 160px">
+                                                            <div class='price'>{{ single_price($tax) }}</div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <span class='thin'>{{ translate('Total Shipping') }}</span>
+
+                                                        </td>
+                                                        <td style="max-width: 160px">
+                                                            <div class='price'>{{ single_price($shipping) }}</div>
+                                                        </td>
+
+                                                    </tr>
+                                                    @php
+                                                        $total = $subtotal + $tax + $shipping;
+                                                        if (Session::has('club_point')) {
+                                                            $total -= Session::get('club_point');
+                                                        }
+                                                        if ($coupon_discount > 0) {
+                                                            $total -= $coupon_discount;
+                                                        }
+                                                    @endphp
+                                                    <tr>
+                                                        <td>
+                                                            <span class='thin'
+                                                                style="font-weight: bold">{{ translate('Total') }}</span>
+
+                                                        </td>
+                                                        <td style="max-width: 160px">
+                                                            <div class='price' style="font-weight: bold">
+                                                                {{ single_price($total) }}</div>
+                                                        </td>
+
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <div class='line'></div>
+
+                                            <a type="button" class="btn btn-success mb-2" href="{{route('my-cards')}}"
+                                                style="background-color: #5794E0; width: 100%; border: 0px"> <i
+                                                    class="fa fa-plus"></i> {{ translate('Add Card') }} </a>
+                                        </div>
+                                    </div>
+                                    <div class='credit-info'>
+                                        <div class='credit-info-content'>
+                                            <div class="mb-3">
+                                                Please select your card:
+                                            </div>
+                                            <div class="mb-3">
+                                                <select id="mounth">
+                                                    @foreach ($bindCards as $card)
+                                                        <option value="{{ $card->id }}">{{ $card->pan }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <img src='{{ static_asset('assets/img/cards/paymo-transparent.png') }}'
+                                                height='80' class='credit-card-image' />
+                                            @php
+                                                $cardHolder = '';
+                                                $exDate = '';
+                                                if ($bindCards->count() > 0) {
+                                                    $cardHolder = $bindCards[0]->card_holder;
+                                                    $exDate = $bindCards[0]->expiry;
+                                                }
+                                            @endphp
+                                            <div class="row mb-3">
+                                                <div class="col-9">
+                                                    Card Holder <br>
+                                                    <h6 id="cardHolder">{{ $cardHolder }}</h6>
+                                                </div>
+                                                <div class="col-3">
+                                                    Expiry <br>
+                                                    <h6 id="ExpDate">{{ $exDate }}</h6>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" data-dismiss="modal" class="btn btn-secondary">{{ translate('Cancel') }}</button>
+                                <button type="button" onclick="paymentSubmit()" class="btn btn-primary">
+                                    {{ translate('Complete Order') }} </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
+
+    <style lang="scss">
+        .select-hidden {
+            display: none;
+            visibility: hidden;
+            /* padding-right: 10px; */
+        }
+
+        .select {
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            font-size: 16px;
+            color: #fff;
+            width: 100%;
+            height: 40px;
+            border-radius: 4px;
+        }
+
+        .select-styled {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            border-radius: 4px;
+            background-color: #5794E0;
+            padding: 8px 15px;
+            -moz-transition: all 0.2s ease-in;
+            -o-transition: all 0.2s ease-in;
+            -webkit-transition: all 0.2s ease-in;
+            transition: all 0.2s ease-in;
+        }
+
+        .select-styled:after {
+            content: "";
+            width: 0;
+            height: 0;
+            border: 7px solid transparent;
+            border-color: #fff transparent transparent transparent;
+            position: absolute;
+            top: 16px;
+            right: 10px;
+        }
+
+        .select-styled:hover {
+            background-color: #5794E0;
+        }
+
+        .select-styled:active,
+        .select-styled.active {
+            background-color: #5794E0;
+        }
+
+        .select-styled:active:after,
+        .select-styled.active:after {
+            top: 9px;
+            border-radius: 4px;
+            border-color: transparent transparent #fff transparent;
+        }
+
+        .select-options {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            left: 0;
+            z-index: 999;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            background-color: #5794E0;
+        }
+
+        .select-options li {
+            margin: 0;
+            padding: 12px 0;
+            text-indent: 15px;
+            border-top: 1px solid #5794E0;
+            -moz-transition: all 0.15s ease-in;
+            -o-transition: all 0.15s ease-in;
+            -webkit-transition: all 0.15s ease-in;
+            transition: all 0.15s ease-in;
+        }
+
+        .select-options li:hover,
+        .select-options li.is-selected {
+            color: #5794E0;
+            background: #fff;
+            border-radius: 4px;
+        }
+
+        .select-options li[rel="hide"] {
+            display: none;
+        }
+
+        .thin {
+            font-weight: 400;
+        }
+
+        .small {
+            font-size: 12px;
+            font-size: .8rem;
+        }
+
+        .half-input-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .half-input-table td:first-of-type {
+            border-right: 10px solid #4488dd;
+            width: 50%;
+        }
+
+        .window {
+            /* height: 540px; */
+            /* width: 800px; */
+            /* background: #bab8b8; */
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            /* box-shadow: 0px 15px 50px 10px rgba(0, 0, 0, 0.2); */
+            /* border-radius: 30px; */
+            /* z-index: 10; */
+        }
+
+        .order-info {
+            height: 100%;
+            width: 50%;
+            padding-left: 25px;
+            padding-right: 25px;
+            box-sizing: border-box;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .price {
+            bottom: 0px;
+            /* position: absolute; */
+            right: 0px;
+            color: #4488dd;
+        }
+
+        .order-table td:first-of-type {
+            width: 25%;
+        }
+
+        .order-table {
+            position: relative;
+        }
+
+        .line {
+            height: 1px;
+            width: 100%;
+            background: #ddd;
+        }
+
+        .order-table td:last-of-type {
+            vertical-align: top;
+            padding-left: 25px;
+        }
+
+        .order-info-content {
+            table-layout: fixed;
+
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        .pay-btn {
+            border: none;
+            background: #22b877;
+            line-height: 2em;
+            border-radius: 10px;
+            font-size: 19px;
+            font-size: 1.2rem;
+            color: #fff;
+            cursor: pointer;
+            position: absolute;
+            bottom: 25px;
+            width: calc(100% - 50px);
+            -webkit-transition: all .2s ease;
+            transition: all .2s ease;
+        }
+
+        .pay-btn:hover {
+            background: #22a877;
+            color: #eee;
+            -webkit-transition: all .2s ease;
+            transition: all .2s ease;
+        }
+
+        .total {
+            margin-top: 25px;
+            font-size: 20px;
+            font-size: 1.3rem;
+            position: absolute;
+            bottom: 30px;
+            right: 27px;
+            left: 35px;
+        }
+
+        .dense {
+            line-height: 1.2em;
+            font-size: 16px;
+            font-size: 1rem;
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+            margin-top: 3px;
+            line-height: 1.5em;
+            font-size: 20px;
+            font-size: 1.3rem;
+            border: none;
+            padding: 5px 10px 5px 10px;
+            color: #fff;
+            box-sizing: border-box;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .credit-info {
+            background: #4488dd;
+            height: 100%;
+            width: 50%;
+            color: #eee;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            font-size: 14px;
+            font-size: .9rem;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            box-sizing: border-box;
+            padding-left: 25px;
+            padding-right: 25px;
+            border-top-right-radius: 30px;
+            border-bottom-right-radius: 30px;
+            position: relative;
+        }
+
+        /* .dropdown-btn {
+                                                                                        background: rgba(255, 255, 255, 0.1);
+                                                                                        width: 100%;
+                                                                                        border-radius: 5px;
+                                                                                        text-align: center;
+                                                                                        line-height: 1.5em;
+                                                                                        cursor: pointer;
+                                                                                        position: relative;
+                                                                                        -webkit-transition: background .2s ease;
+                                                                                        transition: background .2s ease;
+                                                                                    }
+
+                                                                                    .dropdown-btn:after {
+                                                                                        content: '\25BE';
+                                                                                        right: 8px;
+                                                                                        position: absolute;
+                                                                                    }
+
+                                                                                    .dropdown-btn:hover {
+                                                                                        background: rgba(255, 255, 255, 0.2);
+                                                                                        -webkit-transition: background .2s ease;
+                                                                                        transition: background .2s ease;
+                                                                                    }
+
+                                                                                    .dropdown-select {
+                                                                                        display: none;
+                                                                                    } */
+
+        .credit-card-image {
+            display: block;
+            height: 100px;
+            margin-left: auto;
+            margin-right: auto;
+            /* margin-top: 35px; */
+            /* margin-bottom: 15px; */
+        }
+
+        .credit-info-content {
+            margin-top: 25px;
+            -webkit-flex-flow: column;
+            -ms-flex-flow: column;
+            flex-flow: column;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .window {
+                width: 100%;
+                height: 100%;
+                display: block;
+                border-radius: 0px;
+            }
+
+            .order-info {
+                width: 100%;
+                height: auto;
+                /* padding-bottom: 100px; */
+                border-radius: 0px;
+            }
+
+            .credit-info {
+                width: 100%;
+                height: auto;
+                /* padding-bottom: 100px; */
+                border-radius: 0px;
+            }
+
+            .pay-btn {
+                border-radius: 0px;
+            }
+        }
+    </style>
 @endsection
 
 @section('script')
+    <script>
+        function paymentSubmit() {
+            if ({{ $bindCards->count() }}) {
+                $('#new-payment').modal('hide');
+                Swal.fire({
+                    title: 'Do you really want to do this?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Apply',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return $.ajax({
+                            type: 'POST',
+                            url: "{{ route('payment.paySuccess') }}",
+                            data: {
+                                "_token": "{{ csrf_token() }}",
+                                "bindID": $('#bindID').val()
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'Your verification code has been sent to phone number +' +
+                                        response.phone,
+                                    input: 'text',
+                                    inputAttributes: {
+                                        autocapitalize: 'off',
+                                        placeholder: 'Verification Code'
+                                    },
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Verify',
+                                    showLoaderOnConfirm: true,
+                                    preConfirm: (login) => {
+                                        return $.ajax({
+                                            type: 'POST',
+                                            url: "{{ route('payment.otpVerify') }}",
+                                            data: {
+                                                "_token": "{{ csrf_token() }}",
+                                                "verify_code": login,
+                                                "transaction_id": response
+                                                    .transaction_id
+                                            },
+                                            success: function(response) {
+                                                $('#checkout-form')
+                                                    .submit();
+                                            },
+                                            error: function(response) {
+                                                Swal.fire({
+                                                    title: "Error",
+                                                    text: response
+                                                        .responseJSON
+                                                        .message,
+                                                    icon: "error",
+                                                    confirmButtonColor: "#1c84ee",
+                                                });
+                                            }
+                                        });
+                                    },
+                                    allowOutsideClick: () => !Swal.isLoading()
+                                })
+                            },
+                            error: function(response) {
+                                console.log(response);
+                                Swal.fire({
+                                    title: "Error",
+                                    text: response
+                                        .responseJSON
+                                        .message,
+                                    icon: "error",
+                                    confirmButtonColor: "#1c84ee",
+                                });
+                            }
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                })
+            } else {
+                AIZ.plugins.notify('danger',
+                    '{{ translate('Please Add card to Your profile !') }}');
+            }
+        }
+    </script>
     <script type="text/javascript">
+        localStorage.setItem('pay_method', 'paymo');
+
         $(document).ready(function() {
             $(".online_payment").click(function() {
                 $('#manual_payment_description').parent().addClass('d-none');
@@ -655,22 +1267,43 @@
         }
 
         function submitOrder(el) {
-            $(el).prop('disabled', true);
             if ($('#agree_checkbox').is(":checked")) {
+
                 if (minimum_order_amount_check && $('#sub_total').val() < minimum_order_amount) {
                     AIZ.plugins.notify('danger',
                         '{{ translate('You order amount is less then the minimum order amount') }}');
                 } else {
-                    var offline_payment_active = '{{ addon_is_activated('offline_payment') }}';
-                    if (offline_payment_active == 'true' && $('.offline_payment_option').is(":checked") && $('#trx_id')
-                        .val() == '') {
-                        AIZ.plugins.notify('danger',
-                            '{{ translate('You need to put Transaction id') }}');
-                        $(el).prop('disabled', false);
+                    if (localStorage.getItem('pay_method')) {
+
+                        if (localStorage.getItem('pay_method') == 'paymo') {
+                            $('#new-payment').modal('show');
+                            if ({{ $bindCards->count() }}) {
+
+                            } else {
+                                AIZ.plugins.notify('danger',
+                                    '{{ translate('Please Add card to Your profile !') }}');
+                            }
+                        } else {
+                            var offline_payment_active = '{{ addon_is_activated('offline_payment') }}';
+                            if (offline_payment_active == 'true' && $('.offline_payment_option').is(":checked") && $(
+                                    '#trx_id')
+                                .val() == '') {
+                                AIZ.plugins.notify('danger',
+                                    '{{ translate('You need to put Transaction id') }}');
+                                $(el).prop('disabled', false);
+                            } else {
+                                $(el).prop('disabled', true);
+                                $('#checkout-form').submit();
+                            }
+                        }
+
                     } else {
-                        $('#checkout-form').submit();
+                        AIZ.plugins.notify('danger',
+                            '{{ translate('Please check payment method !') }}');
                     }
+
                 }
+
             } else {
                 AIZ.plugins.notify('danger', '{{ translate('You need to agree with our policies') }}');
                 $(el).prop('disabled', false);
@@ -722,5 +1355,66 @@
                 }
             })
         })
+    </script>
+    <script>
+        function pay_method(method) {
+            localStorage.setItem('pay_method', method);
+        }
+    </script>
+    <script>
+        $('select').each(function() {
+            var $this = $(this),
+                numberOfOptions = $(this).children('option').length;
+
+            $this.addClass('select-hidden');
+            $this.wrap('<div class="select"></div>');
+            $this.after('<div class="select-styled"></div>');
+
+            var $styledSelect = $this.next('div.select-styled');
+            $styledSelect.text($this.children('option').eq(0).text());
+
+            var $list = $('<ul />', {
+                'class': 'select-options'
+            }).insertAfter($styledSelect);
+
+            for (var i = 0; i < numberOfOptions; i++) {
+                $('<li />', {
+                    text: $this.children('option').eq(i).text(),
+                    rel: $this.children('option').eq(i).val()
+                }).appendTo($list);
+                //if ($this.children('option').eq(i).is(':selected')){
+                //  $('li[rel="' + $this.children('option').eq(i).val() + '"]').addClass('is-selected')
+                //}
+            }
+
+            var $listItems = $list.children('li');
+
+            $styledSelect.click(function(e) {
+                e.stopPropagation();
+                $('div.select-styled.active').not(this).each(function() {
+                    $(this).removeClass('active').next('ul.select-options').hide();
+                });
+                $(this).toggleClass('active').next('ul.select-options').toggle();
+            });
+
+            $listItems.click(function(e) {
+                e.stopPropagation();
+                $styledSelect.text($(this).text()).removeClass('active');
+                $this.val($(this).attr('rel'));
+                $list.hide();
+
+                let id = $this.val();
+                let card_info = @json($card_info);
+                document.getElementById("cardHolder").innerHTML = card_info[id]['card_holder'];
+                document.getElementById("ExpDate").innerHTML = card_info[id]['expiry'];
+                $('#bindID').val(id);
+            });
+
+            $(document).click(function() {
+                $styledSelect.removeClass('active');
+                $list.hide();
+            });
+
+        });
     </script>
 @endsection

@@ -10,13 +10,17 @@ use App\Models\Order;
 use App\Models\Coupon;
 use App\Models\CouponUsage;
 use App\Models\Address;
+use App\Models\Shop;
 use App\Models\Carrier;
 use App\Models\CombinedOrder;
 use App\Models\Product;
+use App\Models\BindedCard;
 use App\Utility\PayhereUtility;
 use App\Utility\NotificationUtility;
 use Session;
 use Auth;
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
 
 class CheckoutController extends Controller
 {
@@ -30,6 +34,7 @@ class CheckoutController extends Controller
     public function checkout(Request $request)
     {
         // Minumum order amount check
+
         if(get_setting('minimum_order_amount_check') == 1){
             $subtotal = 0;
             foreach (Cart::where('user_id', Auth::user()->id)->get() as $key => $cartItem){ 
@@ -55,6 +60,7 @@ class CheckoutController extends Controller
 
                 // If block for Online payment, wallet and cash on delivery. Else block for Offline payment
                 $decorator = __NAMESPACE__ . '\\Payment\\' . str_replace(' ', '', ucwords(str_replace('_', ' ', $request->payment_option))) . "Controller";
+
                 if (class_exists($decorator)) {
                     return (new $decorator)->pay($request);
                 }
@@ -67,8 +73,8 @@ class CheckoutController extends Controller
                         'photo'  => $request->photo
                     );
                     foreach ($combined_order->orders as $order) {
-                        $order->manual_payment = 1;
-                        $order->manual_payment_data = json_encode($manual_payment_data);
+                        $order->payment_type = $request->payment_option;
+                        $order->payment_status = 'paid';
                         $order->save();
                     }
                     flash(translate('Your order has been placed successfully. Please submit payment information from purchase history'))->success();
@@ -79,6 +85,215 @@ class CheckoutController extends Controller
             flash(translate('Select Payment Option.'))->warning();
             return back();
         }
+    }
+
+    public function paySuccess(Request $request)
+    {
+        $carts = Cart::where('user_id', Auth::user()->id)
+            ->get();
+
+        $seller_products = array();
+        foreach ($carts as $cartItem) {
+            $product_ids = array();
+            $product = Product::find($cartItem['product_id']);
+            if (isset($seller_products[$product->user_id])) {
+                $product_ids = $seller_products[$product->user_id];
+            }
+            array_push($product_ids, $cartItem);
+            $seller_products[$product->user_id] = $product_ids;
+        }
+
+        $sum_pay_sellers = 0; $params = [];
+        foreach ($seller_products as $key => $seller_product) {
+
+            $subtotal = 0;
+            $tax = 0;
+            $shipping = 0;
+            $coupon_discount = 0;
+            $sum_pay_sellers = 0;
+
+            foreach ($seller_product as $cartItem) {
+                $product = Product::find($cartItem['product_id']);
+                $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
+                $tax +=  cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
+                $coupon_discount += $cartItem['discount'];
+
+            }
+
+            $sum_pay_sellers = $subtotal + $tax + $shipping;
+
+            $shop = Shop::where('user_id', $key)->first();
+
+            if($shop && $shop->paymo_setting!=null)
+            {
+                $paymo_setting = json_decode($shop->paymo_setting, true);  
+
+                $terminal_id = $paymo_setting['terminal_id'];
+
+                $params[] = [
+                    'account' => $key,
+                    'terminal_id' => $terminal_id,
+                    'amount' => $sum_pay_sellers * 100,
+                    'details' => 'Для услуги ' . $key
+                ];
+            } else {
+
+                return response()->json([
+                    'message' => 'Undifined Seller!'
+                ], 404);
+            }
+
+        }
+        
+        $bind = BindedCard::find($request->bindID);
+        try {
+
+            $client = new Client();
+            $url = 'https://partner.atmos.uz/token';
+
+            $response = $client->request('POST', $url, [
+                'headers' =>  [
+                    'Accept' => 'application/json',
+                ],
+                'query' => 'grant_type=client_credentials',
+                'auth' => [
+                    env('PAYMO_KEY'), 
+                    env('PAYMO_SECRET')
+                ]
+            ]);
+
+            $info = json_decode($response->getBody()->getContents(), true); 
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => $e->getMessage(),
+            ],400);
+        }
+
+        try {
+
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer '. $info['access_token']
+            ])->post('https://partner.atmos.uz/merchant/bulk/pay/create', [
+                "store_id" =>  env('PAYMO_STOREID'),
+                "params" => $params
+            ]);
+
+            $response = json_decode($response->body(), true);      
+
+            if($response['result']['code'] == "OK" ) {
+
+                $res = Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer '. $info['access_token']
+                ])->post('https://partner.atmos.uz/merchant/bulk/pay/pre-confirm', [
+                    "store_id" =>  env('PAYMO_STOREID'),
+                    "card_token" => $bind->card_token,
+                    "transaction_id" => $response['transaction_id']
+                ]);
+    
+                $res = json_decode($res->body(), true);      
+    
+                if($res['result']['code'] == "OK" ) {
+    
+                   
+                    return response()->json([
+                        'transaction_id' => $response['transaction_id'],
+                        'phone' => $bind->phone
+                    ]);
+    
+                } else {
+                    return response()->json([
+                            'message' => $res['result']['description']
+                    ], 400);
+                  
+                     
+                }    
+
+
+            } else {
+                return response()->json([
+                        'message' => $response['result']['description']
+                ], 400);
+              
+                 
+            }
+            
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => $e->getMessage(),
+            ],404);
+        }
+        
+    }
+
+    public function otpVerify(Request $request)
+    {
+    	
+            try {
+
+                $client = new Client();
+                $url = 'https://partner.atmos.uz/token';
+    
+                $response = $client->request('POST', $url, [
+                    'headers' =>  [
+                        'Accept' => 'application/json',
+                    ],
+                    'query' => 'grant_type=client_credentials',
+                    'auth' => [
+                        env('PAYMO_KEY'), 
+                        env('PAYMO_SECRET')
+                    ]
+                ]);
+    
+                $info = json_decode($response->getBody()->getContents(), true); 
+    
+            } catch (\Exception $e) {
+    
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            try {
+
+                $response = Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer '. $info['access_token']
+                ])->post('https://partner.atmos.uz/merchant/bulk/pay/confirm', [
+                    "transaction_id" =>  $request->transaction_id,
+                    "otp" => $request->verify_code,
+                    "store_id" =>  env('PAYMO_STOREID')
+                ]);
+
+                $response = json_decode($response->body(), true);      
+   
+
+                if($response['result']['code'] == "OK" ) {
+                    
+                    return response()->json([
+                        'message' => 'Your Card binded successfully!'
+                    ]);                
+
+                } else {
+                        return response()->json([
+                            'message' => $response['result']['description']
+                        ], 400);
+                  
+                     
+                }
+                
+    
+            } catch (\Exception $e) {
+    
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ]);
+            }
     }
 
     //redirects to this method after a successfull checkout
@@ -145,6 +360,20 @@ class CheckoutController extends Controller
 
     public function store_delivery_info(Request $request)
     {
+        $bindCards = BindedCard::where('user_id', auth()->user()->id)->get();
+        $card_info = [];
+        foreach($bindCards as $card) {
+            $card_info[$card->id] = [
+                'card_holder' => $card->card_holder,
+                'expiry' => $card->expiry
+            ];
+        }
+
+        $bind = 0;
+        if ($bindCards->count() > 0) {
+            $bind = $bindCards[0]->id;
+        }
+
         $carts = Cart::where('user_id', Auth::user()->id)
                 ->get();
 
@@ -160,8 +389,11 @@ class CheckoutController extends Controller
         $subtotal = 0;
 
         if ($carts && count($carts) > 0) {
+            
             foreach ($carts as $key => $cartItem) {
+
                 $product = Product::find($cartItem['product_id']);
+
                 $tax += cart_product_tax($cartItem, $product,false) * $cartItem['quantity'];
                 $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
 
@@ -187,10 +419,10 @@ class CheckoutController extends Controller
                 $cartItem->save();
             }
             $total = $subtotal + $tax + $shipping;
-
-            return view('frontend.payment_select', compact('carts', 'shipping_info', 'total'));
+            return view('frontend.payment_select', compact('carts', 'shipping_info', 'total', 'bindCards','card_info','bind'));
 
         } else {
+
             flash(translate('Your Cart was empty'))->warning();
             return redirect()->route('home');
         }

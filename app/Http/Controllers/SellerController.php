@@ -133,6 +133,48 @@ class SellerController extends Controller
         return view('backend.sellers.edit', compact('shop'));
     }
 
+    public function paymo_setting($id)
+    {
+        $shop = Shop::findOrFail(decrypt($id));
+
+        if($shop->paymo_setting) {
+            $pay = json_decode($shop->paymo_setting, true);
+            $setting[0] = [
+                'id' => $shop->id,
+                'store_id' => $pay['store_id'],
+                'account' => $pay['account'],
+                'terminal_id' => $pay['terminal_id']
+            ];
+        } else {
+            $setting[0] = [
+                'id' => $shop->id,
+                'store_id' => '',
+                'account' => '',
+                'terminal_id' => ''
+            ];
+        }
+
+        return view('backend.sellers.paymo-setting', compact('setting'));
+    }
+
+    public function paymo_update($id, Request $request)
+    {
+        
+        $setting[0] = [
+            'id' => $id,
+            'store_id' => $request->store_id,
+            'account' => $request->account,
+            'terminal_id' => $request->terminal_id
+        ];
+
+        $shop = Shop::findOrFail($id);
+        $shop->paymo_setting = $setting[0];
+        $shop->save();
+
+        flash(translate('Paymo Setting has been updated successfully'))->success();
+        return redirect()->route('sellers.paymo-setting', encrypt($id));
+    }
+
     /**
      * Update the specified resource in storage.
      *

@@ -161,6 +161,11 @@
                                             </a>
                                         @endif
                                     @endcan
+                                    @can('paymo_setting')
+                                        <a href="{{route('sellers.paymo-setting', encrypt($shop->id))}}" class="dropdown-item">
+                                            {{translate('Paymo Setting')}}
+                                        </a>
+                                    @endcan
                                     @can('delete_seller')
                                         <a href="#" class="dropdown-item confirm-delete" data-href="{{route('sellers.destroy', $shop->id)}}" class="">
                                             {{translate('Delete')}}

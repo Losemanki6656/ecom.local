@@ -123,6 +123,7 @@ class BusinessSettingsController extends Controller
         }
 
         $business_settings = BusinessSetting::where('type', $request->payment_method.'_sandbox')->first();
+        
         if($business_settings != null){
             if ($request->has($request->payment_method.'_sandbox')) {
                 $business_settings->value = 1;
