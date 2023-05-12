@@ -103,7 +103,7 @@ class CheckoutController extends Controller
             $seller_products[$product->user_id] = $product_ids;
         }
 
-        $sum_pay_sellers = 0; $params = [];
+        $sum_pay_sellers = 0; $params = []; $sum_pay_admin = 0;
         foreach ($seller_products as $key => $seller_product) {
 
             $subtotal = 0;
@@ -111,16 +111,29 @@ class CheckoutController extends Controller
             $shipping = 0;
             $coupon_discount = 0;
             $sum_pay_sellers = 0;
+            $adminTotal = 0;
 
             foreach ($seller_product as $cartItem) {
+
                 $product = Product::find($cartItem['product_id']);
-                $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
+
+                $category = Category::where('id',$product->category_id)->first();
+
+                if($category && $category->commision_rate != 0) {
+
+                    $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * (100 - $category->commision_rate)/100;
+                    $adminTotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * ($category->commision_rate)/100;
+                } else {
+                    $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
+                }
+
                 $tax +=  cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
                 $coupon_discount += $cartItem['discount'];
 
             }
 
             $sum_pay_sellers = $subtotal + $tax + $shipping;
+            $sum_pay_admin += $adminTotal;
 
             $shop = Shop::where('user_id', $key)->first();
 
@@ -136,6 +149,7 @@ class CheckoutController extends Controller
                     'amount' => $sum_pay_sellers * 100,
                     'details' => 'Для услуги ' . $key
                 ];
+
             } else {
 
                 return response()->json([
@@ -144,6 +158,13 @@ class CheckoutController extends Controller
             }
 
         }
+
+        $params[] = [
+            'account' => 'Admin',
+            'terminal_id' => env('PAYMO_TERMINALID'),
+            'amount' => $sum_pay_admin * 100,
+            'details' => 'Для услуги Админа'
+        ];
         
         $bind = BindedCard::find($request->bindID);
         try {
