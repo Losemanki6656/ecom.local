@@ -297,8 +297,8 @@ class HomeController extends Controller
                     ],
                     'query' => 'grant_type=client_credentials',
                     'auth' => [
-                        env('PAYMO_KEY'), 
-                        env('PAYMO_SECRET')
+                        env('PAYMO_BIND_KEY'), 
+                        env('PAYMO_BIND_SECRET')
                     ]
                 ]);
     
