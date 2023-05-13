@@ -159,6 +159,7 @@ class CheckoutController extends Controller
 
         }
 
+        if($sum_pay_admin != 0)
         $params[] = [
             'account' => 'Admin',
             'terminal_id' => env('PAYMO_TERMINALID'),
@@ -194,6 +195,7 @@ class CheckoutController extends Controller
 
         try {
 
+
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer '. $info['access_token']
@@ -202,7 +204,8 @@ class CheckoutController extends Controller
                 "params" => $params
             ]);
 
-            $response = json_decode($response->body(), true);      
+            $response = json_decode($response->body(), true);   
+            
 
             if($response['result']['code'] == "OK" ) {
 
