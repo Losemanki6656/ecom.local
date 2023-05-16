@@ -121,10 +121,12 @@ class CheckoutController extends Controller
 
                 if($category && $category->commision_rate != 0) {
 
-                    $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * (100 - $category->commision_rate)/100;
-                    $adminTotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * ($category->commision_rate)/100;
+                    $subtotal += (int)cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * (100 - $category->commision_rate)/100;
+                    $adminTotal += (int)cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * ($category->commision_rate)/100;
                 } else {
-                    $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
+
+                    $subtotal += (int)cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
+                   
                 }
 
                 $tax +=  cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
