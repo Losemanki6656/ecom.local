@@ -46,29 +46,29 @@ class PaymoRequest
         $statusCode = $response->status();
         $result = [];
 
-        if($statusCode >= 400 && $statusCode <= 500){
-            switch ($statusCode) {
-                case 401:
-                    $result['message'] = 'Unauthorized';
-                    break;
-                case 403:
-                    $result['message'] = 'Forbidden';
-                    break;
-                case 404:
-                    $result['message'] = 'Not Found';
-                    break;
-                case 405:
-                    $result['message'] = 'Method Not Allowed';
-                    break;
-                default:
-                    $result['message'] = ($statusCode == 500) ? $response->result->description : '500 error';
-                break;
-            }
+        // if($statusCode >= 400 && $statusCode <= 500){
+        //     switch ($statusCode) {
+        //         case 401:
+        //             $result['message'] = 'Unauthorized';
+        //             break;
+        //         case 403:
+        //             $result['message'] = 'Forbidden';
+        //             break;
+        //         case 404:
+        //             $result['message'] = 'Not Found';
+        //             break;
+        //         case 405:
+        //             $result['message'] = 'Method Not Allowed';
+        //             break;
+        //         default:
+        //             $result['message'] = ($statusCode == 500) ? 'Whoops, looks like something went wrong' : '500 error';
+        //         break;
+        //     }
 
-            return response()->json([
-                'message' =>  $result['message']
-            ], $statusCode);
-        }
+        //     return response()->json([
+        //         'message' =>  $result['message']
+        //     ], $statusCode);
+        // }
 
         return $response->json();
     }
