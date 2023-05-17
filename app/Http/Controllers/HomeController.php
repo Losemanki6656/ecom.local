@@ -234,6 +234,7 @@ class HomeController extends Controller
                     if($response['result']['code'] == "STPIMS-ERR-133")
                     {
                         $cards = BindedCard::where('user_id', auth()->user()->id)->where('pan',$response['data']['pan'])->count();
+                        
                         if(!$cards) {
                             $bincard = new BindedCard();
                             $bincard->user_id = auth()->user()->id;

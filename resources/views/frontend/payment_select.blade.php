@@ -57,7 +57,7 @@
                         id="checkout-form">
                         @csrf
                         <input type="hidden" name="owner_id" value="{{ $carts[0]['owner_id'] }}">
-                      
+
                         <input type="hidden" name="BindID" id="bindID" value="{{ $bind }}">
                         <input type="hidden" name="otp" id="otp" value="">
                         <input type="hidden" name="trans" id="trans" value="">
@@ -766,7 +766,8 @@
                                             </table>
                                             <div class='line'></div>
 
-                                            <a type="button" class="btn btn-success mb-2" href="{{route('my-cards')}}"
+                                            <a type="button" class="btn btn-success mb-2"
+                                                href="{{ route('my-cards') }}"
                                                 style="background-color: #5794E0; width: 100%; border: 0px"> <i
                                                     class="fa fa-plus"></i> {{ translate('Add Card') }} </a>
                                         </div>
@@ -810,7 +811,8 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" data-dismiss="modal" class="btn btn-secondary">{{ translate('Cancel') }}</button>
+                                <button type="button" data-dismiss="modal"
+                                    class="btn btn-secondary">{{ translate('Cancel') }}</button>
                                 <button type="button" onclick="paymentSubmit()" class="btn btn-primary">
                                     {{ translate('Complete Order') }} </button>
                             </div>
@@ -1080,32 +1082,32 @@
         }
 
         /* .dropdown-btn {
-                                                                                        background: rgba(255, 255, 255, 0.1);
-                                                                                        width: 100%;
-                                                                                        border-radius: 5px;
-                                                                                        text-align: center;
-                                                                                        line-height: 1.5em;
-                                                                                        cursor: pointer;
-                                                                                        position: relative;
-                                                                                        -webkit-transition: background .2s ease;
-                                                                                        transition: background .2s ease;
-                                                                                    }
+                                                                                                                background: rgba(255, 255, 255, 0.1);
+                                                                                                                width: 100%;
+                                                                                                                border-radius: 5px;
+                                                                                                                text-align: center;
+                                                                                                                line-height: 1.5em;
+                                                                                                                cursor: pointer;
+                                                                                                                position: relative;
+                                                                                                                -webkit-transition: background .2s ease;
+                                                                                                                transition: background .2s ease;
+                                                                                                            }
 
-                                                                                    .dropdown-btn:after {
-                                                                                        content: '\25BE';
-                                                                                        right: 8px;
-                                                                                        position: absolute;
-                                                                                    }
+                                                                                                            .dropdown-btn:after {
+                                                                                                                content: '\25BE';
+                                                                                                                right: 8px;
+                                                                                                                position: absolute;
+                                                                                                            }
 
-                                                                                    .dropdown-btn:hover {
-                                                                                        background: rgba(255, 255, 255, 0.2);
-                                                                                        -webkit-transition: background .2s ease;
-                                                                                        transition: background .2s ease;
-                                                                                    }
+                                                                                                            .dropdown-btn:hover {
+                                                                                                                background: rgba(255, 255, 255, 0.2);
+                                                                                                                -webkit-transition: background .2s ease;
+                                                                                                                transition: background .2s ease;
+                                                                                                            }
 
-                                                                                    .dropdown-select {
-                                                                                        display: none;
-                                                                                    } */
+                                                                                                            .dropdown-select {
+                                                                                                                display: none;
+                                                                                                            } */
 
         .credit-card-image {
             display: block;
@@ -1184,8 +1186,11 @@
                                         autocapitalize: 'off',
                                         placeholder: 'Verification Code'
                                     },
-                                    showCancelButton: true,
+                                    // showCancelButton: true,
+                                    showDenyButton: true,
+                                    denyButtonText: 'Resend',
                                     confirmButtonText: 'Verify',
+                                    reverseButtons: true,
                                     showLoaderOnConfirm: true,
                                     preConfirm: (login) => {
                                         return $.ajax({
@@ -1212,6 +1217,10 @@
                                                 });
                                             }
                                         });
+                                    },
+                                    preDeny: () => {
+                                        Swal.fire('Changes are not saved', '',
+                                            'info')
                                     },
                                     allowOutsideClick: () => !Swal.isLoading()
                                 })

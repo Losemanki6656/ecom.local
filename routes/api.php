@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V2;
 
 use Illuminate\Support\Facades\Route;
 
+Route::post('/paymo-confirm-transaction', 'App\Http\Controllers\Payment\Callback\AtmosCallbackController@callbackTransaction')->name('callbackTransaction');
+
 Route::group(['prefix' => 'v2/auth', 'middleware' => ['app_language']], function () {
     Route::post('login', 'App\Http\Controllers\Api\V2\AuthController@login');
     Route::post('signup', 'App\Http\Controllers\Api\V2\AuthController@signup');
@@ -22,9 +24,6 @@ Route::group(['prefix' => 'v2/auth', 'middleware' => ['app_language']], function
 
 
 Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
-
-
-
 
 
     // auction products routes

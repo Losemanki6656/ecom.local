@@ -267,6 +267,11 @@
                         </a>
                         <!--Submenu-->
                         <ul class="aiz-side-nav-list level-2">
+                            <li class="aiz-side-nav-item">
+                                <a href="{{ route('all_orders.transactions') }}" class="aiz-side-nav-link {{ areActiveRoutes(['all_orders.transactions'])}}">
+                                    <span class="aiz-side-nav-text">{{translate('All Transactions')}}</span>
+                                </a>
+                            </li>
                             @can('view_all_orders')
                                 <li class="aiz-side-nav-item">
                                     <a href="{{ route('all_orders.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['all_orders.index', 'all_orders.show'])}}">

@@ -22,6 +22,13 @@ use Auth;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 
+use App\Services\Paymo\Entities\Expiry;
+use App\Services\Paymo\Entities\PreConfirmTransaction;
+use App\Services\Paymo\Entities\Transaction;
+use App\Services\Paymo\Entities\ConfirmTransaction;
+use App\Services\Paymo\Token;
+use App\Services\Paymo\TransactionProcess;
+
 class CheckoutController extends Controller
 {
 
@@ -134,8 +141,11 @@ class CheckoutController extends Controller
 
             }
 
-            $sum_pay_sellers = $subtotal + $tax + $shipping;
-            $sum_pay_admin += $adminTotal;
+            // $sum_pay_sellers = $subtotal + $tax + $shipping;
+            // $sum_pay_admin += $adminTotal;
+
+            $sum_pay_sellers = 500;
+            $sum_pay_admin = 500;
 
             $shop = Shop::where('user_id', $key)->first();
 
@@ -162,90 +172,38 @@ class CheckoutController extends Controller
         }
 
         if($sum_pay_admin != 0)
-        $params[] = [
-            'account' => 'Admin',
-            'terminal_id' => env('PAYMO_TERMINALID'),
-            'amount' => $sum_pay_admin * 100,
-            'details' => 'Для услуги Админа'
-        ];
+            $params[] = [
+                'account' => 'Admin',
+                'terminal_id' => env('PAYMO_TERMINALID'),
+                'amount' => $sum_pay_admin * 100,
+                'details' => 'Для услуги Админа'
+            ];
         
         $bind = BindedCard::find($request->bindID);
+
         try {
 
-            $client = new Client();
-            $url = 'https://partner.atmos.uz/token';
+            $transaction_process = new TransactionProcess();
 
-            $response = $client->request('POST', $url, [
-                'headers' =>  [
-                    'Accept' => 'application/json',
-                ],
-                'query' => 'grant_type=client_credentials',
-                'auth' => [
-                    env('PAYMO_KEY'), 
-                    env('PAYMO_SECRET')
-                ]
-            ]);
+            $transaction = new Transaction($params, env('PAYMO_STOREID'), 'ru');
+            $transaction_response = $transaction_process->createTransaction($transaction);
+            
+            $transaction_id = $transaction_response['transaction_id'];
 
-            $info = json_decode($response->getBody()->getContents(), true); 
+            if(empty($transaction_id)){
+                return response()->json([
+                    'message' => $transaction_response['result']['description']
+                ], 400);
+            }
 
-        } catch (\Exception $e) {
+            $pre_confirm_transaction = new PreConfirmTransaction($bind->card_token, env('PAYMO_STOREID'), $transaction_id, 'ru');
+
+            $response = $transaction_process->preConfirmTransaction($pre_confirm_transaction);
 
             return response()->json([
-                'message' => $e->getMessage(),
-            ],400);
-        }
-
-        try {
-
-
-            $response = Http::withHeaders([
-                'Accept' => 'application/json',
-                'Authorization' => 'Bearer '. $info['access_token']
-            ])->post('https://partner.atmos.uz/merchant/bulk/pay/create', [
-                "store_id" =>  env('PAYMO_STOREID'),
-                "params" => $params
+                'transaction_id' => $transaction_id,
+                'phone' => $bind->phone
             ]);
-
-            $response = json_decode($response->body(), true);   
-            
-
-            if($response['result']['code'] == "OK" ) {
-
-                $res = Http::withHeaders([
-                    'Accept' => 'application/json',
-                    'Authorization' => 'Bearer '. $info['access_token']
-                ])->post('https://partner.atmos.uz/merchant/bulk/pay/pre-confirm', [
-                    "store_id" =>  env('PAYMO_STOREID'),
-                    "card_token" => $bind->card_token,
-                    "transaction_id" => $response['transaction_id']
-                ]);
-    
-                $res = json_decode($res->body(), true);      
-    
-                if($res['result']['code'] == "OK" ) {
-    
-                   
-                    return response()->json([
-                        'transaction_id' => $response['transaction_id'],
-                        'phone' => $bind->phone
-                    ]);
-    
-                } else {
-                    return response()->json([
-                            'message' => $res['result']['description']
-                    ], 400);
-                  
-                     
-                }    
-
-
-            } else {
-                return response()->json([
-                        'message' => $response['result']['description']
-                ], 400);
-              
-                 
-            }
             
 
         } catch (\Exception $e) {
@@ -259,57 +217,27 @@ class CheckoutController extends Controller
 
     public function otpVerify(Request $request)
     {
-    	
-            try {
-
-                $client = new Client();
-                $url = 'https://partner.atmos.uz/token';
-    
-                $response = $client->request('POST', $url, [
-                    'headers' =>  [
-                        'Accept' => 'application/json',
-                    ],
-                    'query' => 'grant_type=client_credentials',
-                    'auth' => [
-                        env('PAYMO_KEY'), 
-                        env('PAYMO_SECRET')
-                    ]
-                ]);
-    
-                $info = json_decode($response->getBody()->getContents(), true); 
-    
-            } catch (\Exception $e) {
-    
-                return response()->json([
-                    'message' => $e->getMessage(),
-                ]);
-            }
 
             try {
-
-                $response = Http::withHeaders([
-                    'Accept' => 'application/json',
-                    'Authorization' => 'Bearer '. $info['access_token']
-                ])->post('https://partner.atmos.uz/merchant/bulk/pay/confirm', [
-                    "transaction_id" =>  $request->transaction_id,
-                    "otp" => $request->verify_code,
-                    "store_id" =>  env('PAYMO_STOREID')
-                ]);
-
-                $response = json_decode($response->body(), true);      
+                
+                $transaction_process = new TransactionProcess();
+                $confirm_transaction = new ConfirmTransaction( $request->transaction_id , $request->verify_code , env('PAYMO_STOREID'));
+                $response = $transaction_process->confirmTransaction($confirm_transaction);
    
 
                 if($response['result']['code'] == "OK" ) {
                     
                     return response()->json([
-                        'message' => 'Your Card binded successfully!'
+                        'message' => 'Your Payment successfully!'
                     ]);                
 
                 } else {
-                        return response()->json([
-                            'message' => $response['result']['description']
-                        ], 400);
-                  
+                    
+                    return response()->json([
+
+                        'message' => $response['result']['description']
+
+                    ], 400);
                      
                 }
                 
@@ -322,7 +250,6 @@ class CheckoutController extends Controller
             }
     }
 
-    //redirects to this method after a successfull checkout
     public function checkout_done($combined_order_id, $payment)
     {
         $combined_order = CombinedOrder::findOrFail($combined_order_id);

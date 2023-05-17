@@ -312,6 +312,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::resource('orders', OrderController::class);
     Route::controller(OrderController::class)->group(function () {
         // All Orders
+        Route::get('/all_transactions', 'all_transactions')->name('all_orders.transactions');
         Route::get('/all_orders', 'all_orders')->name('all_orders.index');
         Route::get('/inhouse-orders', 'all_orders')->name('inhouse_orders.index');
         Route::get('/seller_orders', 'all_orders')->name('seller_orders.index');
