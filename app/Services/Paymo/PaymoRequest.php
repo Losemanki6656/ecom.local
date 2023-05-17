@@ -61,7 +61,7 @@ class PaymoRequest
                     $result['message'] = 'Method Not Allowed';
                     break;
                 default:
-                    $result['message'] = ($statusCode == 500) ? 'Whoops, looks like something went wrong' : '500 error' . $response->result->description ?? '';
+                    $result['message'] = ($statusCode == 500) ? $response->result->description : '500 error';
                 break;
             }
 
