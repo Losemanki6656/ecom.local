@@ -141,11 +141,11 @@ class CheckoutController extends Controller
 
             }
 
-            // $sum_pay_sellers = $subtotal + $tax + $shipping;
-            // $sum_pay_admin += $adminTotal;
+            $sum_pay_sellers = $subtotal + $tax + $shipping;
+            $sum_pay_admin += $adminTotal;
 
-            $sum_pay_sellers = 500;
-            $sum_pay_admin = 500;
+            // $sum_pay_sellers = 500;
+            // $sum_pay_admin = 500;
 
             $shop = Shop::where('user_id', $key)->first();
 
@@ -156,7 +156,7 @@ class CheckoutController extends Controller
                 $terminal_id = $paymo_setting['terminal_id'];
 
                 $params[] = [
-                    'account' => $key,
+                    'account' => $shop->name ?? 'seller',
                     'terminal_id' => $terminal_id,
                     'amount' => $sum_pay_sellers * 100,
                     'details' => 'Для услуги ' . $key
@@ -173,7 +173,7 @@ class CheckoutController extends Controller
 
         if($sum_pay_admin != 0)
             $params[] = [
-                'account' => 'Admin',
+                'account' => 'Ecom-Admin',
                 'terminal_id' => env('PAYMO_TERMINALID'),
                 'amount' => $sum_pay_admin * 100,
                 'details' => 'Для услуги Админа'

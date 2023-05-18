@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Payment\Callback;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PaymoCallbackRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AtmosCallbackController extends Controller
 {
@@ -26,6 +27,8 @@ class AtmosCallbackController extends Controller
             // $dto->json_data = json_encode($array_data);
             // $dto->request_data = json_encode($request_data);
             // $this->repository->store(new CallbackData($dto));
+
+            Log::info($array_data);
 
         } catch (\Exception $exception) {
             $errorResponse = [
