@@ -195,6 +195,11 @@ class ProductController extends Controller
         $product = $this->productService->store($request->except([
             '_token', 'sku', 'choice', 'tax_id', 'tax', 'tax_type', 'flash_deal_id', 'flash_discount', 'flash_discount_type'
         ]));
+
+        // if($request->currency != '29'){
+        //     $request->request->add(['currency' => '0']);
+        // }
+
         $request->merge(['product_id' => $product->id]);
 
         //VAT & Tax

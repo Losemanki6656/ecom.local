@@ -28,7 +28,7 @@ class AtmosCallbackController extends Controller
             // $dto->request_data = json_encode($request_data);
             // $this->repository->store(new CallbackData($dto));
 
-            Log::info($array_data);
+            Log::channel('single')->info($array_data);
 
         } catch (\Exception $exception) {
             $errorResponse = [

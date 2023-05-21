@@ -19,6 +19,31 @@ class Product extends Model
         return $product_translations != null ? $product_translations->$field : $this->$field;
     }
 
+    public function getPriceCurrency()
+    {
+        if(!$this->currency){
+            return $this->unit_price;
+        }
+
+        $currency = Currency::find($this->currency);
+        $currencyUZS = Currency::find(29);
+
+        return ($this->unit_price / $currency->exchange_rate) * $currencyUZS->exchange_rate;
+    }
+
+    public function getProductDiscountAmount()
+    {
+
+        if(!$this->currency){
+            return $this->discount;
+        }
+
+        $currency = Currency::find($this->currency);
+        $currencyUZS = Currency::find(29);
+
+        return ($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate;
+    }
+
     public function product_translations()
     {
         return $this->hasMany(ProductTranslation::class);

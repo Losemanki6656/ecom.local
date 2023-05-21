@@ -617,7 +617,7 @@ if (!function_exists('home_base_price_by_stock_id')) {
     function home_base_price_by_stock_id($id)
     {
         $product_stock = ProductStock::findOrFail($id);
-        $price = $product_stock->price;
+        $price = $product_stock->getPriceCurrency();
         $tax = 0;
 
         foreach ($product_stock->product->taxes as $product_tax) {
@@ -634,7 +634,7 @@ if (!function_exists('home_base_price_by_stock_id')) {
 if (!function_exists('home_base_price')) {
     function home_base_price($product, $formatted = true)
     {
-        $price = $product->unit_price;
+        $price = $product->getPriceCurrency();
         $tax = 0;
 
         foreach ($product->taxes as $product_tax) {
@@ -645,7 +645,8 @@ if (!function_exists('home_base_price')) {
             }
         }
         $price += $tax;
-        return $formatted ? format_price(convert_price($price)) : $price;
+
+        return $formatted ? number_format(convert_price($price), 0, '.', ' ') : $price;
     }
 }
 
@@ -694,7 +695,8 @@ if (!function_exists('home_discounted_base_price_by_stock_id')) {
 if (!function_exists('home_discounted_base_price')) {
     function home_discounted_base_price($product, $formatted = true)
     {
-        $price = $product->unit_price;
+        $price = $product->getPriceCurrency();
+
         $tax = 0;
 
         $discount_applicable = false;
@@ -712,7 +714,7 @@ if (!function_exists('home_discounted_base_price')) {
             if ($product->discount_type == 'percent') {
                 $price -= ($price * $product->discount) / 100;
             } elseif ($product->discount_type == 'amount') {
-                $price -= $product->discount;
+                $price -= $product->getProductDiscountAmount();
             }
         }
 

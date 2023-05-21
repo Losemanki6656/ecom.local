@@ -248,6 +248,12 @@
                                     placeholder="{{ translate('Unit price') }}" name="unit_price" class="form-control"
                                     required>
                             </div>
+                            <div class="col-md-3">
+                                <select class="form-control aiz-selectpicker" name="currency">
+                                    <option value="29">{{ translate('UZS') }}</option>
+                                    <option value="1">{{ translate('USD') }}</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-group row">

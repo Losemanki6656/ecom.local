@@ -128,6 +128,8 @@ class ProductService
         }
         unset($collection['button']);
 
+        $collection['currency'] = $data['currency'] ?? null;
+
         $data = $collection->merge(compact(
             'user_id',
             'approved',
@@ -274,6 +276,8 @@ class ProductService
         }
 
         unset($collection['button']);
+        
+        $collection['currency'] = $data['currency'] ?? null;
         
         $data = $collection->merge(compact(
             'discount_start_date',

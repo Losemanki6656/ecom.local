@@ -281,6 +281,15 @@
                             <div class="col-lg-6">
                                 <input type="text" placeholder="{{translate('Unit price')}}" name="unit_price" class="form-control" value="{{$product->unit_price}}" required>
                             </div>
+                            <div class="col-md-3">
+                                <select class="form-control aiz-selectpicker" name="currency">
+                                    <option value="29">{{translate('UZS')}}</option>
+                                    <option value="1" 
+                                    @if ($product->currency)
+                                        selected
+                                    @endif>{{translate('USD')}}</option>
+                                </select>
+                            </div>
                         </div>
 
                         @php
