@@ -176,7 +176,6 @@ class CheckoutController extends Controller
                 'details' => 'Для услуги Админа'
             ];
         
-            dd($params);
         $bind = BindedCard::find($request->bindID);
 
         try {
