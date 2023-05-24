@@ -144,9 +144,6 @@ class CheckoutController extends Controller
             $sum_pay_sellers = $subtotal + $tax + $shipping;
             $sum_pay_admin += $adminTotal;
 
-            // $sum_pay_sellers = 500;
-            // $sum_pay_admin = 500;
-
             $shop = Shop::where('user_id', $key)->first();
 
             if($shop && $shop->paymo_setting!=null)
@@ -179,6 +176,7 @@ class CheckoutController extends Controller
                 'details' => 'Для услуги Админа'
             ];
         
+            dd($params);
         $bind = BindedCard::find($request->bindID);
 
         try {

@@ -640,28 +640,29 @@ class HomeController extends Controller
         $tax = 0;
         $max_limit = 0;
 
-        if ($request->has('color')) {
+        if($request->has('color')){
             $str = $request['color'];
         }
 
-        if (json_decode($product->choice_options) != null) {
+        if(json_decode($product->choice_options) != null){
             foreach (json_decode($product->choice_options) as $key => $choice) {
-                if ($str != null) {
-                    $str .= '-' . str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
-                } else {
-                    $str .= str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
+                if($str != null){
+                    $str .= '-'.str_replace(' ', '', $request['attribute_id_'.$choice->attribute_id]);
+                }
+                else{
+                    $str .= str_replace(' ', '', $request['attribute_id_'.$choice->attribute_id]);
                 }
             }
         }
 
         $product_stock = $product->stocks->where('variant', $str)->first();
 
-        $price = $product_stock->price;
+        $price = $product_stock->getPriceCurrency();
 
 
-        if ($product->wholesale_product) {
+        if($product->wholesale_product){
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();
-            if ($wholesalePrice) {
+            if($wholesalePrice){
                 $price = $wholesalePrice->price;
             }
         }
@@ -669,17 +670,17 @@ class HomeController extends Controller
         $quantity = $product_stock->qty;
         $max_limit = $product_stock->qty;
 
-        if ($quantity >= 1 && $product->min_qty <= $quantity) {
+        if($quantity >= 1 && $product->min_qty <= $quantity){
             $in_stock = 1;
-        } else {
+        }else{
             $in_stock = 0;
         }
 
         //Product Stock Visibility
-        if ($product->stock_visibility_state == 'text') {
-            if ($quantity >= 1 && $product->min_qty < $quantity) {
+        if($product->stock_visibility_state == 'text') {
+            if($quantity >= 1 && $product->min_qty < $quantity){
                 $quantity = translate('In Stock');
-            } else {
+            }else{
                 $quantity = translate('Out Of Stock');
             }
         }
@@ -689,26 +690,30 @@ class HomeController extends Controller
 
         if ($product->discount_start_date == null) {
             $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
+        }
+        elseif (strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
+            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date) {
             $discount_applicable = true;
         }
 
         if ($discount_applicable) {
-            if ($product->discount_type == 'percent') {
-                $price -= ($price * $product->discount) / 100;
-            } elseif ($product->discount_type == 'amount') {
+            if($product->discount_type == 'percent'){
+                $price -= ($price*$product->discount)/100;
+            }
+            elseif($product->discount_type == 'amount' && $product->leading_currency == 0){
                 $price -= $product->discount;
+            }
+            elseif($product->discount_type == 'amount' && $product->leading_currency == 1){
+                $price -= $product->getProductDiscountAmount();
             }
         }
 
         // taxes
         foreach ($product->taxes as $product_tax) {
-            if ($product_tax->tax_type == 'percent') {
+            if($product_tax->tax_type == 'percent'){
                 $tax += ($price * $product_tax->tax) / 100;
-            } elseif ($product_tax->tax_type == 'amount') {
+            }
+            elseif($product_tax->tax_type == 'amount'){
                 $tax += $product_tax->tax;
             }
         }
@@ -716,12 +721,13 @@ class HomeController extends Controller
         $price += $tax;
 
         return array(
-            'price' => single_price($price * $request->quantity),
+            'price' => single_price($price*$request->quantity),
             'quantity' => $quantity,
             'digital' => $product->digital,
             'variation' => $str,
             'max_limit' => $max_limit,
-            'in_stock' => $in_stock
+            'in_stock' => $in_stock,
+            'priced' => $product_stock
         );
     }
 

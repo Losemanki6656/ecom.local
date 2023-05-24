@@ -238,54 +238,46 @@ if (!function_exists('discount_in_percentage')) {
 if (!function_exists('cart_product_price')) {
     function cart_product_price($cart_product, $product, $formatted = true, $tax = true)
     {
-        if ($product->auction_product == 0) {
-            $str = '';
-            if ($cart_product['variation'] != null) {
-                $str = $cart_product['variation'];
-            }
-            $price = 0;
-            $product_stock = $product->stocks->where('variant', $str)->first();
-            if ($product_stock) {
-                $price = $product_stock->price;
-            }
-
-            if ($product->wholesale_product) {
-                $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $cart_product['quantity'])->where('max_qty', '>=', $cart_product['quantity'])->first();
-                if ($wholesalePrice) {
-                    $price = $wholesalePrice->price;
-                }
-            }
-
-            //discount calculation
-            $discount_applicable = false;
-
-            if ($product->discount_start_date == null) {
-                $discount_applicable = true;
-            } elseif (
-                strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-                strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-            ) {
-                $discount_applicable = true;
-            }
-
-            if ($discount_applicable) {
-                if ($product->discount_type == 'percent') {
-                    $price -= ($price * $product->discount) / 100;
-                } elseif ($product->discount_type == 'amount') {
-                    $price -= $product->discount;
-                }
-            }
-        } else {
-            $price = $product->bids->max('amount');
+        $str = '';
+        if ($cart_product['variation'] != null) {
+            $str = $cart_product['variation'];
+        }
+        $price = 0;
+        $product_stock = $product->stocks->where('variant', $str)->first();
+        if($product_stock) {
+//                $price = $product_stock->price;
+            $price = $product_stock->getPriceCurrency();
         }
 
-        //calculation of taxes 
-        if ($tax) {
+
+        //discount calculation
+        $discount_applicable = false;
+
+        if ($product->discount_start_date == null) {
+            $discount_applicable = true;
+        }
+        elseif (strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
+            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date) {
+            $discount_applicable = true;
+        }
+
+        if ($discount_applicable) {
+            if($product->discount_type == 'percent'){
+                $price -= ($price*$product->discount)/100;
+            }
+            elseif($product->discount_type == 'amount'){
+                $price -= $product->discount;
+            }
+        }
+
+        //calculation of taxes
+        if($tax){
             $taxAmount = 0;
             foreach ($product->taxes as $product_tax) {
-                if ($product_tax->tax_type == 'percent') {
+                if($product_tax->tax_type == 'percent'){
                     $taxAmount += ($price * $product_tax->tax) / 100;
-                } elseif ($product_tax->tax_type == 'amount') {
+                }
+                elseif($product_tax->tax_type == 'amount'){
                     $taxAmount += $product_tax->tax;
                 }
             }
@@ -308,7 +300,7 @@ if (!function_exists('cart_product_tax')) {
             $str = $cart_product['variation'];
         }
         $product_stock = $product->stocks->where('variant', $str)->first();
-        $price = $product_stock->price;
+        $price = $product_stock->getPriceCurrency();
 
         //discount calculation
         $discount_applicable = false;
@@ -326,7 +318,7 @@ if (!function_exists('cart_product_tax')) {
             if ($product->discount_type == 'percent') {
                 $price -= ($price * $product->discount) / 100;
             } elseif ($product->discount_type == 'amount') {
-                $price -= $product->discount;
+                $price -= $product->getProductDiscountAmount();
             }
         }
 
@@ -515,17 +507,19 @@ if (!function_exists('carts_coupon_discount')) {
 if (!function_exists('home_price')) {
     function home_price($product, $formatted = true)
     {
-        $lowest_price = $product->unit_price;
-        $highest_price = $product->unit_price;
+        $lowest_price = $product->getPriceCurrency();
+        $highest_price = $product->getPriceCurrency();
 
         if ($product->variant_product) {
             foreach ($product->stocks as $key => $stock) {
-                if ($lowest_price > $stock->price) {
-                    $lowest_price = $stock->price;
+
+                if ($lowest_price > $stock->getPriceCurrency()) {
+                    $lowest_price = $stock->getPriceCurrency();
                 }
-                if ($highest_price < $stock->price) {
-                    $highest_price = $stock->price;
+                if ($highest_price < $stock->getPriceCurrency()) {
+                    $highest_price = $stock->getPriceCurrency();
                 }
+
             }
         }
 
@@ -555,17 +549,20 @@ if (!function_exists('home_price')) {
 if (!function_exists('home_discounted_price')) {
     function home_discounted_price($product, $formatted = true)
     {
-        $lowest_price = $product->unit_price;
-        $highest_price = $product->unit_price;
+        $lowest_price = $product->getPriceCurrency();
+        $highest_price = $product->getPriceCurrency();
 
         if ($product->variant_product) {
+
             foreach ($product->stocks as $key => $stock) {
-                if ($lowest_price > $stock->price) {
-                    $lowest_price = $stock->price;
+
+                if ($lowest_price > $stock->getPriceCurrency()) {
+                    $lowest_price = $stock->getPriceCurrency();
                 }
-                if ($highest_price < $stock->price) {
-                    $highest_price = $stock->price;
+                if ($highest_price < $stock->getPriceCurrency()) {
+                    $highest_price = $stock->getPriceCurrency();
                 }
+
             }
         }
 
@@ -584,10 +581,15 @@ if (!function_exists('home_discounted_price')) {
             if ($product->discount_type == 'percent') {
                 $lowest_price -= ($lowest_price * $product->discount) / 100;
                 $highest_price -= ($highest_price * $product->discount) / 100;
-            } elseif ($product->discount_type == 'amount') {
+            } elseif ($product->discount_type == 'amount' && $product->leading_currency == 0) {
                 $lowest_price -= $product->discount;
                 $highest_price -= $product->discount;
             }
+            elseif ($product->discount_type == 'amount' && $product->leading_currency == 1) {
+                $lowest_price -= $product->getProductDiscountAmount();
+                $highest_price -= $product->getProductDiscountAmount();
+            }
+
         }
 
         foreach ($product->taxes as $product_tax) {
@@ -609,6 +611,65 @@ if (!function_exists('home_discounted_price')) {
         } else {
             return $lowest_price . ' - ' . $highest_price;
         }
+    }
+}
+
+if (!function_exists('home_discounted_price_filter')) {
+    function home_discounted_price_filter($product)
+    {
+        $lowest_price = $product->getPriceCurrency();
+        $highest_price = $product->getPriceCurrency();
+
+        if ($product->variant_product) {
+
+            foreach ($product->stocks as $key => $stock) {
+
+                if ($lowest_price > $stock->getPriceCurrency()) {
+                    $lowest_price = $stock->getPriceCurrency();
+                }
+                if ($highest_price < $stock->getPriceCurrency()) {
+                    $highest_price = $stock->getPriceCurrency();
+                }
+
+            }
+        }
+
+        $discount_applicable = false;
+
+        if ($product->discount_start_date == null) {
+            $discount_applicable = true;
+        } elseif (
+            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
+            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
+        ) {
+            $discount_applicable = true;
+        }
+
+        if ($discount_applicable) {
+            if ($product->discount_type == 'percent') {
+                $lowest_price -= ($lowest_price * $product->discount) / 100;
+                $highest_price -= ($highest_price * $product->discount) / 100;
+            } elseif ($product->discount_type == 'amount' && $product->leading_currency == 0) {
+                $lowest_price -= $product->discount;
+                $highest_price -= $product->discount;
+            }
+            elseif ($product->discount_type == 'amount' && $product->leading_currency == 1) {
+                $lowest_price -= $product->getProductDiscountAmount();
+                $highest_price -= $product->getProductDiscountAmount();
+            }
+
+        }
+
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $lowest_price += ($lowest_price * $product_tax->tax) / 100;
+                $highest_price += ($highest_price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'amount') {
+                $lowest_price += $product_tax->tax;
+                $highest_price += $product_tax->tax;
+            }
+        }
+        return $lowest_price;
     }
 }
 

@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Color;
 use App\Models\Shop;
+use App\Models\Currency;
 use App\Models\Attribute;
 use App\Models\AttributeCategory;
 use App\Utility\CategoryUtility;
@@ -19,8 +20,28 @@ class SearchController extends Controller
     {
         $query = $request->keyword;
         $sort_by = $request->sort_by;
+
         $min_price = $request->min_price;
         $max_price = $request->max_price;
+
+        if(session('currency_code') == "USD")
+        {
+            $currency = Currency::find(29); 
+            $min_price_usd = $request->min_price;
+            $max_price_usd = $request->max_price;
+            $min_price_uzs = $request->min_price * $currency->exchange_rate;
+            $max_price_uzs = $request->max_price * $currency->exchange_rate;
+        } 
+        else 
+        if(session('currency_code') == null)
+        {
+            $currency = Currency::find(29);
+            $min_price_usd = $request->min_price / $currency->exchange_rate;
+            $max_price_usd = $request->max_price / $currency->exchange_rate;
+            $min_price_uzs = $request->min_price;
+            $max_price_uzs = $request->max_price;
+        }
+       
         $seller_id = $request->seller_id;
         $attributes = Attribute::all();
         $selected_attribute_values = array();
@@ -64,10 +85,6 @@ class SearchController extends Controller
             //     $attribute_ids = AttributeCategory::whereIn('category_id', $category_ids)->pluck('attribute_id')->toArray();
             //     $attributes = Attribute::whereIn('id', $attribute_ids)->get();
             // }
-        }
-
-        if ($min_price != null && $max_price != null) {
-            $products->where('unit_price', '>=', $min_price)->where('unit_price', '<=', $max_price);
         }
 
         if ($query != null) {
@@ -131,6 +148,22 @@ class SearchController extends Controller
                 }
             });
         }
+
+        if ($min_price != null || $max_price != null) {
+            $a = [];
+
+            foreach($products->get() as $item)
+            {  
+                if($min_price != null && $max_price == null)
+                    if ((home_discounted_price_filter($item) >= $min_price_uzs)) $a[] = $item->id;
+                else if($min_price == null && $max_price != null)
+                    if ((home_discounted_price_filter($item) <= $max_price_uzs)) $a[] = $item->id;
+                else if($min_price != null && $max_price != null)
+                    if ((home_discounted_price_filter($item) >= $min_price_uzs) && (home_discounted_price_filter($item) <= $max_price_uzs)) $a[] = $item->id;
+            }
+            $products->whereIn('id', $a);
+        }
+
 
         $products = filter_products($products)->with('taxes')->paginate(24)->appends(request()->query());
 
