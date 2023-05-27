@@ -329,8 +329,10 @@
                 </div>
                 <div class="col-md-3">
                     <select class="form-control aiz-selectpicker" name="currency">
-                        <option value="29">{{ translate('UZS') }}</option>
-                        <option value="1">{{ translate('USD') }}</option>
+                        <option value="29" @if ($product->currency == '29' || $product->currency == null) selected @endif>
+                            {{ translate('UZS') }}</option>
+                        <option value="1" @if ($product->currency == '1') selected @endif>
+                            {{ translate('USD') }}</option>
                     </select>
                 </div>
             </div>

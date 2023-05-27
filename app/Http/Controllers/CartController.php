@@ -106,7 +106,7 @@ class CartController extends Controller
             $data['variation'] = $str;
 
             $product_stock = $product->stocks->where('variant', $str)->first();
-            $price = $product_stock->price;
+            $price = $product_stock->getPriceCurrency();
 
             if($product->wholesale_product){
                 $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();

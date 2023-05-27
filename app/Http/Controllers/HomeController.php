@@ -667,6 +667,8 @@ class HomeController extends Controller
             }
         }
 
+        
+
         $quantity = $product_stock->qty;
         $max_limit = $product_stock->qty;
 
@@ -695,16 +697,18 @@ class HomeController extends Controller
             strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date) {
             $discount_applicable = true;
         }
-
         if ($discount_applicable) {
             if($product->discount_type == 'percent'){
                 $price -= ($price*$product->discount)/100;
+                $price = (int) $price;
             }
             elseif($product->discount_type == 'amount' && $product->leading_currency == 0){
                 $price -= $product->discount;
+                
             }
             elseif($product->discount_type == 'amount' && $product->leading_currency == 1){
                 $price -= $product->getProductDiscountAmount();
+              
             }
         }
 

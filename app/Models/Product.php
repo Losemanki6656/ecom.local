@@ -41,7 +41,7 @@ class Product extends Model
         $currency = Currency::find($this->currency);
         $currencyUZS = Currency::find(29);
 
-        return ($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate;
+        return (int)(($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate);
     }
 
     public function product_translations()

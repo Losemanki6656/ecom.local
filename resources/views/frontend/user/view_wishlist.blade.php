@@ -74,7 +74,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <div id="addToCart-modal-body">
-
+                    
                 </div>
             </div>
         </div>
