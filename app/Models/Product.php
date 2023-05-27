@@ -44,6 +44,15 @@ class Product extends Model
         return (int)(($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate);
     }
 
+    public function getDiscountedAmount(){
+
+        $currency = Currency::where('id','=',self::UZS)->first();
+        
+        $exchange_rate = $currency->exchange_rate;
+        return $this->discount * $exchange_rate;
+    }
+
+
     public function product_translations()
     {
         return $this->hasMany(ProductTranslation::class);

@@ -549,6 +549,7 @@ if (!function_exists('home_price')) {
 if (!function_exists('home_discounted_price')) {
     function home_discounted_price($product, $formatted = true)
     {
+
         $lowest_price = $product->getPriceCurrency();
         $highest_price = $product->getPriceCurrency();
 
@@ -582,8 +583,8 @@ if (!function_exists('home_discounted_price')) {
                 $lowest_price -= ($lowest_price * $product->discount) / 100;
                 $highest_price -= ($highest_price * $product->discount) / 100;
             } elseif ($product->discount_type == 'amount' && $product->leading_currency == 0) {
-                $lowest_price -= $product->discount;
-                $highest_price -= $product->discount;
+                $lowest_price -= $product->getProductDiscountAmount();
+                $highest_price -= $product->getProductDiscountAmount();
             }
             elseif ($product->discount_type == 'amount' && $product->leading_currency == 1) {
                 $lowest_price -= $product->getProductDiscountAmount();

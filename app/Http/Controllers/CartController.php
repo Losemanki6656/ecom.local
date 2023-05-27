@@ -140,9 +140,10 @@ class CartController extends Controller
             if ($discount_applicable) {
                 if($product->discount_type == 'percent'){
                     $price -= ($price*$product->discount)/100;
+                    $price = (int) $price;
                 }
                 elseif($product->discount_type == 'amount'){
-                    $price -= $product->discount;
+                    $price -= $product->getProductDiscountAmount();
                 }
             }
 

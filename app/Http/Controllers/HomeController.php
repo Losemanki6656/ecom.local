@@ -703,7 +703,7 @@ class HomeController extends Controller
                 $price = (int) $price;
             }
             elseif($product->discount_type == 'amount' && $product->leading_currency == 0){
-                $price -= $product->discount;
+                $price -= $product->getProductDiscountAmount();
                 
             }
             elseif($product->discount_type == 'amount' && $product->leading_currency == 1){
