@@ -35,7 +35,7 @@ class Product extends Model
     {
         if(!$this->currency){
             $currency = 29;
-        }
+        } else $currency = $this->currency;
 
         $currency = Currency::find($currency);
         $currencyUZS = Currency::find(29);
