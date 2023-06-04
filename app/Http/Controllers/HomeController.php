@@ -372,10 +372,10 @@ class HomeController extends Controller
     	
             try {
 
-                $cards = BindedCard::find($request->card_id)->delete();
+                BindedCard::find($request->card_id)->delete();
 
                 return response()->json([
-                    'message' => 'success',
+                    'message' => 'success'
                 ]);
     
             } catch (\Exception $e) {
