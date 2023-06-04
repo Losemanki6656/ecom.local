@@ -366,6 +366,30 @@ class HomeController extends Controller
         }
     }
 
+    public function delete_card(Request $request)
+    {
+        if (Auth::user()->user_type == 'customer') {
+    	
+            try {
+
+                $cards = BindedCard::find($request->card_id)->delete();
+
+                return response()->json([
+                    'message' => 'success',
+                ]);
+    
+            } catch (\Exception $e) {
+    
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
+
+        } else {
+            abort(404);
+        }
+    }
+
     public function replace($text)
     {
         $sym1 = ["/",' '];
@@ -690,25 +714,22 @@ class HomeController extends Controller
         //discount calculation
         $discount_applicable = false;
 
-        if ($product->discount_start_date == null) {
+        if ($product->discount_start_date != null) {
             $discount_applicable = true;
         }
         elseif (strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
             strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date) {
             $discount_applicable = true;
         }
+
         if ($discount_applicable) {
             if($product->discount_type == 'percent'){
                 $price -= ($price*$product->discount)/100;
                 $price = (int) $price;
             }
-            elseif($product->discount_type == 'amount' && $product->leading_currency == 0){
+            elseif($product->discount_type == 'amount'){
                 $price -= $product->getProductDiscountAmount();
                 
-            }
-            elseif($product->discount_type == 'amount' && $product->leading_currency == 1){
-                $price -= $product->getProductDiscountAmount();
-              
             }
         }
 

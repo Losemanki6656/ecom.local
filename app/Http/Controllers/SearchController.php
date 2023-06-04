@@ -21,8 +21,8 @@ class SearchController extends Controller
         $query = $request->keyword;
         $sort_by = $request->sort_by;
 
-        $min_price = $request->min_price;
-        $max_price = $request->max_price;
+        $min_price = (int)$request->min_price;
+        $max_price = (int)$request->max_price;
 
         if(session('currency_code') == "USD")
         {
@@ -33,13 +33,13 @@ class SearchController extends Controller
             $max_price_uzs = $request->max_price * $currency->exchange_rate;
         } 
         else 
-        if(session('currency_code') == null)
+        if(session('currency_code') == null || session('currency_code') == 860 )
         {
             $currency = Currency::find(29);
             $min_price_usd = $request->min_price / $currency->exchange_rate;
             $max_price_usd = $request->max_price / $currency->exchange_rate;
-            $min_price_uzs = $request->min_price;
-            $max_price_uzs = $request->max_price;
+            $min_price_uzs = $request->min_price ?? 0;
+            $max_price_uzs = (int) $request->max_price;
         }
        
         $seller_id = $request->seller_id;
@@ -152,18 +152,31 @@ class SearchController extends Controller
         if ($min_price != null || $max_price != null) {
             $a = [];
 
+            $b = []; $x = 0;
+
             foreach($products->get() as $item)
             {  
-                if($min_price != null && $max_price == null)
-                    if ((home_discounted_price_filter($item) >= $min_price_uzs)) $a[] = $item->id;
-                else if($min_price == null && $max_price != null)
-                    if ((home_discounted_price_filter($item) <= $max_price_uzs)) $a[] = $item->id;
-                else if($min_price != null && $max_price != null)
-                    if ((home_discounted_price_filter($item) >= $min_price_uzs) && (home_discounted_price_filter($item) <= $max_price_uzs)) $a[] = $item->id;
+                if($min_price != 0 && $max_price == 0)
+                    {
+                        if ((home_discounted_price_filter($item) >= $min_price_uzs)) $a[] = $item->id;
+                    }
+                else 
+                    if($min_price == 0 && $max_price != 0)
+                    {
+                        if ((home_discounted_price_filter($item) <= $max_price_uzs)) $a[] = $item->id;
+                    }
+                else 
+                    if($min_price != 0 && $max_price != 0)
+                    {
+                        if ((home_discounted_price_filter($item) >= $min_price_uzs) && (home_discounted_price_filter($item) <= $max_price_uzs)) $a[] = $item->id;
+                    }
+
             }
+
             $products->whereIn('id', $a);
         }
 
+        // dd($products->get());
 
         $products = filter_products($products)->with('taxes')->paginate(24)->appends(request()->query());
 

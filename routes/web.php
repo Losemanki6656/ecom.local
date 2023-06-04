@@ -245,6 +245,7 @@ Route::group(['middleware' => ['user', 'verified', 'unbanned']], function() {
         
         Route::post('/user/add-card', 'add_card')->name('add_card');
         Route::post('/user/add-card-success', 'add_card_success')->name('add_card_success');
+        Route::post('/user/delete-card-success', 'delete_card')->name('delete_card');
     });
     
     Route::get('/all-notifications', [NotificationController::class, 'index'])->name('all-notifications');

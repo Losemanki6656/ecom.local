@@ -77,14 +77,16 @@
 
                 @foreach ($cards as $card)
                     <div class="col-xs-12 col-sm-6 mb-2">
-                        <div class="credit-card-s">
-                            <img src="{{ asset('public/assets/img/chip.png') }}" class="logo">
-                            <div class="numbers">{{ $card->pan }}</div>
-                            <div class="name-and-expiry">
-                                <span>{{ $card->card_holder }}</span>
-                                <span>{{ $card->expiry }}</span>
+                        <a onclick="delete_card({{ $card->id }}, '{{ $card->card_holder }}')">
+                            <div class="credit-card-s">
+                                <img src="{{ asset('public/assets/img/chip.png') }}" class="logo">
+                                <div class="numbers">{{ $card->pan }}</div>
+                                <div class="name-and-expiry">
+                                    <span>{{ $card->card_holder }}</span>
+                                    <span>{{ $card->expiry }}</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 @endforeach
 
@@ -393,7 +395,7 @@
                                                     'success'
                                                 ).then(function() {
                                                     location
-                                                    .reload();
+                                                        .reload();
                                                 });
                                             },
                                             error: function(response) {
@@ -427,72 +429,51 @@
 
             });
 
-            // let timerInterval
-            // Swal.fire({
-            //     title: 'Wait please!',
-            //     html: 'More <b></b> milliseconds.',
-            //     timer: 2000,
-            //     timerProgressBar: true,
-            //     showLoaderOnConfirm: true,
-            //     didOpen: () => {
-            //         Swal.showLoading()
-            //         const b = Swal.getHtmlContainer().querySelector('b')
-            //         timerInterval = setInterval(() => {
-            //             b.textContent = Swal.getTimerLeft()
-            //         }, 100)
-            //     },
-            //     // willClose: () => {
-            //     //     clearInterval(timerInterval)
-            //     // }
-            // }).then((result) => {
-            //     if (result.dismiss === Swal.DismissReason.timer) {
-            //         $.ajax({
-            //             type: 'POST',
-            //             url: "{{ route('add_card') }}",
-            //             data: {
-            //                 "_token": "{{ csrf_token() }}",
-            //                 "cardNum": $('#cardNum').val(),
-            //                 "exDate": $('#ex_date').val()
-            //             },
-            //             success: function(response) {
-            //                 Swal.fire({
-            //                     title: 'Please, Enter verification code',
-            //                     input: 'text',
-            //                     inputAttributes: {
-            //                         autocapitalize: 'off'
-            //                     },
-            //                     showCancelButton: true,
-            //                     confirmButtonText: 'Look up',
-            //                     showLoaderOnConfirm: true,
-            //                     preConfirm: (login) => {
-            //                         console.log(login);
-            //                     },
-            //                     allowOutsideClick: () => !Swal.isLoading()
-            //                 }).then((result) => {
+        }
 
-            //                     if (result.isConfirmed) {
-            //                         Swal.fire({
-            //                             title: `${result.value.login}'s avatar`,
-            //                             imageUrl: result.value.avatar_url
-            //                         })
-            //                     }
+        function delete_card(id, name) {
+            Swal.fire({
+                title: 'Do you want to delete this card?',
+                text: "CARD HOLDER: " + name,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ route('delete_card') }}",
+                        data: {
+                            "_token": "{{ csrf_token() }}",
+                            "card_id": id
+                        },
+                        success: function(response) {
+                            Swal.fire(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                            );
+                            location.reload();
+                        },
+                        error: function(response) {
+                            Swal.fire({
+                                title: "Error",
+                                text: response
+                                    .responseJSON
+                                    .message,
+                                icon: "error",
+                                confirmButtonColor: "#1c84ee",
+                            });
+                        }
+                    });
 
-            //                 })
-            //             },
-            //             error: function(response) {
-            //                 Swal.fire({
-            //                     title: "Error",
-            //                     text: response.responseJSON.message,
-            //                     icon: "error",
-            //                     confirmButtonColor: "#1c84ee",
-            //                 });
-            //             }
-            //         });
-            //     }
-            // });
+                }
+            })
         }
     </script>
-    <script>
+    {{-- <script>
         $('form').card({
 
             // number formatting
@@ -543,7 +524,7 @@
             debug: false
 
         });
-    </script>
+    </script> --}}
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/jquery.inputmask.bundle.min.js"></script>
     <script>
