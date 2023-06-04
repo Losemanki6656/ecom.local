@@ -712,9 +712,9 @@ class HomeController extends Controller
         }
 
         //discount calculation
-        $discount_applicable = false;
+        $discount_applicable = true;
 
-        if ($product->discount_start_date != null) {
+        if ($product->discount_start_date == null) {
             $discount_applicable = true;
         }
         elseif (strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&

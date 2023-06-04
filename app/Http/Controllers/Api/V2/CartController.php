@@ -140,7 +140,7 @@ class CartController extends Controller
 
         //discount calculation based on flash deal and regular discount
         //calculation of taxes
-        $discount_applicable = false;
+        $discount_applicable = true;
 
         if ($product->discount_start_date == null) {
             $discount_applicable = true;
@@ -155,7 +155,7 @@ class CartController extends Controller
                 $price -= ($price*$product->discount)/100;
             }
             elseif($product->discount_type == 'amount'){
-                $price -= $product->discount;
+                $price -= $product->getProductDiscountAmount();
             }
         }
 

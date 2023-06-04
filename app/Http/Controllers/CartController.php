@@ -127,9 +127,9 @@ class CartController extends Controller
             }
 
             //discount calculation
-            $discount_applicable = false;
+            $discount_applicable = true;
 
-            if ($product->discount_start_date != null) {
+            if ($product->discount_start_date == null) {
                 $discount_applicable = true;
             }
             elseif (strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
@@ -310,7 +310,7 @@ class CartController extends Controller
             $price = $product_stock->price;
 			
 			//discount calculation
-            $discount_applicable = false;
+            $discount_applicable = true;
 
             if ($product->discount_start_date == null) {
                 $discount_applicable = true;
@@ -325,7 +325,7 @@ class CartController extends Controller
                     $price -= ($price*$product->discount)/100;
                 }
                 elseif($product->discount_type == 'amount'){
-                    $price -= $product->discount;
+                    $price -= $product->getProductDiscountAmount();
                 }
             }
 

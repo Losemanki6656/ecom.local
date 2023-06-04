@@ -35,15 +35,22 @@ class Product extends Model
     {
         if(!$this->currency){
             $currency = 29;
-        } else $currency = $this->currency;
+        } else 
+            $currency = $this->currency;
 
-        $currency = Currency::find($currency);
-        $currencyUZS = Currency::find(29);
-        
-        if(session('currency_code') == "USD")     
-            return (($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate);
-        else 
-            return (int)(($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate);
+        if($currency == 29) 
+            return $this->discount;
+        else {
+            $currency = Currency::find($currency);
+            $currencyUZS = Currency::find(29);
+    
+            if(session('currency_code') == "USD")     
+                return (($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate);
+            else 
+                return (int)(($this->discount / $currency->exchange_rate) * $currencyUZS->exchange_rate);
+        }
+
+       
     }
 
     public function getDiscountedAmount(){

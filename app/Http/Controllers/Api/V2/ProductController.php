@@ -249,7 +249,7 @@ class ProductController extends Controller
 
 
         //discount calculation
-        $discount_applicable = false;
+        $discount_applicable = true;
 
         if ($product->discount_start_date == null) {
             $discount_applicable = true;
@@ -264,7 +264,7 @@ class ProductController extends Controller
             if ($product->discount_type == 'percent') {
                 $price -= ($price * $product->discount) / 100;
             } elseif ($product->discount_type == 'amount') {
-                $price -= $product->discount;
+                $price -= $product->getProductDiscountAmount();
             }
         }
 
