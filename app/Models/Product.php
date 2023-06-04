@@ -33,7 +33,11 @@ class Product extends Model
 
     public function getProductDiscountAmount()
     {
-        $currency = Currency::find($this->currency);
+        if(!$this->currency){
+            $currency = 29;
+        }
+
+        $currency = Currency::find($currency);
         $currencyUZS = Currency::find(29);
         
         if(session('currency_code') == "USD")     
