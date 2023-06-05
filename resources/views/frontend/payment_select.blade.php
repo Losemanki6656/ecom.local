@@ -659,58 +659,7 @@
                                     <div class='order-info'>
                                         <div class='order-info-content'>
                                             <h5>Order Summary</h5>
-                                            @php
-                                                $coupon_discount = 0;
-                                            @endphp
-                                            @if (Auth::check() && get_setting('coupon_system') == 1)
-                                                @php
-                                                    $coupon_code = null;
-                                                @endphp
-
-                                                @foreach ($carts as $key => $cartItem)
-                                                    @php
-                                                        $product = \App\Models\Product::find($cartItem['product_id']);
-                                                    @endphp
-                                                    @if ($cartItem->coupon_applied == 1)
-                                                        @php
-                                                            $coupon_code = $cartItem->coupon_code;
-                                                            break;
-                                                        @endphp
-                                                    @endif
-                                                @endforeach
-
-                                                @php
-                                                    $coupon_discount = carts_coupon_discount($coupon_code);
-                                                @endphp
-                                            @endif
-                                            @php $subtotal_for_min_order_amount = 0; @endphp
-                                            @foreach ($carts as $key => $cartItem)
-                                                @php $subtotal_for_min_order_amount += cart_product_price($cartItem, $cartItem->product, false, false) * $cartItem['quantity']; @endphp
-                                            @endforeach
-                                            @php
-                                                $subtotal = 0;
-                                                $tax = 0;
-                                                $shipping = 0;
-                                                $product_shipping_cost = 0;
-                                                $shipping_region = $shipping_info['city'];
-                                            @endphp
-                                            @foreach ($carts as $key => $cartItem)
-                                                @php
-                                                    $product = \App\Models\Product::find($cartItem['product_id']);
-                                                    $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
-                                                    $tax += cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
-                                                    $product_shipping_cost = $cartItem['shipping_cost'];
-                                                    
-                                                    $shipping += $product_shipping_cost;
-                                                    
-                                                    $product_name_with_choice = $product->getTranslation('name');
-                                                    if ($cartItem['variant'] != null) {
-                                                        $product_name_with_choice = $product->getTranslation('name') . ' - ' . $cartItem['variant'];
-                                                    }
-                                                @endphp
-                                            @endforeach
-
-                                            <table class='table'>
+                                            {{-- <table class='table'>
                                                 <tbody>
                                                     <tr>
                                                         <td>
@@ -763,12 +712,15 @@
 
                                                     </tr>
                                                 </tbody>
-                                            </table>
+                                            </table> --}}
+
+                                            <div id="summary_modal">
+                                            </div>
+                                            
                                             <div class='line'></div>
 
-                                            <a type="button" class="btn btn-success mb-2"
-                                                href="{{ route('my-cards') }}"
-                                                style="background-color: #5794E0; width: 100%; border: 0px"> <i
+                                            <a type="button" class="btn btn-primary"
+                                                href="{{ route('my-cards') }}" style="width: 100%"> <i
                                                     class="fa fa-plus"></i> {{ translate('Add Card') }} </a>
                                         </div>
                                     </div>
@@ -1161,6 +1113,10 @@
 
 @section('script')
     <script>
+        let html = document.getElementById("summary").innerHTML;
+        document.getElementById("summary_modal").innerHTML = html;
+    </script>
+    <script>
         function paymentSubmit() {
             if ({{ $bindCards->count() }}) {
                 $('#new-payment').modal('hide');
@@ -1342,6 +1298,8 @@
                 success: function(data, textStatus, jqXHR) {
                     AIZ.plugins.notify(data.response_message.response, data.response_message.message);
                     $("#cart_summary").html(data.html);
+                    let html = document.getElementById("summary").innerHTML;
+                    document.getElementById("summary_modal").innerHTML = html;
                 }
             })
         });
@@ -1361,6 +1319,8 @@
                 processData: false,
                 success: function(data, textStatus, jqXHR) {
                     $("#cart_summary").html(data);
+                    let html = document.getElementById("summary").innerHTML;
+                    document.getElementById("summary_modal").innerHTML = html;
                 }
             })
         })

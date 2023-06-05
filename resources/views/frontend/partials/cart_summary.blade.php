@@ -129,66 +129,68 @@
 
         <input type="hidden" id="sub_total" value="{{ $subtotal }}">
 
-        <table class="table" style="margin-top: 2rem!important;">
-            <tfoot>
-                <!-- Subtotal -->
-                <tr class="cart-subtotal">
-                    <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Subtotal') }}</th>
-                    <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
-                        <span class="fw-600">{{ single_price($subtotal) }}</span>
-                    </td>
-                </tr>
-                <!-- Tax -->
-                <tr class="cart-shipping">
-                    <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Tax') }}</th>
-                    <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
-                        <span class="fw-600">{{ single_price($tax) }}</span>
-                    </td>
-                </tr>
-                <!-- Total Shipping -->
-                <tr class="cart-shipping">
-                    <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Total Shipping') }}</th>
-                    <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
-                        <span class="fw-600">{{ single_price($shipping) }}</span>
-                    </td>
-                </tr>
-                <!-- Redeem point -->
-                @if (Session::has('club_point'))
-                    <tr class="cart-shipping">
-                        <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Redeem point') }}</th>
+        <div id="summary">
+            <table class="table" style="margin-top: 2rem!important;">
+                <tfoot>
+                    <!-- Subtotal -->
+                    <tr class="cart-subtotal">
+                        <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Subtotal') }}</th>
                         <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
-                            <span class="fw-600">{{ single_price(Session::get('club_point')) }}</span>
+                            <span class="fw-600">{{ single_price($subtotal) }}</span>
                         </td>
                     </tr>
-                @endif
-                <!-- Coupon Discount -->
-                @if ($coupon_discount > 0)
+                    <!-- Tax -->
                     <tr class="cart-shipping">
-                        <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Coupon Discount') }}</th>
+                        <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Tax') }}</th>
                         <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
-                            <span class="fw-600">{{ single_price($coupon_discount) }}</span>
+                            <span class="fw-600">{{ single_price($tax) }}</span>
                         </td>
                     </tr>
-                @endif
-
-                @php
-                    $total = $subtotal + $tax + $shipping;
-                    if (Session::has('club_point')) {
-                        $total -= Session::get('club_point');
-                    }
-                    if ($coupon_discount > 0) {
-                        $total -= $coupon_discount;
-                    }
-                @endphp
-                <!-- Total -->
-                <tr class="cart-total">
-                    <th class="pl-0 fs-14 text-dark fw-600"><span class="strong-600">{{ translate('Total') }}</span></th>
-                    <td class="text-right pr-0 fs-14 fw-600 text-primary">
-                        <strong><span>{{ single_price($total) }}</span></strong>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
+                    <!-- Total Shipping -->
+                    <tr class="cart-shipping">
+                        <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Total Shipping') }}</th>
+                        <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
+                            <span class="fw-600">{{ single_price($shipping) }}</span>
+                        </td>
+                    </tr>
+                    <!-- Redeem point -->
+                    @if (Session::has('club_point'))
+                        <tr class="cart-shipping">
+                            <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Redeem point') }}</th>
+                            <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
+                                <span class="fw-600">{{ single_price(Session::get('club_point')) }}</span>
+                            </td>
+                        </tr>
+                    @endif
+                    <!-- Coupon Discount -->
+                    @if ($coupon_discount > 0)
+                        <tr class="cart-shipping">
+                            <th class="pl-0 fs-14 pt-0 pb-2 text-dark fw-600 border-top-0">{{ translate('Coupon Discount') }}</th>
+                            <td class="text-right pr-0 fs-14 pt-0 pb-2 fw-600 text-primary border-top-0">
+                                <span class="fw-600">{{ single_price($coupon_discount) }}</span>
+                            </td>
+                        </tr>
+                    @endif
+    
+                    @php
+                        $total = $subtotal + $tax + $shipping;
+                        if (Session::has('club_point')) {
+                            $total -= Session::get('club_point');
+                        }
+                        if ($coupon_discount > 0) {
+                            $total -= $coupon_discount;
+                        }
+                    @endphp
+                    <!-- Total -->
+                    <tr class="cart-total">
+                        <th class="pl-0 fs-14 text-dark fw-600"><span class="strong-600">{{ translate('Total') }}</span></th>
+                        <td class="text-right pr-0 fs-14 fw-600 text-primary">
+                            <strong><span>{{ single_price($total) }}</span></strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
 
         <!-- Remove Redeem Point -->
         @if (addon_is_activated('club_point'))

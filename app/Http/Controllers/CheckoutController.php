@@ -126,18 +126,20 @@ class CheckoutController extends Controller
 
                 $category = Category::where('id',$product->category_id)->first();
 
-                if($category && $category->commision_rate != 0) {
-
-                    $subtotal += (int)cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * (100 - $category->commision_rate)/100;
-                    $adminTotal += (int)cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] * ($category->commision_rate)/100;
-                } else {
-
-                    $subtotal += (int)cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
-                   
-                }
-
                 $tax +=  cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
                 $coupon_discount += $cartItem['discount'];
+
+                $summm = (int)cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] - $coupon_discount;
+
+                if($category && $category->commision_rate != 0) {
+
+                    $subtotal += $summm * (100 - $category->commision_rate)/100;
+                    $adminTotal += $summm * ($category->commision_rate)/100;
+                } else {
+
+                    $subtotal += $summm;
+                   
+                }
 
             }
 
