@@ -333,7 +333,6 @@ class CheckoutController extends Controller
                                     <town>' . $request->code . '</town>
                                 </receiver>
                                 <service>1</service>
-                                <price>' . $summm . '</price>
                                 <packages>
                                     <package mass="' . $mass . '" quantity="1"></package>
                                 </packages>
