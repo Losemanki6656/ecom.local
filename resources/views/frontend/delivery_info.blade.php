@@ -582,6 +582,8 @@
 
             if ($("#pickup_radio").is(":checked")) {
                 $('#pickupMap').show();
+            } else {
+                $('#pickupMap').hide();
             }
 
             var value = $(el).val();
