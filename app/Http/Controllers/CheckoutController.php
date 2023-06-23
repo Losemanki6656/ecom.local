@@ -299,7 +299,8 @@ class CheckoutController extends Controller
             }
 
             $price_emu = 0;
-
+            $allmass = 0;
+            $allsumm = 0;
             foreach ($seller_products as $key => $seller_product) {
 
                 $mass = 0;
@@ -341,12 +342,15 @@ class CheckoutController extends Controller
                         ]);
 
                 $res = XmlToArray::convert($response->body());
-
+                $allmass += $mass;
+                $allsumm += $summm;
                 $price_emu += (int) $res['calc']['@attributes']['price'];
             }
 
             return response()->json([
-                'price_emu' => $price_emu
+                'price_emu' => $price_emu,
+                'summ' => $allsumm,
+                'mass' => $allmass
             ]);
 
         } catch (\GuzzleHttp\Exception\RequestException $e) {

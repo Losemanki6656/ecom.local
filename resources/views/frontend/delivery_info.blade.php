@@ -384,6 +384,7 @@
                                                                             data-content="<span class='d-block'>
                                                                                             <span class='d-block fs-16 fw-600 mb-2'> {{ $pick_up_point['name'] }}</span>
                                                                                             <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['address'] }}</span>
+                                                                                            <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['town']['@attributes']['regionname'] }}</span>
                                                                                         </span>">
                                                                         </option>
                                                                     @endforeach
@@ -393,8 +394,12 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="row pt-3" id="pickupMap" style="display: none">
-                                                    <div class="pt-5" id="map"></div>
+                                                <div class="row pt-3 text-center d-flex justify-content-between align-items-center"
+                                                    id="pickupMap" style="display: none;">
+                                                    <div class="pt-5 text-center d-flex justify-content-between align-items-center"
+                                                        id="map"
+                                                        style="width: 100%; align-content: center; align-items: center">
+                                                    </div>
                                                 </div>
 
                                                 <!-- Carrier Wise Shipping -->
@@ -436,6 +441,10 @@
                                                         <h6 class="fs-14 fw-700 mt-3" id="pickup_address">
                                                         </h6>
                                                         <h6 class="fs-14 fw-700 mt-3" id="price_emu">
+                                                        </h6>
+                                                        <h6 class="fs-14 fw-700 mt-3" id="allsumm">
+                                                        </h6>
+                                                        <h6 class="fs-14 fw-700 mt-3" id="allmass">
                                                         </h6>
                                                     </div>
                                                     <div class="col-md-6"></div>
@@ -519,6 +528,10 @@
 
                     $('#loader').modal('hide');
                     $("#price_emu").html('<i class="las la-truck"></i> ' + res['price_emu'] + ' UZS');
+                    $("#allsumm").html('<i class="las la-dollar-sign"></i> Общая сумма: ' + res['summ'] +
+                        ' UZS');
+                    $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res['mass'] +
+                        ' кг');
                     $("#pickupMenu").show();
 
                 },
@@ -533,8 +546,12 @@
         }
 
         function openStreetMap() {
+
             var L = window.L;
-            var map = L.map('map');
+            var map = L.map('map', {
+                scrollWheelZoom: false,
+                tap: false
+            });
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
