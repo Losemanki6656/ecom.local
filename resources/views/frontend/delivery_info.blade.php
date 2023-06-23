@@ -313,7 +313,7 @@
                                                                     <label class="aiz-megabox d-block bg-white mb-0">
                                                                         <input type="radio"
                                                                             name="shipping_type_{{ $key }}"
-                                                                            value="home_delivery"
+                                                                            value="home_delivery" id="home_radio"
                                                                             onchange="show_pickup_point(this, {{ $key }})"
                                                                             data-target=".pickup_point_id_{{ $key }}"
                                                                             checked>
@@ -394,9 +394,9 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="row pt-3 text-center d-flex justify-content-between align-items-center"
+                                                <div class="row pt-3 justify-content-between align-items-center"
                                                     id="pickupMap" style="display: none;">
-                                                    <div class="pt-5 text-center d-flex justify-content-between align-items-center"
+                                                    <div class="pt-5 justify-content-between align-items-center"
                                                         id="map"
                                                         style="width: 100%; align-content: center; align-items: center">
                                                     </div>
@@ -575,7 +575,6 @@
 
         function show_pickup_point(el, type) {
             if ($("#carrier_radio").is(":checked")) {
-
                 $('#pickupMenu').hide();
                 $('#pickupMap').hide();
             }
