@@ -394,11 +394,9 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="row pt-3 justify-content-between align-items-center"
-                                                    id="pickupMap" style="display: none;">
-                                                    <div class="pt-5 justify-content-between align-items-center"
-                                                        id="map"
-                                                        style="width: 100%; align-content: center; align-items: center">
+                                                <div class="row pt-3 d-flex" id="pickupMap">
+                                                    <div class="col-md-12 pt-5 d-flex" id="map"
+                                                        style="width: 100%;">
                                                     </div>
                                                 </div>
 
@@ -492,6 +490,8 @@
     <script>
         $(document).ready(function() {
             openStreetMap();
+            $('#pickupMap').removeClass('d-flex');
+            $('#pickupMap').addClass('d-none');
         });
     </script>
     <script>
@@ -574,15 +574,13 @@
         }
 
         function show_pickup_point(el, type) {
-            if ($("#carrier_radio").is(":checked")) {
-                $('#pickupMenu').hide();
-                $('#pickupMap').hide();
-            }
 
             if ($("#pickup_radio").is(":checked")) {
-                $('#pickupMap').show();
+                $('#pickupMap').removeClass('d-none');
+                $('#pickupMap').addClass('d-flex');
             } else {
-                $('#pickupMap').hide();
+                $('#pickupMap').addClass('d-none');
+                $('#pickupMap').removeClass('d-flex');
             }
 
             var value = $(el).val();
