@@ -57,401 +57,196 @@
                         <form class="form-default" action="{{ route('checkout.store_delivery_info') }}" role="form"
                             method="POST">
                             @csrf
-                            @php
-                                $admin_products = [];
-                                $seller_products = [];
-                                $admin_product_variation = [];
-                                $seller_product_variation = [];
-                                foreach ($carts as $key => $cartItem) {
-                                    $product = \App\Models\Product::find($cartItem['product_id']);
-                                
-                                    if ($product->added_by == 'admin') {
-                                        array_push($admin_products, $cartItem['product_id']);
-                                        $admin_product_variation[] = $cartItem['variation'];
-                                    } else {
-                                        $product_ids = [];
-                                        if (isset($seller_products[$product->user_id])) {
-                                            $product_ids = $seller_products[$product->user_id];
-                                        }
-                                        array_push($product_ids, $cartItem['product_id']);
-                                        $seller_products[$product->user_id] = $product_ids;
-                                        $seller_product_variation[] = $cartItem['variation'];
-                                    }
-                                }
-                                
-                                $pickup_point_list = [];
-                                if (get_setting('pickup_point') == 1) {
-                                    $pickup_point_list = \App\Models\PickupPoint::where('pick_up_status', 1)->get();
-                                }
-                            @endphp
-
-                            <!-- Inhouse Products -->
-                            @if (!empty($admin_products))
-                                <div class="card mb-5 border-0 rounded-0 shadow-none">
-                                    <div class="card-header py-3 px-0 border-bottom-0">
-                                        <h5 class="fs-16 fw-700 text-dark mb-0">{{ get_setting('site_name') }}
-                                            {{ translate('Inhouse Products') }}</h5>
+                            @foreach ($seller_products as $key => $item)
+                                <div class="mb-4">
+                                    <!-- Headers -->
+                                    <div class="row gutters-2 border-bottom mb-3 pb-3 text-secondary fs-12">
+                                        <div class="col-md-6">
+                                            <h5 class="fs-16 fw-700 text-dark mb-0">
+                                                {{ \App\Models\Shop::where('user_id', $key)->first()->name }} </h5>
+                                        </div>
+                                        <div class="col-md-6 text-right">
+                                            <span class="fw-700 fs-16 text-info" id="sellerProduct{{ $key }}"><i
+                                                    class="las la-truck"></i> 0
+                                                UZS</span>
+                                        </div>
                                     </div>
-                                    <div class="card-body p-0">
-                                        <!-- Product List -->
-                                        <ul class="list-group list-group-flush border p-3 mb-3">
+                                    <!-- Cart Items -->
+                                    <ul class="list-group list-group-flush">
+                                        @php
+                                            $total = 0;
+                                        @endphp
+                                        @foreach ($item as $key => $cartItem)
                                             @php
-                                                $physical = false;
+                                                $product = \App\Models\Product::find($cartItem['product_id']);
+                                                $product_stock = $product->stocks->where('variant', $cartItem['variation'])->first();
+                                                // $total = $total + ($cartItem['price']  + $cartItem['tax']) * $cartItem['quantity'];
+                                                $total = $total + cart_product_price($cartItem, $product, false) * $cartItem['quantity'];
+                                                $product_name_with_choice = $product->getTranslation('name');
+                                                if ($cartItem['variation'] != null) {
+                                                    $product_name_with_choice = $product->getTranslation('name') . ' - ' . $cartItem['variation'];
+                                                }
                                             @endphp
-                                            @foreach ($admin_products as $key => $cartItem)
-                                                @php
-                                                    $product = \App\Models\Product::find($cartItem);
-                                                    if ($product->digital == 0) {
-                                                        $physical = true;
-                                                    }
-                                                @endphp
-                                                <li class="list-group-item">
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="mr-2 mr-md-3">
+                                            <li class="list-group-item px-0">
+                                                <div class="row gutters-2 align-items-center">
+                                                    <!-- Product Image & name -->
+                                                    <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+                                                        <span class="mr-2 ml-0">
                                                             <img src="{{ uploaded_asset($product->thumbnail_img) }}"
-                                                                class="img-fit size-60px"
+                                                                class="img-fit size-70px"
                                                                 alt="{{ $product->getTranslation('name') }}"
                                                                 onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
                                                         </span>
-                                                        <span class="fs-14 fw-400 text-dark">
-                                                            {{ $product->getTranslation('name') }}
-                                                            <br>
-                                                            @if ($admin_product_variation[$key] != '')
-                                                                <span
-                                                                    class="fs-12 text-secondary">{{ translate('Variation') }}:
-                                                                    {{ $admin_product_variation[$key] }}</span>
-                                                            @endif
+                                                        <span class="fs-14">{{ $product_name_with_choice }}</span>
+                                                    </div>
+                                                    <div class="col-md-6 text order-4 order-md-0 my-3 my-md-0 text-right">
+                                                        <span
+                                                            class="opacity-60 fs-12 d-block d-md-none">{{ translate('Total') }}</span>
+                                                        <span
+                                                            class="fw-700 fs-16 text-primary">{{ single_price(cart_product_price($cartItem, $product, false) * $cartItem['quantity']) }}</span>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endforeach
+
+                            <div class="mb-4">
+                                <div class="row pt-3">
+                                    <div class="col-md-6">
+                                        <h6 class="fs-14 fw-700 mt-3">
+                                            {{ translate('Choose Delivery Type') }}</h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row gutters-5">
+                                            <!-- Home Delivery -->
+                                            @if (get_setting('shipping_type') != 'carrier_wise_shipping')
+                                                <div class="col-6">
+                                                    <label class="aiz-megabox d-block bg-white mb-0">
+                                                        <input type="radio" name="shipping_type_{{ $key }}"
+                                                            value="home_delivery" id="home_radio"
+                                                            onchange="show_pickup_point(this, {{ $key }})"
+                                                            data-target=".pickup_point_id_{{ $key }}" checked>
+                                                        <span class="d-flex p-3 aiz-megabox-elem rounded-0"
+                                                            style="padding: 0.75rem 1.2rem;">
+                                                            <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
+                                                            <span
+                                                                class="flex-grow-1 pl-3 fw-600">{{ translate('Home Delivery') }}</span>
                                                         </span>
-                                                    </div>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                        <!-- Choose Delivery Type -->
-                                        @if ($physical)
-                                            <div class="row pt-3">
-                                                <div class="col-md-6">
-                                                    <h6 class="fs-14 fw-700 mt-3">{{ translate('Choose Delivery Type') }}
-                                                    </h6>
+                                                    </label>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="row gutters-5">
-                                                        <!-- Home Delivery -->
-                                                        @if (get_setting('shipping_type') != 'carrier_wise_shipping')
-                                                            <div class="col-6">
-                                                                <label class="aiz-megabox d-block bg-white mb-0">
-                                                                    <input type="radio"
-                                                                        name="shipping_type_{{ \App\Models\User::where('user_type', 'admin')->first()->id }}"
-                                                                        value="home_delivery"
-                                                                        onchange="show_pickup_point(this, 'admin')"
-                                                                        data-target=".pickup_point_id_admin" checked>
-                                                                    <span class="d-flex aiz-megabox-elem rounded-0"
-                                                                        style="padding: 0.75rem 1.2rem;">
-                                                                        <span
-                                                                            class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                        <span
-                                                                            class="flex-grow-1 pl-3 fw-600">{{ translate('Home Delivery') }}</span>
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-                                                            <!-- Carrier -->
-                                                        @else
-                                                            <div class="col-6">
-                                                                <label class="aiz-megabox d-block bg-white mb-0">
-                                                                    <input type="radio"
-                                                                        name="shipping_type_{{ \App\Models\User::where('user_type', 'admin')->first()->id }}"
-                                                                        value="carrier"
-                                                                        onchange="show_pickup_point(this, 'admin')"
-                                                                        data-target=".pickup_point_id_admin" checked>
-                                                                    <span class="d-flex aiz-megabox-elem rounded-0"
-                                                                        style="padding: 0.75rem 1.2rem;">
-                                                                        <span
-                                                                            class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                        <span
-                                                                            class="flex-grow-1 pl-3 fw-600">{{ translate('Carrier') }}</span>
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-                                                        @endif
-                                                        <!-- Local Pickup -->
-                                                        @if ($pickup_point_list)
-                                                            <div class="col-6">
-                                                                <label class="aiz-megabox d-block bg-white mb-0">
-                                                                    <input type="radio"
-                                                                        name="shipping_type_{{ \App\Models\User::where('user_type', 'admin')->first()->id }}"
-                                                                        value="pickup_point"
-                                                                        onchange="show_pickup_point(this, 'admin')"
-                                                                        data-target=".pickup_point_id_admin">
-                                                                    <span class="d-flex aiz-megabox-elem rounded-0"
-                                                                        style="padding: 0.75rem 1.2rem;">
-                                                                        <span
-                                                                            class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                        <span
-                                                                            class="flex-grow-1 pl-3 fw-600">{{ translate('Local Pickup') }}</span>
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-                                                    <!-- Pickup Point List -->
-                                                    @if ($pickup_point_list)
-                                                        <div class="mt-3 pickup_point_id_admin d-none">
-                                                            <select class="form-control aiz-selectpicker rounded-0"
-                                                                name="pickup_point_id_{{ \App\Models\User::where('user_type', 'admin')->first()->id }}"
-                                                                data-live-search="true">
-                                                                <option>{{ translate('Select your nearest pickup point') }}
-                                                                </option>
-                                                                @foreach ($pickup_point_list as $pick_up_point)
-                                                                    <option value="{{ $pick_up_point->id }}"
-                                                                        data-content="<span class='d-block'>
-                                                                                    <span class='d-block fs-16 fw-600 mb-2'>{{ $pick_up_point->getTranslation('name') }}</span>
-                                                                                    <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point->getTranslation('address') }}</span>
-                                                                                    <span class='d-block opacity-50 fs-12'><i class='las la-phone'></i>{{ $pick_up_point->phone }}</span>
-                                                                                </span>">
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                            </div>
-
-                                            <!-- Carrier Wise Shipping -->
-                                            @if (get_setting('shipping_type') == 'carrier_wise_shipping')
-                                                <div class="row pt-3 carrier_id_admin">
-                                                    @foreach ($carrier_list as $carrier_key => $carrier)
-                                                        <div class="col-md-12 mb-2">
-                                                            <label class="aiz-megabox d-block bg-white mb-0">
-                                                                <input type="radio"
-                                                                    name="carrier_id_{{ \App\Models\User::where('user_type', 'admin')->first()->id }}"
-                                                                    value="{{ $carrier->id }}"
-                                                                    @if ($carrier_key == 0) checked @endif>
-                                                                <span class="d-flex p-3 aiz-megabox-elem rounded-0">
-                                                                    <span
-                                                                        class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                    <span class="flex-grow-1 pl-3 fw-600">
-                                                                        <img src="{{ uploaded_asset($carrier->logo) }}"
-                                                                            alt="Image" class="w-50px img-fit">
-                                                                    </span>
-                                                                    <span
-                                                                        class="flex-grow-1 pl-3 fw-700">{{ $carrier->name }}</span>
-                                                                    <span
-                                                                        class="flex-grow-1 pl-3 fw-600">{{ translate('Transit in') . ' ' . $carrier->transit_time }}</span>
-                                                                    <span
-                                                                        class="flex-grow-1 pl-3 fw-600">{{ single_price(carrier_base_price($carts, $carrier->id, \App\Models\User::where('user_type', 'admin')->first()->id)) }}</span>
-                                                                </span>
-                                                            </label>
-                                                        </div>
-                                                    @endforeach
+                                                <!-- Carrier -->
+                                            @else
+                                                <div class="col-6">
+                                                    <label class="aiz-megabox d-block bg-white mb-0">
+                                                        <input type="radio" id="carrier_radio"
+                                                            name="shipping_type_{{ $key }}" value="carrier"
+                                                            onchange="show_pickup_point(this, {{ $key }})"
+                                                            data-target=".pickup_point_id_{{ $key }}" checked>
+                                                        <span class="d-flex p-3 aiz-megabox-elem rounded-0"
+                                                            style="padding: 0.75rem 1.2rem;">
+                                                            <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
+                                                            <span
+                                                                class="flex-grow-1 pl-3 fw-600">{{ translate('Carrier') }}</span>
+                                                        </span>
+                                                    </label>
                                                 </div>
                                             @endif
+                                            <!-- Local Pickup -->
+                                            @if ($localPickups)
+                                                <div class="col-6">
+                                                    <label class="aiz-megabox d-block bg-white mb-0">
+                                                        <input type="radio" name="shipping_type_{{ $key }}"
+                                                            value="pickup_point" id="pickup_radio"
+                                                            onchange="show_pickup_point(this, {{ $key }})"
+                                                            data-target=".pickup_point_id_{{ $key }}">
+                                                        <span class="d-flex p-3 aiz-megabox-elem rounded-0"
+                                                            style="padding: 0.75rem 1.2rem;">
+                                                            <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
+                                                            <span
+                                                                class="flex-grow-1 pl-3 fw-600">{{ translate('Local Pickup') }}</span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            @endif
+                                        </div>
 
+                                        <!-- Pickup Point List -->
+
+                                        @if ($localPickups)
+                                            <div class="mt-4 pickup_point_id_{{ $key }} d-none">
+                                                <select class="form-control aiz-selectpicker rounded-0"
+                                                    name="pickup_point_id_{{ $key }}" data-live-search="true"
+                                                    id="pickup_select" onchange="pickupSelect()">
+                                                    <option>
+                                                        {{ translate('Select your nearest pickup point') }}
+                                                    </option>
+                                                    @foreach ($localPickups as $pick_up_point)
+                                                        <option value="{{ $pick_up_point['town']['@content'] }}"
+                                                            data-content="<span class='d-block'>
+                                                                                        <span class='d-block fs-16 fw-600 mb-2'> {{ $pick_up_point['name'] }}</span>
+                                                                                        <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['address'] }}</span>
+                                                                                        <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['town']['@attributes']['regionname'] }}</span>
+                                                                                    </span>">
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         @endif
-
-
-
                                     </div>
                                 </div>
-                            @endif
 
-                            <!-- Seller Products -->
-                            @if (!empty($seller_products))
-                                @foreach ($seller_products as $key => $seller_product)
-                                    <div class="card mb-5 border-0 rounded-0 shadow-none">
-                                        <div class="card-header py-3 px-0 border-bottom-0">
-                                            <h5 class="fs-16 fw-700 text-dark mb-0">
-                                                {{ \App\Models\Shop::where('user_id', $key)->first()->name }}
-                                                {{ translate('Products') }}</h5>
-                                        </div>
-                                        <div class="card-body p-0">
-                                            <!-- Product List -->
-                                            <ul class="list-group list-group-flush border p-3 mb-3">
-                                                @php
-                                                    $physical = false;
-                                                @endphp
-                                                @foreach ($seller_product as $key2 => $cartItem)
-                                                    @php
-                                                        $product = \App\Models\Product::find($cartItem);
-                                                        if ($product->digital == 0) {
-                                                            $physical = true;
-                                                        }
-                                                    @endphp
-                                                    <li class="list-group-item">
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="mr-2 mr-md-3">
-                                                                <img src="{{ uploaded_asset($product->thumbnail_img) }}"
-                                                                    class="img-fit size-60px"
-                                                                    alt="{{ $product->getTranslation('name') }}"
-                                                                    onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
-                                                            </span>
-                                                            <span class="fs-14 fw-400 text-dark">
-                                                                {{ $product->getTranslation('name') }}
-                                                                <br>
-                                                                @if ($seller_product_variation[$key2] != '')
-                                                                    <span
-                                                                        class="fs-12 text-secondary">{{ translate('Variation') }}:
-                                                                        {{ $seller_product_variation[$key2] }}</span>
-                                                                @endif
-                                                            </span>
-                                                        </div>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                            <!-- Choose Delivery Type -->
-                                            @if ($physical)
-                                                <div class="row pt-3">
-                                                    <div class="col-md-6">
-                                                        <h6 class="fs-14 fw-700 mt-3">
-                                                            {{ translate('Choose Delivery Type') }}</h6>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="row gutters-5">
-                                                            <!-- Home Delivery -->
-                                                            @if (get_setting('shipping_type') != 'carrier_wise_shipping')
-                                                                <div class="col-6">
-                                                                    <label class="aiz-megabox d-block bg-white mb-0">
-                                                                        <input type="radio"
-                                                                            name="shipping_type_{{ $key }}"
-                                                                            value="home_delivery" id="home_radio"
-                                                                            onchange="show_pickup_point(this, {{ $key }})"
-                                                                            data-target=".pickup_point_id_{{ $key }}"
-                                                                            checked>
-                                                                        <span class="d-flex p-3 aiz-megabox-elem rounded-0"
-                                                                            style="padding: 0.75rem 1.2rem;">
-                                                                            <span
-                                                                                class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                            <span
-                                                                                class="flex-grow-1 pl-3 fw-600">{{ translate('Home Delivery') }}</span>
-                                                                        </span>
-                                                                    </label>
-                                                                </div>
-                                                                <!-- Carrier -->
-                                                            @else
-                                                                <div class="col-6">
-                                                                    <label class="aiz-megabox d-block bg-white mb-0">
-                                                                        <input type="radio" id="carrier_radio"
-                                                                            name="shipping_type_{{ $key }}"
-                                                                            value="carrier"
-                                                                            onchange="show_pickup_point(this, {{ $key }})"
-                                                                            data-target=".pickup_point_id_{{ $key }}"
-                                                                            checked>
-                                                                        <span class="d-flex p-3 aiz-megabox-elem rounded-0"
-                                                                            style="padding: 0.75rem 1.2rem;">
-                                                                            <span
-                                                                                class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                            <span
-                                                                                class="flex-grow-1 pl-3 fw-600">{{ translate('Carrier') }}</span>
-                                                                        </span>
-                                                                    </label>
-                                                                </div>
-                                                            @endif
-                                                            <!-- Local Pickup -->
-                                                            @if ($pickup_point_list)
-                                                                <div class="col-6">
-                                                                    <label class="aiz-megabox d-block bg-white mb-0">
-                                                                        <input type="radio"
-                                                                            name="shipping_type_{{ $key }}"
-                                                                            value="pickup_point" id="pickup_radio"
-                                                                            onchange="show_pickup_point(this, {{ $key }})"
-                                                                            data-target=".pickup_point_id_{{ $key }}">
-                                                                        <span class="d-flex p-3 aiz-megabox-elem rounded-0"
-                                                                            style="padding: 0.75rem 1.2rem;">
-                                                                            <span
-                                                                                class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                            <span
-                                                                                class="flex-grow-1 pl-3 fw-600">{{ translate('Local Pickup') }}</span>
-                                                                        </span>
-                                                                    </label>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-
-                                                        <!-- Pickup Point List -->
-
-                                                        @if ($pickup_point_list)
-                                                            <div class="mt-4 pickup_point_id_{{ $key }} d-none">
-                                                                <select class="form-control aiz-selectpicker rounded-0"
-                                                                    name="pickup_point_id_{{ $key }}"
-                                                                    data-live-search="true" id="pickup_select"
-                                                                    onchange="pickupSelect()">
-                                                                    <option>
-                                                                        {{ translate('Select your nearest pickup point') }}
-                                                                    </option>
-                                                                    @foreach ($localPickups as $pick_up_point)
-                                                                        <option
-                                                                            value="{{ $pick_up_point['town']['@content'] }}"
-                                                                            data-content="<span class='d-block'>
-                                                                                            <span class='d-block fs-16 fw-600 mb-2'> {{ $pick_up_point['name'] }}</span>
-                                                                                            <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['address'] }}</span>
-                                                                                            <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['town']['@attributes']['regionname'] }}</span>
-                                                                                        </span>">
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </div>
-
-                                                <div class="row pt-3 d-flex" id="pickupMap">
-                                                    <div class="col-md-12 pt-5 d-flex" id="map"
-                                                        style="width: 100%;">
-                                                    </div>
-                                                </div>
-
-                                                <!-- Carrier Wise Shipping -->
-                                                @if (get_setting('shipping_type') == 'carrier_wise_shipping')
-                                                    <div class="row pt-3 carrier_id_{{ $key }}">
-                                                        @foreach ($carrier_list as $carrier_key => $carrier)
-                                                            <div class="col-md-12 mb-2">
-                                                                <label class="aiz-megabox d-block bg-white mb-0">
-                                                                    <input type="radio"
-                                                                        name="carrier_id_{{ $key }}"
-                                                                        value="{{ $carrier->id }}"
-                                                                        @if ($carrier_key == 0) checked @endif>
-                                                                    <span class="d-flex p-3 aiz-megabox-elem rounded-0">
-                                                                        <span
-                                                                            class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                                                        <span class="flex-grow-1 pl-3 fw-600">
-                                                                            <img src="{{ uploaded_asset($carrier->logo) }}"
-                                                                                alt="Image" class="w-50px img-fit">
-                                                                        </span>
-                                                                        <span
-                                                                            class="flex-grow-1 pl-3 fw-600">{{ $carrier->name }}</span>
-                                                                        <span
-                                                                            class="flex-grow-1 pl-3 fw-600">{{ translate('Transit in') . ' ' . $carrier->transit_time }}</span>
-                                                                        <span
-                                                                            class="flex-grow-1 pl-3 fw-600">{{ single_price(carrier_base_price($carts, $carrier->id, $key)) }}</span>
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @endif
-
-                                                <div class="row pt-3" id="pickupMenu" style="display: none">
-                                                    <div class="col-md-6 pb-3">
-                                                        <h6 class="fs-14 fw-700 mt-3" id="pickup_phone">
-                                                        </h6>
-                                                        <h6 class="fs-14 fw-700 mt-3" id="pickup_worktime">
-                                                        </h6>
-                                                        <h6 class="fs-14 fw-700 mt-3" id="pickup_address">
-                                                        </h6>
-                                                        <h6 class="fs-14 fw-700 mt-3" id="price_emu">
-                                                        </h6>
-                                                        <h6 class="fs-14 fw-700 mt-3" id="allsumm">
-                                                        </h6>
-                                                        <h6 class="fs-14 fw-700 mt-3" id="allmass">
-                                                        </h6>
-                                                    </div>
-                                                    <div class="col-md-6"></div>
-                                                </div>
-                                            @endif
-                                        </div>
+                                <div class="row pt-3 d-flex" id="pickupMap">
+                                    <div class="col-md-12 pt-5 d-flex" id="map" style="width: 100%;">
                                     </div>
-                                @endforeach
-                            @endif
+                                </div>
+
+                                <!-- Carrier Wise Shipping -->
+                                @if (get_setting('shipping_type') == 'carrier_wise_shipping')
+                                    <div class="row pt-3 carrier_id_{{ $key }}">
+                                        @foreach ($carrier_list as $carrier_key => $carrier)
+                                            <div class="col-md-12 mb-2">
+                                                <label class="aiz-megabox d-block bg-white mb-0">
+                                                    <input type="radio" name="carrier_id_{{ $key }}"
+                                                        value="{{ $carrier->id }}"
+                                                        @if ($carrier_key == 0) checked @endif>
+                                                    <span class="d-flex p-3 aiz-megabox-elem rounded-0">
+                                                        <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
+                                                        <span class="flex-grow-1 pl-3 fw-600">
+                                                            <img src="{{ uploaded_asset($carrier->logo) }}"
+                                                                alt="Image" class="w-50px img-fit">
+                                                        </span>
+                                                        <span class="flex-grow-1 pl-3 fw-600">{{ $carrier->name }}</span>
+                                                        <span
+                                                            class="flex-grow-1 pl-3 fw-600">{{ translate('Transit in') . ' ' . $carrier->transit_time }}</span>
+                                                        <span
+                                                            class="flex-grow-1 pl-3 fw-600">{{ single_price(carrier_base_price($carts, $carrier->id, $key)) }}</span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <div class="row pt-3" id="pickupMenu" style="display: none">
+                                    <div class="col-md-6 pb-3">
+                                        <h6 class="fs-14 fw-700 mt-3" id="pickup_phone">
+                                        </h6>
+                                        <h6 class="fs-14 fw-700 mt-3" id="pickup_worktime">
+                                        </h6>
+                                        <h6 class="fs-14 fw-700 mt-3" id="pickup_address">
+                                        </h6>
+                                        <h6 class="fs-14 fw-700 mt-3" id="price_emu">
+                                        </h6>
+                                        <h6 class="fs-14 fw-700 mt-3" id="allsumm">
+                                        </h6>
+                                        <h6 class="fs-14 fw-700 mt-3" id="allmass">
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-6"></div>
+                                </div>
+                            </div>
 
                             <div class="pt-4 d-flex justify-content-between align-items-center">
                                 <!-- Return to shop -->
@@ -533,7 +328,14 @@
                     $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res['mass'] +
                         ' кг');
                     $("#pickupMenu").show();
-
+                    let array = res.seller_emu_price;
+                    array.forEach(element => {
+                        $("#sellerProduct" + element['key']).html(
+                            '<i class="las la-weight-hanging"></i> ' + element['mass'] +
+                            ' кг;' + '&nbsp &nbsp &nbsp<i class="las la-truck"></i> ' + element[
+                                'price'] + ' UZS'
+                        );
+                    });
                 },
                 error: function(error) {
                     console.log(error);

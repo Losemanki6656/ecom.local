@@ -301,6 +301,8 @@ class CheckoutController extends Controller
             $price_emu = 0;
             $allmass = 0;
             $allsumm = 0;
+            $seller_emu_price = [];
+
             foreach ($seller_products as $key => $seller_product) {
 
                 $mass = 0;
@@ -344,12 +346,21 @@ class CheckoutController extends Controller
                 $allmass += $mass;
                 $allsumm += $summm;
                 $price_emu += (int) $res['calc']['@attributes']['price'];
+
+                $seller_emu_price[] = [
+                    'key' => $key,
+                    'price' => (int) $res['calc']['@attributes']['price'],
+                    'mass' => $mass,
+                    'summ' => $summm
+                ];
+
             }
 
             return response()->json([
                 'price_emu' => $price_emu,
                 'summ' => $allsumm,
-                'mass' => $allmass
+                'mass' => $allmass,
+                'seller_emu_price' => $seller_emu_price
             ]);
 
         } catch (\GuzzleHttp\Exception\RequestException $e) {
@@ -364,25 +375,29 @@ class CheckoutController extends Controller
     public function store_shipping_info(Request $request)
     {
 
-        try {
+        if (1 == 1) {
+            try {
 
-            $response = Http::withHeaders([
-                "Content-Type" => "text/xml;charset=utf-8"
-            ])->send("POST", "https://home.courierexe.ru/api/", [
-                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                $response = Http::withHeaders([
+                    "Content-Type" => "text/xml;charset=utf-8"
+                ])->send("POST", "https://home.courierexe.ru/api/", [
+                            "body" => '<?xml version="1.0" encoding="utf-8"?>
                                 <pvzlist>
                                     <auth extra="245" />
                                 </pvzlist>'
-                    ]);
+                        ]);
 
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
 
-            flash(translate($e->getMessage()))->warning();
-            return back();
+                flash(translate($e->getMessage()))->warning();
+                return back();
+            }
+
+            $res = XmlToArray::convert($response->body());
+            $localPickups = $res['pvz'];
         }
 
-        $res = XmlToArray::convert($response->body());
-        $localPickups = $res['pvz'];
+        // $localPickups = [];
 
         // dd($localPickups);
 
@@ -396,6 +411,20 @@ class CheckoutController extends Controller
             flash(translate('Your cart is empty'))->warning();
             return redirect()->route('home');
         }
+
+        $seller_products = array();
+        foreach ($carts as $cartItem) {
+            $product_ids = array();
+            $product = Product::find($cartItem['product_id']);
+            if (isset($seller_products[$product->user_id])) {
+                $product_ids = $seller_products[$product->user_id];
+            }
+            array_push($product_ids, $cartItem);
+            $seller_products[$product->user_id] = $product_ids;
+
+        }
+
+        // dd($seller_products);
 
         foreach ($carts as $key => $cartItem) {
             $cartItem->address_id = $request->address_id;
@@ -414,7 +443,7 @@ class CheckoutController extends Controller
             $carrier_list = $carrier_query->get();
         }
 
-        return view('frontend.delivery_info', compact('carts', 'carrier_list', 'localPickups'));
+        return view('frontend.delivery_info', compact('carts', 'carrier_list', 'localPickups', 'seller_products'));
     }
 
     public function store_delivery_info(Request $request)
