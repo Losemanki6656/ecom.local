@@ -549,7 +549,7 @@
 
             var L = window.L;
             var map = L.map('map', {
-                scrollWheelZoom: false,
+                // scrollWheelZoom: false,
                 tap: false
             });
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
