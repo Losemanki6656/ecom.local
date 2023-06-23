@@ -63,7 +63,8 @@
                                     <div class="row gutters-2 border-bottom mb-3 pb-3 text-secondary fs-12">
                                         <div class="col-md-6">
                                             <h5 class="fs-16 fw-700 text-dark mb-0">
-                                                {{ \App\Models\Shop::where('user_id', $key)->first()->name }} </h5>
+                                                {{ \App\Models\Shop::where('user_id', $key)->first()->name ?? 'Seller Not Found' }}
+                                            </h5>
                                         </div>
                                         <div class="col-md-6 text-right">
                                             <span class="fw-700 fs-16 text-info" id="sellerProduct{{ $key }}"><i
