@@ -70,7 +70,7 @@ Route::controller(DemoController::class)->group(function () {
     Route::get('/migrate_attribute_values', 'migrate_attribute_values');
 });
 
-Route::get('/refresh-csrf', function() {
+Route::get('/refresh-csrf', function () {
     return csrf_token();
 });
 
@@ -125,7 +125,7 @@ Route::controller(HomeController::class)->group(function () {
     //Flash Deal Details Page
     Route::get('/flash-deals', 'all_flash_deals')->name('flash-deals');
     Route::get('/flash-deal/{slug}', 'flash_deal_details')->name('flash-deal-details');
-    
+
     //Todays Deal Details Page
     Route::get('/todays-deal', 'todays_deal')->name('todays-deal');
 
@@ -160,7 +160,7 @@ Route::post('/language', [LanguageController::class, 'changeLanguage'])->name('l
 Route::post('/currency', [CurrencyController::class, 'changeCurrency'])->name('currency.change');
 
 
-Route::get('/sitemap.xml', function() {
+Route::get('/sitemap.xml', function () {
     return base_path('sitemap.xml');
 });
 
@@ -201,7 +201,7 @@ Route::controller(MercadopagoController::class)->group(function () {
     Route::any('/mercadopago/payment/done', 'paymentstatus')->name('mercadopago.done');
     Route::any('/mercadopago/payment/cancel', 'callback')->name('mercadopago.cancel');
 });
-//Mercadopago 
+//Mercadopago
 
 // SSLCOMMERZ Start
 Route::controller(SslcommerzController::class)->group(function () {
@@ -233,7 +233,7 @@ Route::controller(CompareController::class)->group(function () {
 // Subscribe
 Route::resource('subscribers', SubscriberController::class);
 
-Route::group(['middleware' => ['user', 'verified', 'unbanned']], function() {
+Route::group(['middleware' => ['user', 'verified', 'unbanned']], function () {
 
     Route::controller(HomeController::class)->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
@@ -242,23 +242,24 @@ Route::group(['middleware' => ['user', 'verified', 'unbanned']], function() {
         Route::post('/new-user-verification', 'new_verify')->name('user.new.verify');
         Route::post('/new-user-email', 'update_email')->name('user.change.email');
         Route::post('/user/update-profile', 'userProfileUpdate')->name('user.profile.update');
-        
+
         Route::post('/user/add-card', 'add_card')->name('add_card');
         Route::post('/user/add-card-success', 'add_card_success')->name('add_card_success');
         Route::post('/user/delete-card-success', 'delete_card')->name('delete_card');
     });
-    
+
     Route::get('/all-notifications', [NotificationController::class, 'index'])->name('all-notifications');
 
 });
 
-Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function() {
+Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function () {
 
     // Checkout Routs
-    Route::group(['prefix' => 'checkout'], function() {
+    Route::group(['prefix' => 'checkout'], function () {
         Route::controller(CheckoutController::class)->group(function () {
             Route::get('/', 'get_shipping_info')->name('checkout.shipping_info');
             Route::any('/delivery_info', 'store_shipping_info')->name('checkout.store_shipping_infostore');
+            Route::post('/pickupCodeInfo', 'pickupCodeInfo')->name('checkout.pickupCodeInfo');
             Route::post('/payment_select', 'store_delivery_info')->name('checkout.store_delivery_info');
             Route::get('/order-confirmed', 'order_confirmed')->name('order_confirmed');
             Route::post('/payment', 'checkout')->name('payment.checkout');
@@ -270,7 +271,7 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function() 
             Route::post('/remove_coupon_code', 'remove_coupon_code')->name('checkout.remove_coupon_code');
             //Club point
             Route::post('/apply-club-point', 'apply_club_point')->name('checkout.apply_club_point');
-            Route::post('/remove-club-point', 'remove_club_point')->name('checkout.remove_club_point'); 
+            Route::post('/remove-club-point', 'remove_club_point')->name('checkout.remove_club_point');
         });
     });
 
@@ -305,7 +306,7 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function() 
     Route::post('support_ticket/reply', [SupportTicketController::class, 'seller_store'])->name('support_ticket.seller_store');
 
     // Customer Package
-    Route::post('/customer_packages/purchase',[CustomerPackageController::class, 'purchase_package'])->name('customer_packages.purchase');
+    Route::post('/customer_packages/purchase', [CustomerPackageController::class, 'purchase_package'])->name('customer_packages.purchase');
 
     // Customer Product
     Route::resource('customer_products', CustomerProductController::class);
@@ -324,20 +325,20 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function() 
 Route::get('translation-check/{check}', [LanguageController::class, 'get_translation']);
 
 
-Route::group(['middleware' => ['auth']], function() {
-    
+Route::group(['middleware' => ['auth']], function () {
+
     Route::get('invoice/{order_id}', [InvoiceController::class, 'invoice_download'])->name('invoice.download');
 
     // Reviews
     Route::resource('/reviews', ReviewController::class);
-    
+
     // Product Conversation
     Route::resource('conversations', ConversationController::class);
     Route::controller(ConversationController::class)->group(function () {
         Route::get('/conversations/destroy/{id}', 'destroy')->name('conversations.destroy');
         Route::post('conversations/refresh', 'refresh')->name('conversations.refresh');
     });
-    
+
     // Product Query
     Route::resource('product-queries', ProductQueryController::class);
 
@@ -420,8 +421,8 @@ Route::get('/nagad/callback', [NagadController::class, 'verify'])->name('nagad.c
 
 //aamarpay
 Route::controller(AamarpayController::class)->group(function () {
-    Route::post('/aamarpay/success','success')->name('aamarpay.success');
-    Route::post('/aamarpay/fail','fail')->name('aamarpay.fail');
+    Route::post('/aamarpay/success', 'success')->name('aamarpay.success');
+    Route::post('/aamarpay/fail', 'fail')->name('aamarpay.fail');
 });
 
 //Authorize-Net-Payment
@@ -444,5 +445,3 @@ Route::controller(PageController::class)->group(function () {
     //Custom page
     Route::get('/{slug}', 'show_custom_page')->name('custom-pages.show_custom_page');
 });
-
-

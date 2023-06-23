@@ -6,13 +6,39 @@ use App\Models\BusinessSetting;
 use Illuminate\Http\Request;
 use App\Models\Shop;
 use Auth;
+use Illuminate\Support\Facades\Http;
+use Mtownsend\XmlToArray\XmlToArray;
 
 class ShopController extends Controller
 {
     public function index()
     {
         $shop = Auth::user()->shop;
-        return view('seller.shop', compact('shop'));
+
+        try {
+
+            $response = Http::withHeaders([
+                "Content-Type" => "text/xml;charset=utf-8"
+            ])->send("POST", "https://home.courierexe.ru/api/", [
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                        <townlist>
+                            <auth extra="245" />
+                            <conditions>
+                                <country>UZ</country>
+                            </conditions>
+                        </townlist>'
+                    ]);
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+
+            flash(translate($e->getMessage()))->warning();
+            return back();
+        }
+
+        $res = XmlToArray::convert($response->body());
+        $townLists = $res['town'];
+
+        return view('seller.shop', compact('shop', 'townLists'));
     }
 
     public function update(Request $request)
@@ -24,19 +50,20 @@ class ShopController extends Controller
                 $shop->shipping_cost = $request->shipping_cost;
             }
 
-            $shop->name             = $request->name;
-            $shop->address          = $request->address;
-            $shop->phone            = $request->phone;
-            $shop->slug             = preg_replace('/\s+/', '-', $request->name) . '-' . $shop->id;
-            $shop->meta_title       = $request->meta_title;
+            $shop->name = $request->name;
+            $shop->emu_town = $request->adress_emu;
+            $shop->address = $request->address;
+            $shop->phone = $request->phone;
+            $shop->slug = preg_replace('/\s+/', '-', $request->name) . '-' . $shop->id;
+            $shop->meta_title = $request->meta_title;
             $shop->meta_description = $request->meta_description;
-            $shop->logo             = $request->logo;
+            $shop->logo = $request->logo;
         }
 
         if ($request->has('delivery_pickup_longitude') && $request->has('delivery_pickup_latitude')) {
 
-            $shop->delivery_pickup_longitude    = $request->delivery_pickup_longitude;
-            $shop->delivery_pickup_latitude     = $request->delivery_pickup_latitude;
+            $shop->delivery_pickup_longitude = $request->delivery_pickup_longitude;
+            $shop->delivery_pickup_latitude = $request->delivery_pickup_latitude;
         } elseif (
             $request->has('facebook') ||
             $request->has('google') ||
@@ -51,9 +78,9 @@ class ShopController extends Controller
             $shop->youtube = $request->youtube;
         } elseif (
             $request->has('top_banner') ||
-            $request->has('sliders') || 
-            $request->has('banner_full_width_1') || 
-            $request->has('banners_half_width') || 
+            $request->has('sliders') ||
+            $request->has('banner_full_width_1') ||
+            $request->has('banners_half_width') ||
             $request->has('banner_full_width_2')
         ) {
             $shop->top_banner = $request->top_banner;
@@ -72,7 +99,7 @@ class ShopController extends Controller
         return back();
     }
 
-    public function verify_form ()
+    public function verify_form()
     {
         if (Auth::user()->shop->verification_info == null) {
             $shop = Auth::user()->shop;

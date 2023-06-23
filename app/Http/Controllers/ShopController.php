@@ -9,6 +9,7 @@ use App\Models\BusinessSetting;
 use Auth;
 use Hash;
 use App\Notifications\EmailVerificationNotification;
+use Illuminate\Support\Facades\Http;
 
 class ShopController extends Controller
 {
@@ -37,14 +38,15 @@ class ShopController extends Controller
     public function create()
     {
         if (Auth::check()) {
-			if((Auth::user()->user_type == 'admin' || Auth::user()->user_type == 'customer')) {
-				flash(translate('Admin or Customer can not be a seller'))->error();
-				return back();
-			} if(Auth::user()->user_type == 'seller'){
-				flash(translate('This user already a seller'))->error();
-				return back();
-			}
-            
+            if ((Auth::user()->user_type == 'admin' || Auth::user()->user_type == 'customer')) {
+                flash(translate('Admin or Customer can not be a seller'))->error();
+                return back();
+            }
+            if (Auth::user()->user_type == 'seller') {
+                flash(translate('This user already a seller'))->error();
+                return back();
+            }
+
         } else {
             return view('frontend.seller_form');
         }
@@ -59,11 +61,11 @@ class ShopController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'      => 'required|string|max:255',
-            'email'     => 'required|email|unique:users|max:255',
-            'password'  => 'required|string|min:6|confirmed',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users|max:255',
+            'password' => 'required|string|min:6|confirmed',
             'shop_name' => 'required|max:255',
-            'address'   => 'required',
+            'address' => 'required',
         ]);
 
         $user = null;
@@ -97,7 +99,7 @@ class ShopController extends Controller
             $shop->user_id = $user->id;
             $shop->name = $request->shop_name;
             $shop->address = $request->address;
-            $shop->slug = preg_replace('/\s+/', '-', str_replace("/"," ", $request->shop_name));
+            $shop->slug = preg_replace('/\s+/', '-', str_replace("/", " ", $request->shop_name));
 
             if ($shop->save()) {
                 auth()->login($user, false);

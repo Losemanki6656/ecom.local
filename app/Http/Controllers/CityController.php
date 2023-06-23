@@ -6,12 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\City;
 use App\Models\CityTranslation;
 use App\Models\State;
+use Illuminate\Support\Facades\Http;
+use Mtownsend\XmlToArray\XmlToArray;
 
 class CityController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         // Staff Permission Check
-        $this->middleware(['permission:manage_shipping_cities'])->only('index','create','destroy');
+        $this->middleware(['permission:manage_shipping_cities'])->only('index', 'create', 'destroy');
     }
     /**
      * Display a listing of the resource.
@@ -23,16 +26,39 @@ class CityController extends Controller
         $sort_city = $request->sort_city;
         $sort_state = $request->sort_state;
         $cities_queries = City::query();
-        if($request->sort_city) {
+        if ($request->sort_city) {
             $cities_queries->where('name', 'like', "%$sort_city%");
         }
-        if($request->sort_state) {
+        if ($request->sort_state) {
             $cities_queries->where('state_id', $request->sort_state);
         }
         $cities = $cities_queries->orderBy('status', 'desc')->paginate(15);
         $states = State::where('status', 1)->get();
 
-        return view('backend.setup_configurations.cities.index', compact('cities', 'states', 'sort_city', 'sort_state'));
+        try {
+
+            $response = Http::withHeaders([
+                "Content-Type" => "text/xml;charset=utf-8"
+            ])->send("POST", "https://home.courierexe.ru/api/", [
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                        <townlist>
+                            <auth extra="245" />
+                            <conditions>
+                                <country>UZ</country>
+                            </conditions>
+                        </townlist>'
+                    ]);
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+
+            flash(translate($e->getMessage()))->warning();
+            return back();
+        }
+
+        $res = XmlToArray::convert($response->body());
+        $townLists = $res['town'];
+
+        return view('backend.setup_configurations.cities.index', compact('cities', 'states', 'sort_city', 'sort_state', 'townLists'));
     }
 
     /**
@@ -57,6 +83,7 @@ class CityController extends Controller
         $city->name = $request->name;
         $city->cost = $request->cost;
         $city->state_id = $request->state_id;
+        $city->emu_town = $request->adress_emu;
 
         $city->save();
 
@@ -71,13 +98,36 @@ class CityController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-     public function edit(Request $request, $id)
-     {
-         $lang  = $request->lang;
-         $city  = City::findOrFail($id);
-         $states = State::where('status', 1)->get();
-         return view('backend.setup_configurations.cities.edit', compact('city', 'lang', 'states'));
-     }
+    public function edit(Request $request, $id)
+    {
+        try {
+
+            $response = Http::withHeaders([
+                "Content-Type" => "text/xml;charset=utf-8"
+            ])->send("POST", "https://home.courierexe.ru/api/", [
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                        <townlist>
+                            <auth extra="245" />
+                            <conditions>
+                                <country>UZ</country>
+                            </conditions>
+                        </townlist>'
+                    ]);
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+
+            flash(translate($e->getMessage()))->warning();
+            return back();
+        }
+
+        $res = XmlToArray::convert($response->body());
+        $townLists = $res['town'];
+
+        $lang = $request->lang;
+        $city = City::findOrFail($id);
+        $states = State::where('status', 1)->get();
+        return view('backend.setup_configurations.cities.edit', compact('city', 'lang', 'states', 'townLists'));
+    }
 
 
     /**
@@ -90,12 +140,13 @@ class CityController extends Controller
     public function update(Request $request, $id)
     {
         $city = City::findOrFail($id);
-        if($request->lang == env("DEFAULT_LANGUAGE")){
+        if ($request->lang == env("DEFAULT_LANGUAGE")) {
             $city->name = $request->name;
         }
 
         $city->state_id = $request->state_id;
         $city->cost = $request->cost;
+        $city->emu_town = $request->adress_emu;
 
         $city->save();
 
@@ -123,7 +174,8 @@ class CityController extends Controller
         return redirect()->route('cities.index');
     }
 
-    public function updateStatus(Request $request){
+    public function updateStatus(Request $request)
+    {
         $city = City::findOrFail($request->id);
         $city->status = $request->status;
         $city->save();
