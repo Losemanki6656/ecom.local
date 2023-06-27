@@ -31,7 +31,7 @@ class OrderController extends Controller
         // Staff Permission Check
         $this->middleware(['permission:view_all_orders|view_inhouse_orders|view_seller_orders|view_pickup_point_orders'])->only('all_orders');
         $this->middleware(['permission:view_order_details'])->only('show');
-        $this->middleware(['permission:delete_order'])->only('destroy','bulk_order_delete');
+        $this->middleware(['permission:delete_order'])->only('destroy', 'bulk_order_delete');
     }
 
     // All Orders
@@ -141,14 +141,14 @@ class OrderController extends Controller
 
         $shippingAddress = [];
         if ($address != null) {
-            $shippingAddress['name']        = Auth::user()->name;
-            $shippingAddress['email']       = Auth::user()->email;
-            $shippingAddress['address']     = $address->address;
-            $shippingAddress['country']     = $address->country->name;
-            $shippingAddress['state']       = $address->state->name;
-            $shippingAddress['city']        = $address->city->name;
+            $shippingAddress['name'] = Auth::user()->name;
+            $shippingAddress['email'] = Auth::user()->email;
+            $shippingAddress['address'] = $address->address;
+            $shippingAddress['country'] = $address->country->name;
+            $shippingAddress['state'] = $address->state->name;
+            $shippingAddress['city'] = $address->city->name;
             $shippingAddress['postal_code'] = $address->postal_code;
-            $shippingAddress['phone']       = $address->phone;
+            $shippingAddress['phone'] = $address->phone;
             if ($address->latitude || $address->longitude) {
                 $shippingAddress['lat_lang'] = $address->latitude . ',' . $address->longitude;
             }
@@ -171,7 +171,7 @@ class OrderController extends Controller
         }
 
         foreach ($seller_products as $seller_product) {
-            
+
             $order = new Order;
             $order->combined_order_id = $combined_order->id;
             $order->user_id = Auth::user()->id;
@@ -194,7 +194,7 @@ class OrderController extends Controller
                 $product = Product::find($cartItem['product_id']);
 
                 $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
-                $tax +=  cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
+                $tax += cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
                 $coupon_discount += $cartItem['discount'];
 
                 $product_variation = $cartItem['variation'];
@@ -228,7 +228,7 @@ class OrderController extends Controller
                 if (addon_is_activated('club_point')) {
                     $order_detail->earn_point = $product->earn_point;
                 }
-                
+
                 $order_detail->save();
 
                 $product->num_of_sale += $cartItem['quantity'];
@@ -236,9 +236,9 @@ class OrderController extends Controller
 
                 $order->seller_id = $product->user_id;
                 $order->shipping_type = $cartItem['shipping_type'];
-                
+
                 if ($cartItem['shipping_type'] == 'pickup_point') {
-                    $order->pickup_point_id = $cartItem['pickup_point'];
+                    $order->pickup_point_id = $cartItem['emu_town'];
                 }
                 if ($cartItem['shipping_type'] == 'carrier') {
                     $order->carrier_id = $cartItem['carrier_id'];
@@ -279,7 +279,7 @@ class OrderController extends Controller
 
         $combined_order->save();
 
-        foreach($combined_order->orders as $order){
+        foreach ($combined_order->orders as $order) {
             NotificationUtility::sendOrderPlacedNotification($order);
         }
 
@@ -423,7 +423,8 @@ class OrderController extends Controller
                 }
 
                 if (addon_is_activated('affiliate_system')) {
-                    if (($request->status == 'delivered' || $request->status == 'cancelled') &&
+                    if (
+                        ($request->status == 'delivered' || $request->status == 'cancelled') &&
                         $orderDetail->product_referral_code
                     ) {
 

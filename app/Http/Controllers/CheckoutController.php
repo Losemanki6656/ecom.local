@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
+use App\Models\User;
 use App\Utility\PayfastUtility;
 use Illuminate\Http\Request;
 use App\Models\Category;
@@ -57,6 +59,7 @@ class CheckoutController extends Controller
         // Minumum order amount check end
 
         if ($request->payment_option != null) {
+
             (new OrderController)->store($request);
 
             $request->session()->put('payment_type', 'cart_payment');
@@ -73,17 +76,20 @@ class CheckoutController extends Controller
                     return (new $decorator)->pay($request);
                 } else {
                     $combined_order = CombinedOrder::findOrFail($request->session()->get('combined_order_id'));
-                    $manual_payment_data = array(
-                        'name' => $request->payment_option,
-                        'amount' => $combined_order->grand_total,
-                        'trx_id' => $request->trx_id,
-                        'photo' => $request->photo
-                    );
+
+                    // $manual_payment_data = array(
+                    //     'name' => $request->payment_option,
+                    //     'amount' => $combined_order->grand_total,
+                    //     'trx_id' => $request->trx_id,
+                    //     'photo' => $request->photo
+                    // );
+
                     foreach ($combined_order->orders as $order) {
                         $order->payment_type = $request->payment_option;
                         $order->payment_status = 'paid';
                         $order->save();
                     }
+
                     flash(translate('Your order has been placed successfully. Please submit payment information from purchase history'))->success();
                     return redirect()->route('order_confirmed');
                 }
@@ -287,6 +293,7 @@ class CheckoutController extends Controller
                 ->get();
 
             $seller_products = array();
+            $crts = [];
             foreach ($carts as $cartItem) {
                 $product_ids = array();
                 $product = Product::find($cartItem['product_id']);
@@ -295,7 +302,7 @@ class CheckoutController extends Controller
                 }
                 array_push($product_ids, $cartItem);
                 $seller_products[$product->user_id] = $product_ids;
-
+                $crts[] = $cartItem->id;
             }
 
             $price_emu = 0;
@@ -308,6 +315,8 @@ class CheckoutController extends Controller
                 $mass = 0;
                 $summm = 0;
 
+                $address = 0;
+
                 foreach ($seller_product as $cartItem) {
 
                     // dd($cartItem);
@@ -316,9 +325,31 @@ class CheckoutController extends Controller
 
                     $coupon_discount = $cartItem['discount'];
                     $summm += (int) cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] - $coupon_discount;
+                    $address = $cartItem['address_id'];
                 }
 
                 $shop = Shop::where('user_id', $cartItem['user_id'])->first()->emu_town ?? 'Ташкент';
+
+                // if ($request->code)
+                //     $code = $request->code;
+                // else {
+                //     $code = City::find(Address::find($address)->city_id)->emu_town ?? 'Ташкент';
+                // }
+
+                $pvz_code = $request->code ?? 31;
+
+                $response = Http::withHeaders([
+                    "Content-Type" => "text/xml;charset=utf-8"
+                ])->send("POST", "https://home.courierexe.ru/api/", [
+                            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                            <pvzlist>
+                                <auth extra="245" />
+                                <code>' . $pvz_code . '</code>
+                            </pvzlist>'
+                        ]);
+
+                $res = XmlToArray::convert($response->body());
+                $town = $res['pvz']['town']['@content'];
 
                 $response = Http::withHeaders([
                     "Content-Type" => "text/xml;charset=utf-8"
@@ -332,7 +363,7 @@ class CheckoutController extends Controller
                                     <town>' . $shop . '</town>
                                 </sender>
                                 <receiver>
-                                    <town>' . $request->code . '</town>
+                                    <town>' . $town . '</town>
                                 </receiver>
                                 <service>1</service>
                                 <packages>
@@ -355,6 +386,15 @@ class CheckoutController extends Controller
                 ];
 
             }
+
+            Cart::whereIn('id', $crts)->update([
+                'shipping_cost' => $price_emu
+            ]);
+
+            // foreach ($carts as $cartItem) {
+            //     $cartItem->shipping_cost = $price_emu;
+            //     $cartItem->save();
+            // }
 
             return response()->json([
                 'price_emu' => $price_emu,
@@ -396,10 +436,6 @@ class CheckoutController extends Controller
             $res = XmlToArray::convert($response->body());
             $localPickups = $res['pvz'];
         }
-
-        // $localPickups = [];
-
-        // dd($localPickups);
 
         if ($request->address_id == null) {
             flash(translate("Please add shipping address"))->warning();
@@ -485,24 +521,23 @@ class CheckoutController extends Controller
                 $tax += cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
                 $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
 
-                if (get_setting('shipping_type') != 'carrier_wise_shipping' || $request['shipping_type_' . $product->user_id] == 'pickup_point') {
-                    if ($request['shipping_type_' . $product->user_id] == 'pickup_point') {
-                        $cartItem['shipping_type'] = 'pickup_point';
-                        $cartItem['pickup_point'] = $request['pickup_point_id_' . $product->user_id];
-                    } else {
+                if ($request['shipping_type_1'] == 'pickup_point') {
+                    if ($request->pickup_point_emu == "Select your nearest pickup point") {
+                        flash(translate('Pickup point not selected!'))->warning();
+                        return redirect()->route('home');
+                    }
+                    $cartItem['shipping_type'] = 'pickup_point';
+                    $cartItem['emu_town'] = $request['pickup_point_emu'];
+                    $cartItem['pickup_point'] = $request['pickup_point_id_1'];
+                } else
+                    if ($request['shipping_type_1'] == 'home_delivery') {
                         $cartItem['shipping_type'] = 'home_delivery';
+                    } else {
+                        $cartItem['shipping_type'] = 'carrier';
+                        $cartItem['carrier_id'] = $request['carrier_id_1'];
                     }
-                    // $cartItem['shipping_cost'] = 0;
-                    if ($cartItem['shipping_type'] == 'home_delivery') {
-                        // $cartItem['shipping_cost'] = getShippingCost($carts, $key);
-                    }
-                } else {
-                    $cartItem['shipping_type'] = 'carrier';
-                    $cartItem['carrier_id'] = $request['carrier_id_' . $product->user_id];
-                    $cartItem['shipping_cost'] = getShippingCost($carts, $key, $cartItem['carrier_id']);
-                }
 
-                $shipping += $cartItem['shipping_cost'];
+                $shipping = $cartItem['shipping_cost'];
                 $cartItem->save();
             }
             $total = $subtotal + $tax + $shipping;
@@ -650,10 +685,195 @@ class CheckoutController extends Controller
 
     public function order_confirmed()
     {
-        $combined_order = CombinedOrder::findOrFail(Session::get('combined_order_id'));
+        $combined_order = CombinedOrder::with([
+            'orders',
+            'orders.orderDetails'
+        ])->findOrFail(Session::get('combined_order_id'));
 
-        Cart::where('user_id', $combined_order->user_id)
-            ->delete();
+        $customer = User::find($combined_order->user_id);
+        $custo_phone = $customer->phone ?? "998998388188";
+        $custo_name = $customer->name ?? "ClientNotInfo";
+
+        //EMU Order
+        $cart = Cart::where('user_id', Auth::user()->id)->first();
+        $shipping_type = $cart->shipping_type;
+        $emu_town = $cart->emu_town;
+        $address = Address::find($cart->address_id);
+        $city = City::find($address->city_id);
+
+        foreach ($combined_order->orders as $item) {
+
+            $mass = 0;
+            $prods = "";
+            foreach ($item->orderDetails as $value) {
+                $product = Product::find($value->product_id);
+                $mass += $product->unit * $value->quantity;
+                $prods = $prods . " " . $product->name . ";";
+            }
+
+            $seller = Shop::where('user_id', $item->seller_id)->first();
+            $user = User::find($item->seller_id);
+
+            if ($item->shipping_type == 'pickup_point') {
+
+                $pvz_code = $item->emu_town ?? 31;
+
+                $response = Http::withHeaders([
+                    "Content-Type" => "text/xml;charset=utf-8"
+                ])->send("POST", "https://home.courierexe.ru/api/", [
+                            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                            <pvzlist>
+                                <auth extra="245" />
+                                <code>' . $pvz_code . '</code>
+                            </pvzlist>'
+                        ]);
+
+                $res = XmlToArray::convert($response->body());
+                $town = $res['pvz']['town']['@content'];
+
+                if ($item->payment_type == "paymo") {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $town . '</town>
+                                        <pvz>' . $pvz_code . '</pvz>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>1</service>
+                                    <weight>' . $mass . '</weight>
+                                    <paytype>Paymo</paytype>
+                                    <packages>
+                                        <package mass="' . $mass . '" quantity="1"></package>
+                                    </packages>
+                                    <instruction>' . $prods . '</instruction>
+                                </order>
+                            </neworder>'
+                            ]);
+                } else {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $town . '</town>
+                                        <pvz>' . $pvz_code . '</pvz>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>1</service>
+                                    <price>' . $item->grand_total . '</price>
+                                    <weight>' . $mass . '</weight>
+                                    <paytype>Cash on Delivery</paytype>
+                                    <packages>
+                                        <package mass="' . $mass . '" quantity="1"></package>
+                                    </packages>
+                                    <instruction>' . $prods . '</instruction>
+                                </order>
+                            </neworder>'
+                            ]);
+                }
+            } else {
+                if ($item->payment_type == "paymo") {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $city->emu_town . '</town>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>3</service>
+                                    <weight>' . $mass . '</weight>
+                                    <paytype>Paymo</paytype>
+                                    <packages>
+                                        <package mass="' . $mass . '" quantity="1"></package>
+                                    </packages>
+                                    <instruction>' . $prods . '</instruction>
+                                </order>
+                            </neworder>'
+                            ]);
+                } else {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $city->emu_town . '</town>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>3</service>
+                                    <price>' . $item->grand_total . '</price>
+                                    <weight>' . $mass . '</weight>
+                                    <paytype>Cash on Delivery</paytype>
+                                    <packages>
+                                        <package mass="' . $mass . '" quantity="1"></package>
+                                    </packages>
+                                    <instruction>' . $prods . '</instruction>
+                                </order>
+                            </neworder>'
+                            ]);
+                }
+            }
+
+            $res = XmlToArray::convert($response->body());
+
+        }
+
+
+        Cart::where('user_id', $combined_order->user_id)->delete();
 
         //Session::forget('club_point');
         //Session::forget('combined_order_id');

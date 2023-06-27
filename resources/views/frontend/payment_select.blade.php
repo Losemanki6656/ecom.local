@@ -82,383 +82,7 @@
                             <!-- Payment Options -->
                             <div class="card-body text-center px-4 pt-0">
                                 <div class="row gutters-10">
-                                    <!-- Paypal -->
-                                    {{-- @if (get_setting('paypal_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="paypal" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/paypal.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span class="d-block fw-600 fs-15">{{ translate('Paypal') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif --}}
-                                    <!--Stripe -->
-                                    {{-- @if (get_setting('stripe_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="stripe" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/stripe.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Stripe') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- Mercadopago -->
-                                    @if (get_setting('mercadopago_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="mercadopago" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/mercadopago.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Mercadopago') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- sslcommerz -->
-                                    @if (get_setting('sslcommerz_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="sslcommerz" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/sslcommerz.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('sslcommerz') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- instamojo -->
-                                    @if (get_setting('instamojo_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="instamojo" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/instamojo.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Instamojo') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- razorpay -->
-                                    @if (get_setting('razorpay') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="razorpay" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/rozarpay.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Razorpay') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- paystack -->
-                                    @if (get_setting('paystack') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="paystack" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/paystack.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Paystack') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- voguepay -->
-                                    @if (get_setting('voguepay') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="voguepay" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/vogue.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('VoguePay') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- payhere -->
-                                    @if (get_setting('payhere') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="payhere" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/payhere.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('payhere') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- ngenius -->
-                                    @if (get_setting('ngenius') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="ngenius" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/ngenius.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('ngenius') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- iyzico -->
-                                    @if (get_setting('iyzico') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="iyzico" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/iyzico.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Iyzico') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- nagad -->
-                                    @if (get_setting('nagad') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="nagad" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/nagad.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Nagad') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- bkash -->
-                                    @if (get_setting('bkash') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="bkash" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/bkash.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Bkash') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- aamarpay -->
-                                    @if (get_setting('aamarpay') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="aamarpay" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/aamarpay.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Aamarpay') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- authorizenet -->
-                                    @if (get_setting('authorizenet') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="authorizenet" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/authorizenet.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Authorize Net') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- payku -->
-                                    @if (get_setting('payku') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="payku" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/payku.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Payku') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- African Payment Getaway -->
-                                    @if (addon_is_activated('african_pg'))
-                                        <!-- flutterwave -->
-                                        @if (get_setting('flutterwave') == 1)
-                                            <div class="col-6 col-xl-3 col-md-4">
-                                                <label class="aiz-megabox d-block mb-3">
-                                                    <input value="flutterwave" class="online_payment"
-                                                        type="radio" name="payment_option" checked>
-                                                    <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/flutterwave.png') }}"
-                                                            class="img-fit mb-2">
-                                                        <span class="d-block text-center">
-                                                            <span
-                                                                class="d-block fw-600 fs-15">{{ translate('flutterwave') }}</span>
-                                                        </span>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        @endif
-                                        <!-- payfast -->
-                                        @if (get_setting('payfast') == 1)
-                                            <div class="col-6 col-xl-3 col-md-4">
-                                                <label class="aiz-megabox d-block mb-3">
-                                                    <input value="payfast" class="online_payment" type="radio"
-                                                        name="payment_option" checked>
-                                                    <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/payfast.png') }}"
-                                                            class="img-fit mb-2">
-                                                        <span class="d-block text-center">
-                                                            <span
-                                                                class="d-block fw-600 fs-15">{{ translate('payfast') }}</span>
-                                                        </span>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        @endif
-                                    @endif
-                                    <!--paytm -->
-                                    @if (addon_is_activated('paytm') && get_setting('paytm_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="paytm" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/paytm.jpg') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Paytm') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- toyyibpay -->
-                                    @if (addon_is_activated('paytm') && get_setting('toyyibpay_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="toyyibpay" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/toyyibpay.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('ToyyibPay') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- myfatoorah -->
-                                    @if (addon_is_activated('paytm') && get_setting('myfatoorah') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="myfatoorah" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/myfatoorah.png') }}"
-                                                        class="img-fit mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('MyFatoorah') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    <!-- khalti -->
-                                    @if (addon_is_activated('paytm') && get_setting('khalti_payment') == 1)
-                                        <div class="col-6 col-xl-3 col-md-4">
-                                            <label class="aiz-megabox d-block mb-3">
-                                                <input value="Khalti" class="online_payment" type="radio"
-                                                    name="payment_option" checked>
-                                                <span class="d-block aiz-megabox-elem p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/khalti.png') }}"
-                                                        class="img-fluid mb-2">
-                                                    <span class="d-block text-center">
-                                                        <span
-                                                            class="d-block fw-600 fs-15">{{ translate('Khalti') }}</span>
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif --}}
-                                    <!-- Cash Payment -->
+
                                     @if (get_setting('cash_payment') == 1)
                                         @php
                                             $digital = 0;
@@ -716,12 +340,12 @@
 
                                             <div id="summary_modal">
                                             </div>
-                                            
+
                                             <div class='line'></div>
 
-                                            <a type="button" class="btn btn-primary"
-                                                href="{{ route('my-cards') }}" style="width: 100%"> <i
-                                                    class="fa fa-plus"></i> {{ translate('Add Card') }} </a>
+                                            <a type="button" class="btn btn-primary" href="{{ route('my-cards') }}"
+                                                style="width: 100%"> <i class="fa fa-plus"></i>
+                                                {{ translate('Add Card') }} </a>
                                         </div>
                                     </div>
                                     <div class='credit-info'>
@@ -1034,32 +658,32 @@
         }
 
         /* .dropdown-btn {
-                                                                                                                background: rgba(255, 255, 255, 0.1);
-                                                                                                                width: 100%;
-                                                                                                                border-radius: 5px;
-                                                                                                                text-align: center;
-                                                                                                                line-height: 1.5em;
-                                                                                                                cursor: pointer;
-                                                                                                                position: relative;
-                                                                                                                -webkit-transition: background .2s ease;
-                                                                                                                transition: background .2s ease;
-                                                                                                            }
+                                                                                                                            background: rgba(255, 255, 255, 0.1);
+                                                                                                                            width: 100%;
+                                                                                                                            border-radius: 5px;
+                                                                                                                            text-align: center;
+                                                                                                                            line-height: 1.5em;
+                                                                                                                            cursor: pointer;
+                                                                                                                            position: relative;
+                                                                                                                            -webkit-transition: background .2s ease;
+                                                                                                                            transition: background .2s ease;
+                                                                                                                        }
 
-                                                                                                            .dropdown-btn:after {
-                                                                                                                content: '\25BE';
-                                                                                                                right: 8px;
-                                                                                                                position: absolute;
-                                                                                                            }
+                                                                                                                        .dropdown-btn:after {
+                                                                                                                            content: '\25BE';
+                                                                                                                            right: 8px;
+                                                                                                                            position: absolute;
+                                                                                                                        }
 
-                                                                                                            .dropdown-btn:hover {
-                                                                                                                background: rgba(255, 255, 255, 0.2);
-                                                                                                                -webkit-transition: background .2s ease;
-                                                                                                                transition: background .2s ease;
-                                                                                                            }
+                                                                                                                        .dropdown-btn:hover {
+                                                                                                                            background: rgba(255, 255, 255, 0.2);
+                                                                                                                            -webkit-transition: background .2s ease;
+                                                                                                                            transition: background .2s ease;
+                                                                                                                        }
 
-                                                                                                            .dropdown-select {
-                                                                                                                display: none;
-                                                                                                            } */
+                                                                                                                        .dropdown-select {
+                                                                                                                            display: none;
+                                                                                                                        } */
 
         .credit-card-image {
             display: block;

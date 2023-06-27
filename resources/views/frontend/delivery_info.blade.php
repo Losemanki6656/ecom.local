@@ -125,10 +125,9 @@
                                             @if (get_setting('shipping_type') != 'carrier_wise_shipping')
                                                 <div class="col-6">
                                                     <label class="aiz-megabox d-block bg-white mb-0">
-                                                        <input type="radio" name="shipping_type_{{ $key }}"
-                                                            value="home_delivery" id="home_radio"
-                                                            onchange="show_pickup_point(this, {{ $key }})"
-                                                            data-target=".pickup_point_id_{{ $key }}" checked>
+                                                        <input type="radio" name="shipping_type_1" value="home_delivery"
+                                                            id="home_radio" onchange="show_pickup_point(this, 1)"
+                                                            data-target=".pickup_point_id_1" checked>
                                                         <span class="d-flex p-3 aiz-megabox-elem rounded-0"
                                                             style="padding: 0.75rem 1.2rem;">
                                                             <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
@@ -141,10 +140,9 @@
                                             @else
                                                 <div class="col-6">
                                                     <label class="aiz-megabox d-block bg-white mb-0">
-                                                        <input type="radio" id="carrier_radio"
-                                                            name="shipping_type_{{ $key }}" value="carrier"
-                                                            onchange="show_pickup_point(this, {{ $key }})"
-                                                            data-target=".pickup_point_id_{{ $key }}" checked>
+                                                        <input type="radio" id="carrier_radio" name="shipping_type_1"
+                                                            value="carrier" onchange="show_pickup_point(this, 1)"
+                                                            data-target=".pickup_point_id_1" checked>
                                                         <span class="d-flex p-3 aiz-megabox-elem rounded-0"
                                                             style="padding: 0.75rem 1.2rem;">
                                                             <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
@@ -158,10 +156,9 @@
                                             @if ($localPickups)
                                                 <div class="col-6">
                                                     <label class="aiz-megabox d-block bg-white mb-0">
-                                                        <input type="radio" name="shipping_type_{{ $key }}"
-                                                            value="pickup_point" id="pickup_radio"
-                                                            onchange="show_pickup_point(this, {{ $key }})"
-                                                            data-target=".pickup_point_id_{{ $key }}">
+                                                        <input type="radio" name="shipping_type_1" value="pickup_point"
+                                                            id="pickup_radio" onchange="show_pickup_point(this, 1)"
+                                                            data-target=".pickup_point_id_1">
                                                         <span class="d-flex p-3 aiz-megabox-elem rounded-0"
                                                             style="padding: 0.75rem 1.2rem;">
                                                             <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
@@ -176,20 +173,20 @@
                                         <!-- Pickup Point List -->
 
                                         @if ($localPickups)
-                                            <div class="mt-4 pickup_point_id_{{ $key }} d-none">
+                                            <div class="mt-4 pickup_point_id_1 d-none">
                                                 <select class="form-control aiz-selectpicker rounded-0"
-                                                    name="pickup_point_id_{{ $key }}" data-live-search="true"
-                                                    id="pickup_select" onchange="pickupSelect()">
+                                                    name="pickup_point_emu" data-live-search="true" id="pickup_select"
+                                                    onchange="pickupSelect()">
                                                     <option>
                                                         {{ translate('Select your nearest pickup point') }}
                                                     </option>
                                                     @foreach ($localPickups as $pick_up_point)
-                                                        <option value="{{ $pick_up_point['town']['@content'] }}"
+                                                        <option value="{{ $pick_up_point['code'] }}"
                                                             data-content="<span class='d-block'>
-                                                                                        <span class='d-block fs-16 fw-600 mb-2'> {{ $pick_up_point['name'] }}</span>
-                                                                                        <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['address'] }}</span>
-                                                                                        <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['town']['@attributes']['regionname'] }}</span>
-                                                                                    </span>">
+                                                                                <span class='d-block fs-16 fw-600 mb-2'> {{ $pick_up_point['name'] }}</span>
+                                                                                <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['address'] }}</span>
+                                                                                <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> {{ $pick_up_point['town']['@attributes']['regionname'] }}</span>
+                                                                            </span>">
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -288,6 +285,42 @@
             openStreetMap();
             $('#pickupMap').removeClass('d-flex');
             $('#pickupMap').addClass('d-none');
+
+            $('#loader').modal('show');
+            $.ajax({
+                url: "{{ route('checkout.pickupCodeInfo') }}",
+                method: "POST",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    code: null
+                },
+                success: function(res) {
+
+                    $('#loader').modal('hide');
+                    $("#price_emu").html('<i class="las la-truck"></i> Общая сумма: ' + res[
+                            'price_emu'] +
+                        ' UZS');
+                    $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res[
+                            'mass'] +
+                        ' кг');
+                    $("#pickupMenu").show();
+                    let array = res.seller_emu_price;
+                    array.forEach(element => {
+                        $("#sellerProduct" + element['key']).html(
+                            '<i class="las la-weight-hanging"></i> ' + element['mass'] +
+                            ' кг;' + '&nbsp &nbsp &nbsp<i class="las la-truck"></i> ' +
+                            element[
+                                'price'] + ' UZS'
+                        );
+                    });
+                },
+                error: function(error) {
+                    console.log(error);
+                    AIZ.plugins.notify('warning', error.statusText);
+                    $('#loader').modal('hide');
+                }
+            });
+
         });
     </script>
     <script>
@@ -299,7 +332,7 @@
 
             var array = @json($localPickups);
             array.forEach(element => {
-                if (code == element['town']['@content']) {
+                if (code == element['code']) {
                     $("#pickup_phone").html('<i class="las la-phone"></i> ' + element['phone']);
                     $("#pickup_worktime").html('<i class="las la-clock"></i> ' + element['worktime']);
                     $("#pickup_address").html('<i class="las la-map-marker"></i> ' + element['town'][
@@ -323,9 +356,10 @@
                 success: function(res) {
 
                     $('#loader').modal('hide');
-                    $("#price_emu").html('<i class="las la-truck"></i> ' + res['price_emu'] + ' UZS');
-                    $("#allsumm").html('<i class="las la-dollar-sign"></i> Общая сумма: ' + res['summ'] +
+                    $("#price_emu").html('<i class="las la-truck"></i> Общая сумма: ' + res['price_emu'] +
                         ' UZS');
+                    // $("#allsumm").html('<i class="las la-dollar-sign"></i> Общая сумма: ' + res['summ'] +
+                    //     ' UZS');
                     $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res['mass'] +
                         ' кг');
                     $("#pickupMenu").show();
@@ -384,6 +418,39 @@
             } else {
                 $('#pickupMap').addClass('d-none');
                 $('#pickupMap').removeClass('d-flex');
+
+                $('#loader').modal('show');
+
+                $.ajax({
+                    url: "{{ route('checkout.pickupCodeInfo') }}",
+                    method: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        code: null
+                    },
+                    success: function(res) {
+
+                        $('#loader').modal('hide');
+                        $("#price_emu").html('<i class="las la-truck"></i> Общая сумма: ' + res['price_emu'] +
+                            ' UZS');
+                        $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res['mass'] +
+                            ' кг');
+                        $("#pickupMenu").show();
+                        let array = res.seller_emu_price;
+                        array.forEach(element => {
+                            $("#sellerProduct" + element['key']).html(
+                                '<i class="las la-weight-hanging"></i> ' + element['mass'] +
+                                ' кг;' + '&nbsp &nbsp &nbsp<i class="las la-truck"></i> ' + element[
+                                    'price'] + ' UZS'
+                            );
+                        });
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        AIZ.plugins.notify('warning', error.statusText);
+                        $('#loader').modal('hide');
+                    }
+                });
             }
 
             var value = $(el).val();
