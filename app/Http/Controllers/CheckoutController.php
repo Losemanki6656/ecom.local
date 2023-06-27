@@ -149,6 +149,7 @@ class CheckoutController extends Controller
 
                 }
 
+                $shipping = $cartItem['shipping_cost'];
             }
 
             $sum_pay_sellers = $subtotal + $tax + $shipping;
@@ -338,40 +339,67 @@ class CheckoutController extends Controller
 
                 $pvz_code = $request->code ?? 31;
 
-                $response = Http::withHeaders([
-                    "Content-Type" => "text/xml;charset=utf-8"
-                ])->send("POST", "https://home.courierexe.ru/api/", [
-                            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
-                            <pvzlist>
-                                <auth extra="245" />
-                                <code>' . $pvz_code . '</code>
-                            </pvzlist>'
-                        ]);
+                if ($request->code) {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                                <pvzlist>
+                                    <auth extra="245" />
+                                    <code>' . $pvz_code . '</code>
+                                </pvzlist>'
+                            ]);
 
-                $res = XmlToArray::convert($response->body());
-                $town = $res['pvz']['town']['@content'];
+                    $res = XmlToArray::convert($response->body());
+                    $town = $res['pvz']['town']['@content'];
 
-                $response = Http::withHeaders([
-                    "Content-Type" => "text/xml;charset=utf-8"
-                ])->send("POST", "https://home.courierexe.ru/api/", [
-                            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
-                            <calculator>
-                            <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
-                            <order>
-                                <pricetype>CUSTOMER</pricetype>
-                                <sender>
-                                    <town>' . $shop . '</town>
-                                </sender>
-                                <receiver>
-                                    <town>' . $town . '</town>
-                                </receiver>
-                                <service>1</service>
-                                <packages>
-                                    <package mass="' . $mass . '" quantity="1"></package>
-                                </packages>
-                            </order>
-                        </calculator>'
-                        ]);
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                                <calculator>
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
+                                <order>
+                                    <pricetype>CUSTOMER</pricetype>
+                                    <sender>
+                                        <town>' . $shop . '</town>
+                                    </sender>
+                                    <receiver>
+                                        <town>' . $town . '</town>
+                                    </receiver>
+                                    <service>1</service>
+                                    <packages>
+                                        <package mass="' . $mass . '" quantity="1"></package>
+                                    </packages>
+                                </order>
+                            </calculator>'
+                            ]);
+                } else {
+                    $town = City::find(Address::find($address)->city_id)->emu_town ?? 'Ташкент';
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                                <calculator>
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
+                                <order>
+                                    <pricetype>CUSTOMER</pricetype>
+                                    <sender>
+                                        <town>' . $shop . '</town>
+                                    </sender>
+                                    <receiver>
+                                        <town>' . $town . '</town>
+                                    </receiver>
+                                    <service>3</service>
+                                    <packages>
+                                        <package mass="' . $mass . '" quantity="1"></package>
+                                    </packages>
+                                </order>
+                            </calculator>'
+                            ]);
+                }
+
+
 
                 $res = XmlToArray::convert($response->body());
                 $allmass += $mass;
