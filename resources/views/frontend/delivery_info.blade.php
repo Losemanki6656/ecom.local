@@ -419,8 +419,8 @@
                 L.marker([element['latitude'], element['longitude']]).addTo(map)
                     .bindPopup(element['name'])
                     .openPopup()
-                    .on('click', function(e) {
-                        console.log(e);
+                    .on('click', function() {
+                        console.log(element['code']);
                     });
             });
 
