@@ -423,11 +423,11 @@
                     .openPopup()
                     .on('click', function() {
 
-                        $('#loader').modal('show');
 
                         let code = element['code'];
 
                         if (localStorage.getItem('marCode') != code) {
+                            $('#loader').modal('show');
                             $.ajax({
                                 url: "{{ route('checkout.pickupCodeInfo') }}",
                                 method: "POST",
