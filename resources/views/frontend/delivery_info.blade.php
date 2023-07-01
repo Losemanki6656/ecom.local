@@ -290,10 +290,13 @@
         function formSubmit() {
             if ($('#pickup_radio').is(':checked')) {
                 if ($("#pickup_select").val() == "") AIZ.plugins.notify('warning', "Pickup Point Not Selected!");
-                else
+                else {
                     $('#delivery_info_form').submit();
+                    localStorage.setItem('marCode', null);
+                }
             } else {
                 $('#delivery_info_form').submit();
+                localStorage.setItem('marCode', null);
             }
         }
     </script>
@@ -401,7 +404,6 @@
                 }
             });
 
-
         }
 
         function openStreetMap() {
@@ -420,7 +422,104 @@
                     .bindPopup(element['name'])
                     .openPopup()
                     .on('click', function() {
-                        console.log(element['code']);
+
+                        $('#loader').modal('show');
+
+                        let code = element['code'];
+
+                        if (localStorage.getItem('marCode') != code) {
+                            $.ajax({
+                                url: "{{ route('checkout.pickupCodeInfo') }}",
+                                method: "POST",
+                                data: {
+                                    "_token": "{{ csrf_token() }}",
+                                    code: code
+                                },
+                                success: function(res) {
+
+                                    var Parray = @json($localPickups);
+                                    Parray.forEach(element => {
+                                        if (code == element['code']) {
+                                            $("#pickup_phone").html(
+                                                '<i class="las la-phone"></i> +' +
+                                                element[
+                                                    'phone']);
+                                            $("#pickup_worktime").html(
+                                                '<i class="las la-clock"></i> ' +
+                                                element[
+                                                    'worktime']);
+                                            $("#pickup_address").html(
+                                                '<i class="las la-map-marker"></i> ' +
+                                                element[
+                                                    'town'][
+                                                    '@attributes'
+                                                ][
+                                                    'regionname'
+                                                ] +
+                                                ', ' + element['name'] + ', ' + element[
+                                                    'address']);
+
+                                        }
+                                    });
+
+                                    $('#loader').modal('hide');
+                                    $("#price_emu_pickup").html(
+                                        '<i class="las la-truck"></i> Общая сумма: ' + res[
+                                            'price_emu'] +
+                                        ' UZS');
+                                    $("#allmass_pickup").html(
+                                        '<i class="las la-weight-hanging"></i> Общая масса: ' +
+                                        res[
+                                            'mass'] +
+                                        ' кг');
+                                    $("#pickupMenu").show();
+                                    let array = res.seller_emu_price;
+                                    array.forEach(element => {
+                                        $("#sellerProduct" + element['key']).html(
+                                            '<i class="las la-weight-hanging"></i> ' +
+                                            element['mass'] +
+                                            ' кг;' +
+                                            '&nbsp &nbsp &nbsp<i class="las la-truck"></i> ' +
+                                            element[
+                                                'price'] + ' UZS'
+                                        );
+                                    });
+
+                                    $('#pickup_select').val(code);
+
+                                    var Sarray = @json($localPickups);
+                                    Sarray.forEach(element => {
+                                        if (element['code'] == code) {
+
+                                            var name = element['name'];
+                                            var address = element['address'];
+                                            var town = element['town']['@attributes'][
+                                                'regionname'
+                                            ];
+
+                                            var x =
+                                                "<span class='d-block'>" +
+                                                " <span class='d-block fs-16 fw-600 mb-2'> " +
+                                                name + " </span>" +
+                                                "  <span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> " +
+                                                address + " </span>" +
+                                                "<span class='d-block opacity-50 fs-12'><i class='las la-map-marker'></i> " +
+                                                town +
+                                                " </span></span>";
+
+                                            $("#pickup_select").val(code).change();
+                                        }
+                                    });
+                                },
+                                error: function(error) {
+                                    AIZ.plugins.notify('warning', error.statusText);
+                                    $('#loader').modal('hide');
+                                }
+                            });
+                        }
+
+                        localStorage.setItem('marCode', code);
+
                     });
             });
 
@@ -433,6 +532,7 @@
         function show_pickup_point(el, type) {
 
             if ($("#pickup_radio").is(":checked")) {
+
                 $('#pickupMap').removeClass('d-none');
                 $('#pickupMap').addClass('d-flex');
 
