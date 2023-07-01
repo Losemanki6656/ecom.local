@@ -55,7 +55,7 @@
                 <div class="col-xxl-8 col-xl-10 mx-auto">
                     <div class="border bg-white p-4 mb-4">
                         <form class="form-default" action="{{ route('checkout.store_delivery_info') }}" role="form"
-                            method="POST">
+                            id="delivery_info_form" method="POST">
                             @csrf
                             @foreach ($seller_products as $key => $item)
                                 <div class="mb-4">
@@ -177,7 +177,7 @@
                                                 <select class="form-control aiz-selectpicker rounded-0"
                                                     name="pickup_point_emu" data-live-search="true" id="pickup_select"
                                                     onchange="pickupSelect()">
-                                                    <option>
+                                                    <option value="">
                                                         {{ translate('Select your nearest pickup point') }}
                                                     </option>
                                                     @foreach ($localPickups as $pick_up_point)
@@ -202,7 +202,7 @@
 
                                 <!-- Carrier Wise Shipping -->
                                 @if (get_setting('shipping_type') == 'carrier_wise_shipping')
-                                    <div class="row pt-3 carrier_id_{{ $key }}">
+                                    <div class="row pt-3 carrier_id_1">
                                         @foreach ($carrier_list as $carrier_key => $carrier)
                                             <div class="col-md-12 mb-2">
                                                 <label class="aiz-megabox d-block bg-white mb-0">
@@ -253,7 +253,7 @@
                                     {{ translate('Return to shop') }}
                                 </a>
                                 <!-- Continue to Payment -->
-                                <button type="submit"
+                                <button type="button" onclick="formSubmit()"
                                     class="btn btn-primary fs-14 fw-700 rounded-0 px-4">{{ translate('Continue to Payment') }}</button>
                             </div>
                         </form>
@@ -280,6 +280,17 @@
 @endsection
 
 @section('script')
+    <script>
+        function formSubmit() {
+            if ($('#pickup_radio').is(':checked')) {
+                if ($("#pickup_select").val() == "") AIZ.plugins.notify('warning', "Pickup Point Not Selected!");
+                else
+                    $('#delivery_info_form').submit();
+            } else {
+                $('#delivery_info_form').submit();
+            }
+        }
+    </script>
     <script>
         $(document).ready(function() {
             openStreetMap();
@@ -373,7 +384,6 @@
                     });
                 },
                 error: function(error) {
-                    console.log(error);
                     AIZ.plugins.notify('warning', error.statusText);
                     $('#loader').modal('hide');
                 }
@@ -446,7 +456,6 @@
                         });
                     },
                     error: function(error) {
-                        console.log(error);
                         AIZ.plugins.notify('warning', error.statusText);
                         $('#loader').modal('hide');
                     }

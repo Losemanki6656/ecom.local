@@ -329,13 +329,7 @@ class CheckoutController extends Controller
                     $address = $cartItem['address_id'];
                 }
 
-                $shop = Shop::where('user_id', $cartItem['user_id'])->first()->emu_town ?? 'Ташкент';
-
-                // if ($request->code)
-                //     $code = $request->code;
-                // else {
-                //     $code = City::find(Address::find($address)->city_id)->emu_town ?? 'Ташкент';
-                // }
+                $shop = Shop::where('user_id', $cartItem['owner_id'])->first()->emu_town ?? 'Ташкент';
 
                 $pvz_code = $request->code ?? 31;
 
@@ -419,11 +413,6 @@ class CheckoutController extends Controller
                 'shipping_cost' => $price_emu
             ]);
 
-            // foreach ($carts as $cartItem) {
-            //     $cartItem->shipping_cost = $price_emu;
-            //     $cartItem->save();
-            // }
-
             return response()->json([
                 'price_emu' => $price_emu,
                 'summ' => $allsumm,
@@ -443,27 +432,25 @@ class CheckoutController extends Controller
     public function store_shipping_info(Request $request)
     {
 
-        if (1 == 1) {
-            try {
+        try {
 
-                $response = Http::withHeaders([
-                    "Content-Type" => "text/xml;charset=utf-8"
-                ])->send("POST", "https://home.courierexe.ru/api/", [
-                            "body" => '<?xml version="1.0" encoding="utf-8"?>
-                                <pvzlist>
-                                    <auth extra="245" />
-                                </pvzlist>'
-                        ]);
+            $response = Http::withHeaders([
+                "Content-Type" => "text/xml;charset=utf-8"
+            ])->send("POST", "https://home.courierexe.ru/api/", [
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                            <pvzlist>
+                                <auth extra="245" />
+                            </pvzlist>'
+                    ]);
 
-            } catch (\GuzzleHttp\Exception\RequestException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
-                flash(translate($e->getMessage()))->warning();
-                return back();
-            }
-
-            $res = XmlToArray::convert($response->body());
-            $localPickups = $res['pvz'];
+            flash(translate($e->getMessage()))->warning();
+            return back();
         }
+
+        $res = XmlToArray::convert($response->body());
+        $localPickups = $res['pvz'];
 
         if ($request->address_id == null) {
             flash(translate("Please add shipping address"))->warning();
