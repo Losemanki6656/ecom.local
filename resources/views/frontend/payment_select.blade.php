@@ -9,24 +9,30 @@
                 <div class="col-xl-8 mx-auto">
                     <div class="row gutters-5 sm-gutters-10">
                         <div class="col done">
-                            <div class="text-center border border-bottom-6px p-2 text-success">
-                                <i class="la-3x mb-2 las la-shopping-cart"></i>
-                                <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('1. My Cart') }}</h3>
-                            </div>
+                            <a href="{{ route('cart') }}">
+                                <div class="text-center border border-bottom-6px p-2 text-success">
+                                    <i class="la-3x mb-2 las la-shopping-cart"></i>
+                                    <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('1. My Cart') }}</h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col done">
-                            <div class="text-center border border-bottom-6px p-2 text-success">
-                                <i class="la-3x mb-2 las la-map"></i>
-                                <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('2. Shipping info') }}
-                                </h3>
-                            </div>
+                            <a href="{{ route('checkout.shipping_info') }}">
+                                <div class="text-center border border-bottom-6px p-2 text-success">
+                                    <i class="la-3x mb-2 las la-map"></i>
+                                    <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('2. Shipping info') }}
+                                    </h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col done">
-                            <div class="text-center border border-bottom-6px p-2 text-success">
-                                <i class="la-3x mb-2 las la-truck"></i>
-                                <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('3. Delivery info') }}
-                                </h3>
-                            </div>
+                            <a href="{{ route('checkout.store_shipping_infostore_GET') }}">
+                                <div class="text-center border border-bottom-6px p-2 text-success">
+                                    <i class="la-3x mb-2 las la-truck"></i>
+                                    <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('3. Delivery info') }}
+                                    </h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col active">
                             <div class="text-center border border-bottom-6px p-2 text-primary">
@@ -658,32 +664,32 @@
         }
 
         /* .dropdown-btn {
-                                                                                                                            background: rgba(255, 255, 255, 0.1);
-                                                                                                                            width: 100%;
-                                                                                                                            border-radius: 5px;
-                                                                                                                            text-align: center;
-                                                                                                                            line-height: 1.5em;
-                                                                                                                            cursor: pointer;
-                                                                                                                            position: relative;
-                                                                                                                            -webkit-transition: background .2s ease;
-                                                                                                                            transition: background .2s ease;
-                                                                                                                        }
+                                                                                                                                            background: rgba(255, 255, 255, 0.1);
+                                                                                                                                            width: 100%;
+                                                                                                                                            border-radius: 5px;
+                                                                                                                                            text-align: center;
+                                                                                                                                            line-height: 1.5em;
+                                                                                                                                            cursor: pointer;
+                                                                                                                                            position: relative;
+                                                                                                                                            -webkit-transition: background .2s ease;
+                                                                                                                                            transition: background .2s ease;
+                                                                                                                                        }
 
-                                                                                                                        .dropdown-btn:after {
-                                                                                                                            content: '\25BE';
-                                                                                                                            right: 8px;
-                                                                                                                            position: absolute;
-                                                                                                                        }
+                                                                                                                                        .dropdown-btn:after {
+                                                                                                                                            content: '\25BE';
+                                                                                                                                            right: 8px;
+                                                                                                                                            position: absolute;
+                                                                                                                                        }
 
-                                                                                                                        .dropdown-btn:hover {
-                                                                                                                            background: rgba(255, 255, 255, 0.2);
-                                                                                                                            -webkit-transition: background .2s ease;
-                                                                                                                            transition: background .2s ease;
-                                                                                                                        }
+                                                                                                                                        .dropdown-btn:hover {
+                                                                                                                                            background: rgba(255, 255, 255, 0.2);
+                                                                                                                                            -webkit-transition: background .2s ease;
+                                                                                                                                            transition: background .2s ease;
+                                                                                                                                        }
 
-                                                                                                                        .dropdown-select {
-                                                                                                                            display: none;
-                                                                                                                        } */
+                                                                                                                                        .dropdown-select {
+                                                                                                                                            display: none;
+                                                                                                                                        } */
 
         .credit-card-image {
             display: block;

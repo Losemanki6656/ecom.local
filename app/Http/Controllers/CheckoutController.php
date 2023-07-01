@@ -275,12 +275,13 @@ class CheckoutController extends Controller
 
     public function get_shipping_info(Request $request)
     {
-        $carts = Cart::where('user_id', Auth::user()->id)->get();
-        //        if (Session::has('cart') && count(Session::get('cart')) > 0) {
-        if ($carts && count($carts) > 0) {
-            $categories = Category::all();
-            return view('frontend.shipping_info', compact('categories', 'carts'));
+        $carts = Cart::where('user_id', Auth::user()->id);
+
+        if ($carts->count() > 0) {
+            $cart = $carts->first();
+            return view('frontend.shipping_info', compact('cart'));
         }
+
         flash(translate('Your cart is empty'))->success();
         return back();
     }
@@ -480,6 +481,62 @@ class CheckoutController extends Controller
         foreach ($carts as $key => $cartItem) {
             $cartItem->address_id = $request->address_id;
             $cartItem->save();
+        }
+
+        $carrier_list = array();
+        if (get_setting('shipping_type') == 'carrier_wise_shipping') {
+            $zone = \App\Models\Country::where('id', $carts[0]['address']['country_id'])->first()->zone_id;
+
+            $carrier_query = Carrier::query();
+            $carrier_query->whereIn('id', function ($query) use ($zone) {
+                $query->select('carrier_id')->from('carrier_range_prices')
+                    ->where('zone_id', $zone);
+            })->orWhere('free_shipping', 1);
+            $carrier_list = $carrier_query->get();
+        }
+
+        return view('frontend.delivery_info', compact('carts', 'carrier_list', 'localPickups', 'seller_products'));
+    }
+
+    public function store_shipping_info_GET()
+    {
+
+        try {
+
+            $response = Http::withHeaders([
+                "Content-Type" => "text/xml;charset=utf-8"
+            ])->send("POST", "https://home.courierexe.ru/api/", [
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                            <pvzlist>
+                                <auth extra="245" />
+                            </pvzlist>'
+                    ]);
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+
+            flash(translate($e->getMessage()))->warning();
+            return back();
+        }
+
+        $res = XmlToArray::convert($response->body());
+        $localPickups = $res['pvz'];
+
+        $carts = Cart::where('user_id', Auth::user()->id)->get();
+        if ($carts->isEmpty()) {
+            flash(translate('Your cart is empty'))->warning();
+            return redirect()->route('home');
+        }
+
+        $seller_products = array();
+        foreach ($carts as $cartItem) {
+            $product_ids = array();
+            $product = Product::find($cartItem['product_id']);
+            if (isset($seller_products[$product->user_id])) {
+                $product_ids = $seller_products[$product->user_id];
+            }
+            array_push($product_ids, $cartItem);
+            $seller_products[$product->user_id] = $product_ids;
+
         }
 
         $carrier_list = array();

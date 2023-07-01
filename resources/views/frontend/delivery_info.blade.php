@@ -9,17 +9,21 @@
                 <div class="col-xl-8 mx-auto">
                     <div class="row gutters-5 sm-gutters-10">
                         <div class="col done">
-                            <div class="text-center border border-bottom-6px p-2 text-success">
-                                <i class="la-3x mb-2 las la-shopping-cart"></i>
-                                <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('1. My Cart') }}</h3>
-                            </div>
+                            <a href="{{ route('cart') }}">
+                                <div class="text-center border border-bottom-6px p-2 text-success">
+                                    <i class="la-3x mb-2 las la-shopping-cart"></i>
+                                    <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('1. My Cart') }}</h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col done">
-                            <div class="text-center border border-bottom-6px p-2 text-success">
-                                <i class="la-3x mb-2 las la-map"></i>
-                                <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('2. Shipping info') }}
-                                </h3>
-                            </div>
+                            <a href="{{ route('checkout.shipping_info') }}">
+                                <div class="text-center border border-bottom-6px p-2 text-success">
+                                    <i class="la-3x mb-2 las la-map"></i>
+                                    <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('2. Shipping info') }}
+                                    </h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col active">
                             <div class="text-center border border-bottom-6px p-2 text-primary">
@@ -237,9 +241,11 @@
                                         </h6>
                                         <h6 class="fs-14 fw-700 mt-3" id="price_emu">
                                         </h6>
-                                        <h6 class="fs-14 fw-700 mt-3" id="allsumm">
-                                        </h6>
                                         <h6 class="fs-14 fw-700 mt-3" id="allmass">
+                                        </h6>
+                                        <h6 class="fs-14 fw-700 mt-3" id="price_emu_pickup">
+                                        </h6>
+                                        <h6 class="fs-14 fw-700 mt-3" id="allmass_pickup">
                                         </h6>
                                     </div>
                                     <div class="col-md-6"></div>
@@ -306,6 +312,11 @@
                     code: null
                 },
                 success: function(res) {
+                    array = res.seller_emu_price;
+
+                    localStorage.setItem('all_summ', res['price_emu']);
+                    localStorage.setItem('mass', res['mass']);
+                    localStorage.setItem('array', JSON.stringify(array));
 
                     $('#loader').modal('hide');
                     $("#price_emu").html('<i class="las la-truck"></i> Общая сумма: ' + res[
@@ -315,7 +326,6 @@
                             'mass'] +
                         ' кг');
                     $("#pickupMenu").show();
-                    let array = res.seller_emu_price;
                     array.forEach(element => {
                         $("#sellerProduct" + element['key']).html(
                             '<i class="las la-weight-hanging"></i> ' + element['mass'] +
@@ -341,22 +351,6 @@
 
             let code = $("#pickup_select").val();
 
-            var array = @json($localPickups);
-            array.forEach(element => {
-                if (code == element['code']) {
-                    $("#pickup_phone").html('<i class="las la-phone"></i> ' + element['phone']);
-                    $("#pickup_worktime").html('<i class="las la-clock"></i> ' + element['worktime']);
-                    $("#pickup_address").html('<i class="las la-map-marker"></i> ' + element['town'][
-                            '@attributes'
-                        ][
-                            'regionname'
-                        ] +
-                        ', ' + element['name'] + ', ' + element['address']);
-
-                }
-            });
-
-
             $.ajax({
                 url: "{{ route('checkout.pickupCodeInfo') }}",
                 method: "POST",
@@ -366,12 +360,30 @@
                 },
                 success: function(res) {
 
+                    var Parray = @json($localPickups);
+                    Parray.forEach(element => {
+                        if (code == element['code']) {
+                            $("#pickup_phone").html('<i class="las la-phone"></i> +' + element[
+                                'phone']);
+                            $("#pickup_worktime").html('<i class="las la-clock"></i> ' + element[
+                                'worktime']);
+                            $("#pickup_address").html('<i class="las la-map-marker"></i> ' + element[
+                                    'town'][
+                                    '@attributes'
+                                ][
+                                    'regionname'
+                                ] +
+                                ', ' + element['name'] + ', ' + element['address']);
+
+                        }
+                    });
+
                     $('#loader').modal('hide');
-                    $("#price_emu").html('<i class="las la-truck"></i> Общая сумма: ' + res['price_emu'] +
+                    $("#price_emu_pickup").html('<i class="las la-truck"></i> Общая сумма: ' + res[
+                            'price_emu'] +
                         ' UZS');
-                    // $("#allsumm").html('<i class="las la-dollar-sign"></i> Общая сумма: ' + res['summ'] +
-                    //     ' UZS');
-                    $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res['mass'] +
+                    $("#allmass_pickup").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res[
+                            'mass'] +
                         ' кг');
                     $("#pickupMenu").show();
                     let array = res.seller_emu_price;
@@ -399,15 +411,17 @@
                 // scrollWheelZoom: false,
                 tap: false
             });
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             var array = @json($localPickups);
             array.forEach(element => {
+
                 L.marker([element['latitude'], element['longitude']]).addTo(map)
                     .bindPopup(element['name'])
-                    .openPopup();
+                    .openPopup()
+                    .on('click', function(e) {
+                        console.log(e);
+                    });
             });
 
             map.setView(new L.LatLng(41.2942336, 69.2518912), 7);
@@ -416,49 +430,53 @@
     </script>
 
     <script type="text/javascript">
-        function display_option(key) {
-
-        }
-
         function show_pickup_point(el, type) {
 
             if ($("#pickup_radio").is(":checked")) {
                 $('#pickupMap').removeClass('d-none');
                 $('#pickupMap').addClass('d-flex');
+
+                $('#pickup_phone').removeClass('d-none');
+                $('#pickup_worktime').removeClass('d-none');
+                $('#pickup_address').removeClass('d-none');
+                $('#price_emu_pickup').removeClass('d-none');
+                $('#allmass_pickup').removeClass('d-none');
+
+                $('#price_emu').addClass('d-none');
+                $('#allmass').addClass('d-none');
+
             } else {
                 $('#pickupMap').addClass('d-none');
                 $('#pickupMap').removeClass('d-flex');
 
-                $('#loader').modal('show');
+                $('#pickup_phone').addClass('d-none');
+                $('#pickup_worktime').addClass('d-none');
+                $('#pickup_address').addClass('d-none');
+                $('#price_emu_pickup').addClass('d-none');
+                $('#allmass_pickup').addClass('d-none');
 
-                $.ajax({
-                    url: "{{ route('checkout.pickupCodeInfo') }}",
-                    method: "POST",
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        code: null
-                    },
-                    success: function(res) {
+                $('#price_emu').removeClass('d-none');
+                $('#allmass').removeClass('d-none');
 
-                        $('#loader').modal('hide');
-                        $("#price_emu").html('<i class="las la-truck"></i> Общая сумма: ' + res['price_emu'] +
-                            ' UZS');
-                        $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + res['mass'] +
-                            ' кг');
-                        $("#pickupMenu").show();
-                        let array = res.seller_emu_price;
-                        array.forEach(element => {
-                            $("#sellerProduct" + element['key']).html(
-                                '<i class="las la-weight-hanging"></i> ' + element['mass'] +
-                                ' кг;' + '&nbsp &nbsp &nbsp<i class="las la-truck"></i> ' + element[
-                                    'price'] + ' UZS'
-                            );
-                        });
-                    },
-                    error: function(error) {
-                        AIZ.plugins.notify('warning', error.statusText);
-                        $('#loader').modal('hide');
-                    }
+
+                var all_summ = localStorage.getItem('all_summ');
+                var mass = localStorage.getItem('mass');
+                let array = JSON.parse(localStorage.getItem('array'));
+
+                $("#price_emu").html('<i class="las la-truck"></i> Общая сумма: ' + all_summ +
+                    ' UZS');
+                $("#allmass").html('<i class="las la-weight-hanging"></i> Общая масса: ' + mass +
+                    ' кг');
+
+                $("#pickupMenu").show();
+
+                array.forEach(element => {
+                    $("#sellerProduct" + element['key']).html(
+                        '<i class="las la-weight-hanging"></i> ' + element['mass'] +
+                        ' кг;' + '&nbsp &nbsp &nbsp<i class="las la-truck"></i> ' +
+                        element[
+                            'price'] + ' UZS'
+                    );
                 });
             }
 

@@ -259,6 +259,7 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function ()
         Route::controller(CheckoutController::class)->group(function () {
             Route::get('/', 'get_shipping_info')->name('checkout.shipping_info');
             Route::any('/delivery_info', 'store_shipping_info')->name('checkout.store_shipping_infostore');
+            Route::get('/delivery_info', 'store_shipping_info_GET')->name('checkout.store_shipping_infostore_GET');
             Route::post('/pickupCodeInfo', 'pickupCodeInfo')->name('checkout.pickupCodeInfo');
             Route::post('/payment_select', 'store_delivery_info')->name('checkout.store_delivery_info');
             Route::get('/order-confirmed', 'order_confirmed')->name('order_confirmed');
