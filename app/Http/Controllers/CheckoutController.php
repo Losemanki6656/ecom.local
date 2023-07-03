@@ -152,7 +152,7 @@ class CheckoutController extends Controller
                 $shipping = $cartItem['shipping_cost'];
             }
 
-            $sum_pay_sellers = $subtotal + $tax + $shipping;
+            $sum_pay_sellers = $subtotal + $tax;
             $sum_pay_admin += $adminTotal;
 
             $shop = Shop::where('user_id', $key)->first();
@@ -177,6 +177,8 @@ class CheckoutController extends Controller
             }
 
         }
+
+        $sum_pay_admin = $sum_pay_admin + $shipping;
 
         if ($sum_pay_admin != 0)
             $params[] = [
@@ -788,7 +790,7 @@ class CheckoutController extends Controller
 
             if ($item->shipping_type == 'pickup_point') {
 
-                $pvz_code = $item->emu_town ?? 31;
+                $pvz_code = $item->pickup_point_id ?? 31;
 
                 $response = Http::withHeaders([
                     "Content-Type" => "text/xml;charset=utf-8"

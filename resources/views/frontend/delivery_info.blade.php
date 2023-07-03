@@ -415,14 +415,23 @@
             });
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
+            // var blueIcon = L.icon({
+            //     iconUrl: '..//public/assets/marker-blu.png',
+            //     iconSize: [28, 50],
+            // });
+
+            // var redIcon = L.icon({
+            //     iconUrl: '..//public/assets/marker-red.png',
+            //     iconSize: [28, 50],
+            // });
+
             var array = @json($localPickups);
             array.forEach(element => {
 
-                L.marker([element['latitude'], element['longitude']]).addTo(map)
+                marker = L.marker([element['latitude'], element['longitude']]).addTo(map)
                     .bindPopup(element['name'])
                     .openPopup()
                     .on('click', function() {
-
 
                         let code = element['code'];
 
