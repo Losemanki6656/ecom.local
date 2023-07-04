@@ -340,10 +340,8 @@ class CheckoutController extends Controller
                 $allmass = 0;
                 $price_emu = 0;
                 $allsumm = 0;
-
+                $packages = '';
                 foreach ($seller_product as $cartItem) {
-
-                    $shop = Shop::where('user_id', $cartItem['owner_id'])->first()->emu_town ?? 'Ташкент';
 
                     $product = Product::find($cartItem['product_id']);
                     $mass = $product->weight;
@@ -353,66 +351,69 @@ class CheckoutController extends Controller
 
                     $address = $cartItem['address_id'];
 
-                    if ($request->code) {
-                        $response = Http::withHeaders([
-                            "Content-Type" => "text/xml;charset=utf-8"
-                        ])->send("POST", "https://home.courierexe.ru/api/", [
-                                    "body" => '<?xml version="1.0" encoding="UTF-8" ?>
-                                    <calculator>
-                                    <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
-                                    <order>
-                                        <pricetype>CUSTOMER</pricetype>
-                                        <sender>
-                                            <town>' . $shop . '</town>
-                                        </sender>
-                                        <receiver>
-                                            <town>' . $town . '</town>
-                                        </receiver>
-                                        <service>1</service>
-                                        <packages>
-                                            <package mass="' . $mass . '" quantity="' . $cartItem['quantity'] . '"></package>
-                                        </packages>
-                                    </order>
-                                </calculator>'
-                                ]);
-                    } else {
-
-                        $townservice = City::find(Address::find($address)->city_id)->emu_town ?? 'Ташкент';
-
-                        $response = Http::withHeaders([
-                            "Content-Type" => "text/xml;charset=utf-8"
-                        ])->send("POST", "https://home.courierexe.ru/api/", [
-                                    "body" => '<?xml version="1.0" encoding="UTF-8" ?>
-                                    <calculator>
-                                    <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
-                                    <order>
-                                        <pricetype>CUSTOMER</pricetype>
-                                        <sender>
-                                            <town>' . $shop . '</town>
-                                        </sender>
-                                        <receiver>
-                                            <town>' . $townservice . '</town>
-                                        </receiver>
-                                        <service>3</service>
-                                        <packages>
-                                            <package mass="' . $mass . '" quantity="' . $cartItem['quantity'] . '"></package>
-                                        </packages>
-                                    </order>
-                                </calculator>'
-                                ]);
-                    }
-
-                    $i = $mass * $cartItem['quantity'] * 100;
-                    $res = XmlToArray::convert($response->body());
-                    $allmass += (int) round($i);
+                    $allmass += $mass * $cartItem['quantity'] * 100;
                     $allsumm += $summm;
-                    $price_emu += (int) $res['calc']['@attributes']['price'];
+
+                    $packages = $packages . '<package mass="' . $mass . '" quantity="' . $cartItem['quantity'] . '"></package>';
 
                 }
+                $shop = Shop::where('user_id', $cartItem['owner_id'])->first()->emu_town ?? 'Ташкент';
 
+                if ($request->code) {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                                <calculator>
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
+                                <order>
+                                    <pricetype>CUSTOMER</pricetype>
+                                    <sender>
+                                        <town>' . $shop . '</town>
+                                    </sender>
+                                    <receiver>
+                                        <town>' . $town . '</town>
+                                    </receiver>
+                                    <service>1</service>
+                                    <packages>
+                                        ' . $packages . '
+                                    </packages>
+                                </order>
+                            </calculator>'
+                            ]);
+                } else {
+
+                    $townservice = City::find(Address::find($address)->city_id)->emu_town ?? 'Ташкент';
+
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                                <calculator>
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
+                                <order>
+                                    <pricetype>CUSTOMER</pricetype>
+                                    <sender>
+                                        <town>' . $shop . '</town>
+                                    </sender>
+                                    <receiver>
+                                        <town>' . $townservice . '</town>
+                                    </receiver>
+                                    <service>3</service>
+                                    <packages>
+                                    ' . $packages . '
+                                    </packages>
+                                </order>
+                            </calculator>'
+                            ]);
+                }
+
+                $res = XmlToArray::convert($response->body());
+                $price_emu = (int) $res['calc']['@attributes']['price'];
+
+                $totalprice_emu += $price_emu;
                 $totalmass += $allmass;
                 $totalsumm += $allsumm;
-                $totalprice_emu += $price_emu;
 
                 $seller_emu_price[] = [
                     'key' => $key,
