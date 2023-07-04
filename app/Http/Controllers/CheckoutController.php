@@ -797,7 +797,7 @@ class CheckoutController extends Controller
 
             foreach ($item->orderDetails as $value) {
                 $product = Product::find($value->product_id);
-                $mass = $product->weight * $value->quantity;
+                $mass = (int) round($product->weight * $value->quantity);
                 $prods = $product->name;
 
                 if ($item->shipping_type == 'pickup_point') {
@@ -843,7 +843,7 @@ class CheckoutController extends Controller
                                         <weight>' . $mass . '</weight>
                                         <paytype>Paymo</paytype>
                                         <packages>
-                                            <package mass="' . $mass . '" quantity="' . $value->quantity . '"></package>
+                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
                                         </packages>
                                         <instruction>Проверить при покупателе, подписать акт</instruction>
                                         <enclosure>' . $prods . '</enclosure>
@@ -878,9 +878,10 @@ class CheckoutController extends Controller
                                         <weight>' . $mass . '</weight>
                                         <paytype>Cash on Delivery</paytype>
                                         <packages>
-                                            <package mass="' . $mass . '" quantity="1"></package>
+                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
                                         </packages>
-                                        <instruction>' . $prods . '</instruction>
+                                        <instruction>Проверить при покупателе, подписать акт</instruction>
+                                        <enclosure>' . $prods . '</enclosure>
                                     </order>
                                 </neworder>'
                                 ]);
@@ -912,9 +913,10 @@ class CheckoutController extends Controller
                                         <weight>' . $mass . '</weight>
                                         <paytype>Paymo</paytype>
                                         <packages>
-                                            <package mass="' . $mass . '" quantity="1"></package>
+                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
                                         </packages>
-                                        <instruction>' . $prods . '</instruction>
+                                        <instruction>Проверить при покупателе, подписать акт</instruction>
+                                        <enclosure>' . $prods . '</enclosure>
                                     </order>
                                 </neworder>'
                                 ]);
@@ -945,9 +947,10 @@ class CheckoutController extends Controller
                                         <weight>' . $mass . '</weight>
                                         <paytype>Cash on Delivery</paytype>
                                         <packages>
-                                            <package mass="' . $mass . '" quantity="1"></package>
+                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
                                         </packages>
-                                        <instruction>' . $prods . '</instruction>
+                                        <instruction>Проверить при покупателе, подписать акт</instruction>
+                                        <enclosure>' . $prods . '</enclosure>
                                     </order>
                                 </neworder>'
                                 ]);
