@@ -239,7 +239,7 @@
                                                     <tr>
                                                         <th class="border-top-0 py-2">{{ translate('Shipping') }}</th>
                                                         <td class="text-right border-top-0 pr-0 py-2">
-                                                            <span>{{ single_price($order->orderDetails->sum('shipping_cost')) }}</span>
+                                                            <span>{{ single_price($order->orderFirstProd->shipping_cost) }}</span>
                                                         </td>
                                                     </tr>
                                                     <!-- Tax -->

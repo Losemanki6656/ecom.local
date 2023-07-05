@@ -220,7 +220,7 @@ class OrderController extends Controller
                 $order_detail->product_referral_code = $cartItem['product_referral_code'];
                 $order_detail->shipping_cost = $cartItem['shipping_cost'];
 
-                $shipping += $order_detail->shipping_cost;
+                $shipping = $order_detail->shipping_cost;
                 //End of storing shipping cost
 
                 $order_detail->quantity = $cartItem['quantity'];
