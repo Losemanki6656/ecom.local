@@ -425,7 +425,7 @@ class CheckoutController extends Controller
             }
 
             Cart::whereIn('id', $crts)->update([
-                'shipping_cost' => $price_emu
+                'shipping_cost' => $totalprice_emu
             ]);
 
             return response()->json([
