@@ -785,7 +785,7 @@ class CheckoutController extends Controller
         $shipping_type = $cart->shipping_type;
         $emu_town = $cart->emu_town;
         $address = Address::find($cart->address_id);
-        $city = City::find($address->city_id);
+        $city = City::find($address->city_id)->emu_town ?? 'Ташкент';
 
         foreach ($combined_order->orders as $item) {
 
@@ -796,169 +796,161 @@ class CheckoutController extends Controller
             $user = User::find($item->seller_id);
             $pvz_code = $item->pickup_point_id ?? 31;
 
+            $packages = '0';
             foreach ($item->orderDetails as $value) {
                 $product = Product::find($value->product_id);
-                $mass = (int) round($product->weight * $value->quantity);
-                $prods = $product->name;
 
-                if ($item->shipping_type == 'pickup_point') {
+                $mass = (int) ($product->weight * 100 * $value->quantity);
+                $mass = $mass / 100;
+
+                $packages = $packages . '<item quantity="' . $value->quantity . '" mass="' . $mass . '">' . $product->name . '</item>';
+            }
+
+            if ($item->shipping_type == 'pickup_point') {
 
 
+                $response = Http::withHeaders([
+                    "Content-Type" => "text/xml;charset=utf-8"
+                ])->send("POST", "https://home.courierexe.ru/api/", [
+                            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                            <pvzlist>
+                                <auth extra="245" />
+                                <code>' . $pvz_code . '</code>
+                            </pvzlist>'
+                        ]);
+
+                $res = XmlToArray::convert($response->body());
+                $town = $res['pvz']['town']['@content'];
+
+                if ($item->payment_type == "paymo") {
                     $response = Http::withHeaders([
                         "Content-Type" => "text/xml;charset=utf-8"
                     ])->send("POST", "https://home.courierexe.ru/api/", [
-                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
-                                <pvzlist>
-                                    <auth extra="245" />
-                                    <code>' . $pvz_code . '</code>
-                                </pvzlist>'
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $town . '</town>
+                                        <pvz>' . $pvz_code . '</pvz>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>1</service>
+                                    <paytype>Paymo</paytype>
+                                    <items>
+                                        ' . $packages . '
+                                    </items>
+                                </order>
+                            </neworder>'
                             ]);
-
-                    $res = XmlToArray::convert($response->body());
-                    $town = $res['pvz']['town']['@content'];
-
-                    if ($item->payment_type == "paymo") {
-                        $response = Http::withHeaders([
-                            "Content-Type" => "text/xml;charset=utf-8"
-                        ])->send("POST", "https://home.courierexe.ru/api/", [
-                                    "body" => '<?xml version="1.0" encoding="utf-8"?>
-                                    <neworder newfolder="YES">
-                                    <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
-                                    <order orderno="' . $item->code . '">
-                                        <sender>
-                                            <company>' . $seller->name . '</company>
-                                            <person>' . $user->name . '</person>
-                                            <phone>' . $seller->phone . '</phone>
-                                            <town>' . $seller->emu_town . '</town>
-                                            <address>' . $seller->address . '</address>
-                                        </sender>
-                                        <receiver>
-                                            <person>' . $custo_name . '</person>
-                                            <phone>' . $custo_phone . '</phone>
-                                            <town>' . $town . '</town>
-                                            <pvz>' . $pvz_code . '</pvz>
-                                            <zipcode>' . $address->postal_code . '</zipcode>
-                                            <address>' . $address->address . '</address>
-                                        </receiver>
-                                        <service>1</service>
-                                        <weight>' . $mass . '</weight>
-                                        <paytype>Paymo</paytype>
-                                        <packages>
-                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
-                                        </packages>
-                                        <instruction>Проверить при покупателе, подписать акт</instruction>
-                                        <enclosure>' . $prods . '</enclosure>
-                                    </order>
-                                </neworder>'
-                                ]);
-                    } else {
-                        $response = Http::withHeaders([
-                            "Content-Type" => "text/xml;charset=utf-8"
-                        ])->send("POST", "https://home.courierexe.ru/api/", [
-                                    "body" => '<?xml version="1.0" encoding="utf-8"?>
-                                    <neworder newfolder="YES">
-                                    <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
-                                    <order orderno="' . $item->code . '">
-                                        <sender>
-                                            <company>' . $seller->name . '</company>
-                                            <person>' . $user->name . '</person>
-                                            <phone>' . $seller->phone . '</phone>
-                                            <town>' . $seller->emu_town . '</town>
-                                            <address>' . $seller->address . '</address>
-                                        </sender>
-                                        <receiver>
-                                            <person>' . $custo_name . '</person>
-                                            <phone>' . $custo_phone . '</phone>
-                                            <town>' . $town . '</town>
-                                            <pvz>' . $pvz_code . '</pvz>
-                                            <zipcode>' . $address->postal_code . '</zipcode>
-                                            <address>' . $address->address . '</address>
-                                        </receiver>
-                                        <service>1</service>
-                                        <price>' . $item->grand_total . '</price>
-                                        <weight>' . $mass . '</weight>
-                                        <paytype>Cash on Delivery</paytype>
-                                        <packages>
-                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
-                                        </packages>
-                                        <instruction>Проверить при покупателе, подписать акт</instruction>
-                                        <enclosure>' . $prods . '</enclosure>
-                                    </order>
-                                </neworder>'
-                                ]);
-                    }
                 } else {
-                    if ($item->payment_type == "paymo") {
-                        $response = Http::withHeaders([
-                            "Content-Type" => "text/xml;charset=utf-8"
-                        ])->send("POST", "https://home.courierexe.ru/api/", [
-                                    "body" => '<?xml version="1.0" encoding="utf-8"?>
-                                    <neworder newfolder="YES">
-                                    <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
-                                    <order orderno="' . $item->code . '">
-                                        <sender>
-                                            <company>' . $seller->name . '</company>
-                                            <person>' . $user->name . '</person>
-                                            <phone>' . $seller->phone . '</phone>
-                                            <town>' . $seller->emu_town . '</town>
-                                            <address>' . $seller->address . '</address>
-                                        </sender>
-                                        <receiver>
-                                            <person>' . $custo_name . '</person>
-                                            <phone>' . $custo_phone . '</phone>
-                                            <town>' . $city->emu_town . '</town>
-                                            <zipcode>' . $address->postal_code . '</zipcode>
-                                            <address>' . $address->address . '</address>
-                                        </receiver>
-                                        <service>3</service>
-                                        <weight>' . $mass . '</weight>
-                                        <paytype>Paymo</paytype>
-                                        <packages>
-                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
-                                        </packages>
-                                        <instruction>Проверить при покупателе, подписать акт</instruction>
-                                        <enclosure>' . $prods . '</enclosure>
-                                    </order>
-                                </neworder>'
-                                ]);
-                    } else {
-                        $response = Http::withHeaders([
-                            "Content-Type" => "text/xml;charset=utf-8"
-                        ])->send("POST", "https://home.courierexe.ru/api/", [
-                                    "body" => '<?xml version="1.0" encoding="utf-8"?>
-                                    <neworder newfolder="YES">
-                                    <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
-                                    <order orderno="' . $item->code . '">
-                                        <sender>
-                                            <company>' . $seller->name . '</company>
-                                            <person>' . $user->name . '</person>
-                                            <phone>' . $seller->phone . '</phone>
-                                            <town>' . $seller->emu_town . '</town>
-                                            <address>' . $seller->address . '</address>
-                                        </sender>
-                                        <receiver>
-                                            <person>' . $custo_name . '</person>
-                                            <phone>' . $custo_phone . '</phone>
-                                            <town>' . $city->emu_town . '</town>
-                                            <zipcode>' . $address->postal_code . '</zipcode>
-                                            <address>' . $address->address . '</address>
-                                        </receiver>
-                                        <service>3</service>
-                                        <price>' . $item->grand_total . '</price>
-                                        <weight>' . $mass . '</weight>
-                                        <paytype>Cash on Delivery</paytype>
-                                        <packages>
-                                            <package mass="' . $product->weight . '" quantity="' . $value->quantity . '"></package>
-                                        </packages>
-                                        <instruction>Проверить при покупателе, подписать акт</instruction>
-                                        <enclosure>' . $prods . '</enclosure>
-                                    </order>
-                                </neworder>'
-                                ]);
-                    }
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $town . '</town>
+                                        <pvz>' . $pvz_code . '</pvz>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>1</service>
+                                    <price>' . $item->grand_total . '</price>
+                                    <paytype>Cash on Delivery</paytype>
+                                    <items>
+                                        ' . $packages . '
+                                    </items>
+                                </order>
+                            </neworder>'
+                            ]);
+                }
+            } else {
+                if ($item->payment_type == "paymo") {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $city . '</town>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>3</service>
+                                    <paytype>Paymo</paytype>
+                                    <items>
+                                        ' . $packages . '
+                                    </items>
+                                </order>
+                            </neworder>'
+                            ]);
+                } else {
+                    $response = Http::withHeaders([
+                        "Content-Type" => "text/xml;charset=utf-8"
+                    ])->send("POST", "https://home.courierexe.ru/api/", [
+                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                                <neworder newfolder="YES">
+                                <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                                <order orderno="' . $item->code . '">
+                                    <sender>
+                                        <company>' . $seller->name . '</company>
+                                        <person>' . $user->name . '</person>
+                                        <phone>' . $seller->phone . '</phone>
+                                        <town>' . $seller->emu_town . '</town>
+                                        <address>' . $seller->address . '</address>
+                                    </sender>
+                                    <receiver>
+                                        <person>' . $custo_name . '</person>
+                                        <phone>' . $custo_phone . '</phone>
+                                        <town>' . $city . '</town>
+                                        <zipcode>' . $address->postal_code . '</zipcode>
+                                        <address>' . $address->address . '</address>
+                                    </receiver>
+                                    <service>3</service>
+                                    <price>' . $item->grand_total . '</price>
+                                    <weight>' . $mass . '</weight>
+                                    <paytype>Cash on Delivery</paytype>
+                                    <items>
+                                        ' . $packages . '
+                                    </items>
+                                </order>
+                            </neworder>'
+                            ]);
                 }
             }
-
 
         }
 
