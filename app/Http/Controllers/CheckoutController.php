@@ -146,7 +146,6 @@ class CheckoutController extends Controller
                 } else {
 
                     $subtotal += $summm;
-
                 }
 
                 $shipping = $cartItem['shipping_cost'];
@@ -168,14 +167,12 @@ class CheckoutController extends Controller
                     'amount' => $sum_pay_sellers * 100,
                     'details' => 'Для услуги ' . $key
                 ];
-
             } else {
 
                 return response()->json([
                     'message' => 'Undifined Seller!'
                 ], 404);
             }
-
         }
 
         $sum_pay_admin = $sum_pay_admin + $shipping;
@@ -213,15 +210,12 @@ class CheckoutController extends Controller
                 'transaction_id' => $transaction_id,
                 'phone' => $bind->phone
             ]);
-
-
         } catch (\Exception $e) {
 
             return response()->json([
                 'message' => $e->getMessage(),
             ], 404);
         }
-
     }
 
     public function otpVerify(Request $request)
@@ -239,7 +233,6 @@ class CheckoutController extends Controller
                 return response()->json([
                     'message' => 'Your Payment successfully!'
                 ]);
-
             } else {
 
                 return response()->json([
@@ -247,10 +240,7 @@ class CheckoutController extends Controller
                     'message' => $response['result']['description']
 
                 ], 400);
-
             }
-
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -319,12 +309,12 @@ class CheckoutController extends Controller
                 $response = Http::withHeaders([
                     "Content-Type" => "text/xml;charset=utf-8"
                 ])->send("POST", "https://home.courierexe.ru/api/", [
-                            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                    "body" => '<?xml version="1.0" encoding="UTF-8" ?>
                             <pvzlist>
                                 <auth extra="245" />
                                 <code>' . $pvz_code . '</code>
                             </pvzlist>'
-                        ]);
+                ]);
 
                 $res = XmlToArray::convert($response->body());
                 $town = $res['pvz']['town']['@content'];
@@ -355,7 +345,6 @@ class CheckoutController extends Controller
                     $allsumm += $summm;
 
                     $packages = $packages . '<package mass="' . $mass . '" quantity="' . $cartItem['quantity'] . '"></package>';
-
                 }
                 $shop = Shop::where('user_id', $cartItem['owner_id'])->first()->emu_town ?? 'Ташкент';
 
@@ -363,7 +352,7 @@ class CheckoutController extends Controller
                     $response = Http::withHeaders([
                         "Content-Type" => "text/xml;charset=utf-8"
                     ])->send("POST", "https://home.courierexe.ru/api/", [
-                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                        "body" => '<?xml version="1.0" encoding="UTF-8" ?>
                                 <calculator>
                                 <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
                                 <order>
@@ -380,7 +369,7 @@ class CheckoutController extends Controller
                                     </packages>
                                 </order>
                             </calculator>'
-                            ]);
+                    ]);
                 } else {
 
                     $townservice = City::find(Address::find($address)->city_id)->emu_town ?? 'Ташкент';
@@ -388,7 +377,7 @@ class CheckoutController extends Controller
                     $response = Http::withHeaders([
                         "Content-Type" => "text/xml;charset=utf-8"
                     ])->send("POST", "https://home.courierexe.ru/api/", [
-                                "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                        "body" => '<?xml version="1.0" encoding="UTF-8" ?>
                                 <calculator>
                                 <auth extra="245" login="UNIMART" pass="Cabinet_post"/>
                                 <order>
@@ -405,7 +394,7 @@ class CheckoutController extends Controller
                                     </packages>
                                 </order>
                             </calculator>'
-                            ]);
+                    ]);
                 }
 
                 $res = XmlToArray::convert($response->body());
@@ -421,7 +410,6 @@ class CheckoutController extends Controller
                     'mass' => $allmass / 100,
                     'summ' => $allsumm
                 ];
-
             }
 
             Cart::whereIn('id', $crts)->update([
@@ -434,14 +422,12 @@ class CheckoutController extends Controller
                 'mass' => $totalmass / 100,
                 'seller_emu_price' => $seller_emu_price
             ]);
-
         } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             return response()->json([
                 'message' => $e->getMessage()
             ], 400);
         }
-
     }
 
     public function store_shipping_info(Request $request)
@@ -452,12 +438,11 @@ class CheckoutController extends Controller
             $response = Http::withHeaders([
                 "Content-Type" => "text/xml;charset=utf-8"
             ])->send("POST", "https://home.courierexe.ru/api/", [
-                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                "body" => '<?xml version="1.0" encoding="utf-8"?>
                             <pvzlist>
                                 <auth extra="245" />
                             </pvzlist>'
-                    ]);
-
+            ]);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             flash(translate($e->getMessage()))->warning();
@@ -487,7 +472,6 @@ class CheckoutController extends Controller
             }
             array_push($product_ids, $cartItem);
             $seller_products[$product->user_id] = $product_ids;
-
         }
 
         // dd($seller_products);
@@ -520,12 +504,11 @@ class CheckoutController extends Controller
             $response = Http::withHeaders([
                 "Content-Type" => "text/xml;charset=utf-8"
             ])->send("POST", "https://home.courierexe.ru/api/", [
-                        "body" => '<?xml version="1.0" encoding="utf-8"?>
+                "body" => '<?xml version="1.0" encoding="utf-8"?>
                             <pvzlist>
                                 <auth extra="245" />
                             </pvzlist>'
-                    ]);
-
+            ]);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             flash(translate($e->getMessage()))->warning();
@@ -550,7 +533,6 @@ class CheckoutController extends Controller
             }
             array_push($product_ids, $cartItem);
             $seller_products[$product->user_id] = $product_ids;
-
         }
 
         $carrier_list = array();
@@ -617,18 +599,17 @@ class CheckoutController extends Controller
                     $cartItem['pickup_point'] = $request['pickup_point_id_1'];
                 } else
                     if ($request['shipping_type_1'] == 'home_delivery') {
-                        $cartItem['shipping_type'] = 'home_delivery';
-                    } else {
-                        $cartItem['shipping_type'] = 'carrier';
-                        $cartItem['carrier_id'] = $request['carrier_id_1'];
-                    }
+                    $cartItem['shipping_type'] = 'home_delivery';
+                } else {
+                    $cartItem['shipping_type'] = 'carrier';
+                    $cartItem['carrier_id'] = $request['carrier_id_1'];
+                }
 
                 $shipping = $cartItem['shipping_cost'];
                 $cartItem->save();
             }
             $total = $subtotal + $tax + $shipping;
             return view('frontend.payment_select', compact('carts', 'shipping_info', 'total', 'bindCards', 'card_info', 'bind'));
-
         } else {
 
             flash(translate('Your Cart was empty'))->warning();
@@ -672,7 +653,6 @@ class CheckoutController extends Controller
                             } elseif ($coupon->discount_type == 'amount') {
                                 $coupon_discount = $coupon->discount;
                             }
-
                         }
                     } elseif ($coupon->type == 'product_base') {
                         foreach ($carts as $key => $cartItem) {
@@ -705,7 +685,6 @@ class CheckoutController extends Controller
                         $response_message['response'] = 'warning';
                         $response_message['message'] = translate('This coupon is not applicable to your cart products!');
                     }
-
                 } else {
                     $response_message['response'] = 'warning';
                     $response_message['message'] = translate('You already used this coupon!');
@@ -778,7 +757,7 @@ class CheckoutController extends Controller
 
         $customer = User::find($combined_order->user_id);
         $custo_phone = $customer->phone ?? "998998388188";
-        $custo_name = $customer->name ?? "ClientNotInfo";
+        $custo_name = $customer->name ?? "Customer Not Found";
 
         //EMU Order
         $cart = Cart::where('user_id', Auth::user()->id)->first();
@@ -803,7 +782,7 @@ class CheckoutController extends Controller
                 $mass = (int) ($product->weight * 100 * $value->quantity);
                 $mass = $mass / 100;
 
-                $packages = $packages . '<item quantity="' . $value->quantity . '" mass="' . $mass . '">' . $product->name . '</item>';
+                $packages = $packages . '<item quantity="' . $value->quantity . '" mass="' . $mass . '" retprice="' . $value->price . '">' . $product->name . '</item>';
             }
 
             if ($item->shipping_type == 'pickup_point') {
@@ -812,12 +791,12 @@ class CheckoutController extends Controller
                 $response = Http::withHeaders([
                     "Content-Type" => "text/xml;charset=utf-8"
                 ])->send("POST", "https://home.courierexe.ru/api/", [
-                            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                    "body" => '<?xml version="1.0" encoding="UTF-8" ?>
                             <pvzlist>
                                 <auth extra="245" />
                                 <code>' . $pvz_code . '</code>
                             </pvzlist>'
-                        ]);
+                ]);
 
                 $res = XmlToArray::convert($response->body());
                 $town = $res['pvz']['town']['@content'];
@@ -826,7 +805,7 @@ class CheckoutController extends Controller
                     $response = Http::withHeaders([
                         "Content-Type" => "text/xml;charset=utf-8"
                     ])->send("POST", "https://home.courierexe.ru/api/", [
-                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
                                 <neworder newfolder="YES">
                                 <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
                                 <order orderno="' . $item->code . '">
@@ -846,18 +825,19 @@ class CheckoutController extends Controller
                                         <address>' . $address->address . '</address>
                                     </receiver>
                                     <service>1</service>
+                                    <weight>' . $mass . '</weight>
                                     <paytype>Paymo</paytype>
                                     <items>
                                         ' . $packages . '
                                     </items>
                                 </order>
                             </neworder>'
-                            ]);
+                    ]);
                 } else {
                     $response = Http::withHeaders([
                         "Content-Type" => "text/xml;charset=utf-8"
                     ])->send("POST", "https://home.courierexe.ru/api/", [
-                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
                                 <neworder newfolder="YES">
                                 <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
                                 <order orderno="' . $item->code . '">
@@ -877,6 +857,7 @@ class CheckoutController extends Controller
                                         <address>' . $address->address . '</address>
                                     </receiver>
                                     <service>1</service>
+                                    <weight>' . $mass . '</weight>
                                     <price>' . $item->grand_total . '</price>
                                     <paytype>Cash on Delivery</paytype>
                                     <items>
@@ -884,14 +865,14 @@ class CheckoutController extends Controller
                                     </items>
                                 </order>
                             </neworder>'
-                            ]);
+                    ]);
                 }
             } else {
                 if ($item->payment_type == "paymo") {
                     $response = Http::withHeaders([
                         "Content-Type" => "text/xml;charset=utf-8"
                     ])->send("POST", "https://home.courierexe.ru/api/", [
-                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
                                 <neworder newfolder="YES">
                                 <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
                                 <order orderno="' . $item->code . '">
@@ -910,18 +891,19 @@ class CheckoutController extends Controller
                                         <address>' . $address->address . '</address>
                                     </receiver>
                                     <service>3</service>
+                                    <weight>' . $mass . '</weight>
                                     <paytype>Paymo</paytype>
                                     <items>
                                         ' . $packages . '
                                     </items>
                                 </order>
                             </neworder>'
-                            ]);
+                    ]);
                 } else {
                     $response = Http::withHeaders([
                         "Content-Type" => "text/xml;charset=utf-8"
                     ])->send("POST", "https://home.courierexe.ru/api/", [
-                                "body" => '<?xml version="1.0" encoding="utf-8"?>
+                        "body" => '<?xml version="1.0" encoding="utf-8"?>
                                 <neworder newfolder="YES">
                                 <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
                                 <order orderno="' . $item->code . '">
@@ -948,10 +930,9 @@ class CheckoutController extends Controller
                                     </items>
                                 </order>
                             </neworder>'
-                            ]);
+                    ]);
                 }
             }
-
         }
 
 
