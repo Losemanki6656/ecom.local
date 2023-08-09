@@ -664,32 +664,32 @@
         }
 
         /* .dropdown-btn {
-                                                                                                                                            background: rgba(255, 255, 255, 0.1);
-                                                                                                                                            width: 100%;
-                                                                                                                                            border-radius: 5px;
-                                                                                                                                            text-align: center;
-                                                                                                                                            line-height: 1.5em;
-                                                                                                                                            cursor: pointer;
-                                                                                                                                            position: relative;
-                                                                                                                                            -webkit-transition: background .2s ease;
-                                                                                                                                            transition: background .2s ease;
-                                                                                                                                        }
+                                                                                                                                                            background: rgba(255, 255, 255, 0.1);
+                                                                                                                                                            width: 100%;
+                                                                                                                                                            border-radius: 5px;
+                                                                                                                                                            text-align: center;
+                                                                                                                                                            line-height: 1.5em;
+                                                                                                                                                            cursor: pointer;
+                                                                                                                                                            position: relative;
+                                                                                                                                                            -webkit-transition: background .2s ease;
+                                                                                                                                                            transition: background .2s ease;
+                                                                                                                                                        }
 
-                                                                                                                                        .dropdown-btn:after {
-                                                                                                                                            content: '\25BE';
-                                                                                                                                            right: 8px;
-                                                                                                                                            position: absolute;
-                                                                                                                                        }
+                                                                                                                                                        .dropdown-btn:after {
+                                                                                                                                                            content: '\25BE';
+                                                                                                                                                            right: 8px;
+                                                                                                                                                            position: absolute;
+                                                                                                                                                        }
 
-                                                                                                                                        .dropdown-btn:hover {
-                                                                                                                                            background: rgba(255, 255, 255, 0.2);
-                                                                                                                                            -webkit-transition: background .2s ease;
-                                                                                                                                            transition: background .2s ease;
-                                                                                                                                        }
+                                                                                                                                                        .dropdown-btn:hover {
+                                                                                                                                                            background: rgba(255, 255, 255, 0.2);
+                                                                                                                                                            -webkit-transition: background .2s ease;
+                                                                                                                                                            transition: background .2s ease;
+                                                                                                                                                        }
 
-                                                                                                                                        .dropdown-select {
-                                                                                                                                            display: none;
-                                                                                                                                        } */
+                                                                                                                                                        .dropdown-select {
+                                                                                                                                                            display: none;
+                                                                                                                                                        } */
 
         .credit-card-image {
             display: block;
@@ -805,8 +805,18 @@
                                         });
                                     },
                                     preDeny: () => {
-                                        Swal.fire('Changes are not saved', '',
-                                            'info')
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: "{{ route('payment.resend') }}",
+                                            data: {
+                                                "_token": "{{ csrf_token() }}",
+                                                "transaction_id": response
+                                                    .transaction_id
+                                            },
+                                            success: function(response) {
+
+                                            }
+                                        });
                                     },
                                     allowOutsideClick: () => !Swal.isLoading()
                                 })

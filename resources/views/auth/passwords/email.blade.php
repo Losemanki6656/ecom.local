@@ -137,4 +137,9 @@
             }
         }
     </script>
+    <script>
+        $(document).ready(function() {
+            $('input[name="phone"]').inputmask('(99)-999-99-99');
+        });
+    </script>
 @endsection

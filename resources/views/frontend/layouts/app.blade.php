@@ -692,6 +692,9 @@
 
         <script src="{{ asset('public/assets/sweetalert2/sweetalert2.min.js') }}"></script>
         <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+        {{-- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> --}}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/jquery.inputmask.bundle.min.js"></script>
         @yield('script')
         @stack('scripts')
 

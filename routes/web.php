@@ -266,6 +266,7 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function ()
             Route::post('/payment', 'checkout')->name('payment.checkout');
             Route::post('/paySuccess', 'paySuccess')->name('payment.paySuccess');
             Route::post('/otpVerify', 'otpVerify')->name('payment.otpVerify');
+            Route::post('/resend', 'resend')->name('payment.resend');
             Route::post('/get_pick_up_points', 'get_pick_up_points')->name('shipping_info.get_pick_up_points');
             Route::get('/payment-select', 'get_payment_info')->name('checkout.payment_info');
             Route::post('/apply_coupon_code', 'apply_coupon_code')->name('checkout.apply_coupon_code');

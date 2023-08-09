@@ -422,7 +422,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            {{-- <div class="form-group row">
                                 <label class="col-md-3 col-from-label">
                                     {{ translate('External link') }}
                                 </label>
@@ -444,7 +444,7 @@
                                     <small
                                         class="text-muted">{{ translate('Leave it blank if you do not use external site link') }}</small>
                                 </div>
-                            </div>
+                            </div> --}}
                             <br>
                             <div class="sku_combination" id="sku_combination">
 
@@ -468,13 +468,13 @@
                     </div>
 
                     <!--                <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0 h6">{{ translate('Product Shipping Cost') }}</h5>
-                            </div>
-                            <div class="card-body">
+                                    <div class="card-header">
+                                        <h5 class="mb-0 h6">{{ translate('Product Shipping Cost') }}</h5>
+                                    </div>
+                                    <div class="card-body">
 
-                            </div>
-                        </div>-->
+                                    </div>
+                                </div>-->
 
                     <div class="card">
                         <div class="card-header">
@@ -909,19 +909,19 @@
                 success: function(data) {
                     var obj = JSON.parse(data);
                     $('#customer_choice_options').append('\
-                        <div class="form-group row">\
-                            <div class="col-md-3">\
-                                <input type="hidden" name="choice_no[]" value="' + i + '">\
-                                <input type="text" class="form-control" name="choice[]" value="' + name +
+                                <div class="form-group row">\
+                                    <div class="col-md-3">\
+                                        <input type="hidden" name="choice_no[]" value="' + i + '">\
+                                        <input type="text" class="form-control" name="choice[]" value="' + name +
                         '" placeholder="{{ translate('Choice Title') }}" readonly>\
-                            </div>\
-                            <div class="col-md-8">\
-                                <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_' +
+                                    </div>\
+                                    <div class="col-md-8">\
+                                        <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_' +
                         i + '[]" multiple>\
-                                    ' + obj + '\
-                                </select>\
-                            </div>\
-                        </div>');
+                                            ' + obj + '\
+                                        </select>\
+                                    </div>\
+                                </div>');
                     AIZ.plugins.bootstrapSelect('refresh');
                 }
             });

@@ -109,7 +109,8 @@
                                 <label class="col-md-3 col-from-label">{{ translate('Refundable') }}</label>
                                 <div class="col-md-8">
                                     <label class="aiz-switch aiz-switch-success mb-0">
-                                        <input type="checkbox" name="refundable" checked value="1">
+                                        <input type="checkbox" name="refundable" checked value="1"
+                                            onclick="return false;">
                                         <span></span>
                                     </label>
                                 </div>
@@ -300,7 +301,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group row">
+                        {{-- <div class="form-group row">
                             <label class="col-md-3 col-from-label">
                                 {{ translate('External link') }}
                             </label>
@@ -321,7 +322,7 @@
                                 <small
                                     class="text-muted">{{ translate('Leave it blank if you do not use external site link') }}</small>
                             </div>
-                        </div>
+                        </div> --}}
                         <br>
                         <div class="sku_combination" id="sku_combination">
 
@@ -518,7 +519,8 @@
                                 <label class="col-md-6 col-from-label">{{ translate('Status') }}</label>
                                 <div class="col-md-6">
                                     <label class="aiz-switch aiz-switch-success mb-0">
-                                        <input type="checkbox" name="cash_on_delivery" value="1" checked="">
+                                        <input type="checkbox" name="cash_on_delivery" value="1" checked="true"
+                                            onclick="return false;">
                                         <span></span>
                                     </label>
                                 </div>
@@ -531,7 +533,7 @@
                     </div>
                 </div>
 
-                <div class="card">
+                {{-- <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{ translate('Estimate Shipping Time') }}</h5>
                     </div>
@@ -577,7 +579,7 @@
                             </div>
                         @endforeach
                     </div>
-                </div>
+                </div> --}}
 
             </div>
             <div class="col-12">
@@ -618,18 +620,20 @@
                 success: function(data) {
                     var obj = JSON.parse(data);
                     $('#customer_choice_options').append('\
-                        <div class="form-group row">\
-                            <div class="col-md-3">\
-                                <input type="hidden" name="choice_no[]" value="' + i + '">\
-                                <input type="text" class="form-control" name="choice[]" value="' + name +
+                                                <div class="form-group row">\
+                                                    <div class="col-md-3">\
+                                                        <input type="hidden" name="choice_no[]" value="' + i + '">\
+                                                        <input type="text" class="form-control" name="choice[]" value="' +
+                        name +
                         '" placeholder="{{ translate('Choice Title') }}" readonly>\
-                            </div>\
-                            <div class="col-md-8">\
-                                <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_' + i + '[]" multiple>\
-                                    ' + obj + '\
-                                </select>\
-                            </div>\
-                        </div>');
+                                                    </div>\
+                                                    <div class="col-md-8">\
+                                                        <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_' +
+                        i + '[]" multiple>\
+                                                            ' + obj + '\
+                                                        </select>\
+                                                    </div>\
+                                                </div>');
                     AIZ.plugins.bootstrapSelect('refresh');
                 }
             });

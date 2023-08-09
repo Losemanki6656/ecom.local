@@ -509,7 +509,7 @@
                 name: 'Full Name'
             },
 
-            // enable input masking 
+            // enable input masking
             masks: {
                 cardNumber: false
             },
@@ -525,14 +525,11 @@
 
         });
     </script> --}}
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/jquery.inputmask.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
             $('.card-number').inputmask('9999 9999 9999 9999');
             $('.expiration-date').inputmask('99/99');
         });
-        // $('#cardNumber').mask('00.00');
     </script>
 @endpush
 
