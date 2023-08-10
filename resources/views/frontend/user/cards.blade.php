@@ -76,7 +76,7 @@
             <div class="row justify-content-center">
 
                 @foreach ($cards as $card)
-                    <div class="cc">
+                    <div class="cc" style="margin-right: 10px">
                         <div class="cc__front">
                             <div class="cc__brand">
                                 <span class="cc__brand-text">{{ $card->card_holder }}</span>
@@ -89,7 +89,7 @@
                             <div class="cc__brand-text">{{ $card->expiry }}</div>
                             <div class="cc__balance-text">{{ translate('Expiry date') }}</div>
                         </div>
-                        <div class="cc__settings">
+                        <div class="cc__settings" id="cc_setting{{ $card->id }}">
                             <div class="cc__settings-menu">
                                 <div class="cc__settings-menu-item"
                                     onclick="delete_card({{ $card->id }}, '{{ $card->card_holder }}')">
@@ -102,7 +102,7 @@
                                     </div> {{ translate('Delete Card') }}
                                 </div>
                             </div>
-                            <div class="cc__settings-bar">
+                            <div class="cc__settings-bar" onclick="gear({{ $card->id }})">
                                 <svg class="gear-icon icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                     width="24" height="24">
                                     <path
@@ -462,25 +462,23 @@
 @endsection
 
 @section('modal')
-    <!-- Address modal -->
     @include('frontend.partials.address_modal')
 @endsection
 
 @push('scripts')
     <script>
-        const gear = document.querySelector('.gear-icon');
-        const ccSettings = document.querySelector('.cc__settings');
+        function gear(id) {
+            const gear = document.getElementById("cc_setting" + id);
 
-        gear.addEventListener('click', () => {
             if (gear.classList.contains('active')) {
-                ccSettings.classList.remove('cc__settings--active');
-                ccSettings.classList.add('cc__settings--hidden');
+                $("#cc_setting" + id).removeClass('cc__settings--active');
+                $("#cc_setting" + id).addClass('cc__settings--hidden');
             } else {
-                ccSettings.classList.remove('cc__settings--hidden');
-                ccSettings.classList.add('cc__settings--active');
+                $("#cc_setting" + id).addClass('cc__settings--active');
+                $("#cc_setting" + id).removeClass('cc__settings--hidden');
             }
             gear.classList.toggle('active');
-        });
+        }
     </script>
     <script>
         function add_card() {
