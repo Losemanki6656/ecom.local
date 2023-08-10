@@ -76,7 +76,7 @@
             <div class="row justify-content-center">
 
                 @foreach ($cards as $card)
-                    <div class="cc" style="margin-right: 10px">
+                    <div class="cc" style="margin-right: 20px">
                         <div class="cc__front">
                             <div class="cc__brand">
                                 <span class="cc__brand-text">{{ $card->card_holder }}</span>
