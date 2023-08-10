@@ -239,8 +239,27 @@
                                 @endif
                             </div>
 
+                            <div class="pt-3 px-4 fs-14" id="payCard">
+                                <label for="">{{ translate('Select Card') }}</label>
+                                <select class="form-control aiz-selectpicker rounded-0" data-live-search="true"
+                                    id="bindIDselect">
+                                    <option value="">
+                                        {{ translate('Select your card for payment ') }}
+                                    </option>
+                                    @foreach ($bindCards as $card)
+                                        <option value="{{ $card->id }}"
+                                            data-content="<span class='d-block'>
+                                                        <span class='d-block fs-16 fw-600 mb-2'> {{ $card->pan }}</span>
+                                                        <span class='d-block opacity-50 fs-12'><i class='las la-user'></i> {{ $card->card_holder }}</span>
+                                                        <span class='d-block opacity-50 fs-12'><i class='las la-hourglass'></i> {{ $card->expiry }}</span>
+                                                    </span>">
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <!-- Agree Box -->
-                            <div class="pt-3 px-4 fs-14">
+                            <div class="pt-3 px-4 fs-14 mt-4">
                                 <label class="aiz-checkbox">
                                     <input type="checkbox" required id="agree_checkbox">
                                     <span class="aiz-square-check"></span>
@@ -272,473 +291,56 @@
                     </form>
                 </div>
 
-                <!-- Cart Summary -->
-                <div class="col-lg-4 mt-lg-0 mt-4" id="cart_summary">
-                    @include('frontend.partials.cart_summary')
-                </div>
-
-                <div class="modal fade" id="new-payment" tabindex="-1" role="dialog"
+                <div class="modal fade" id="confirmPayment" tabindex="-1" role="dialog"
                     aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">{{ translate('Select Card') }}</h5>
                             </div>
                             <div class="modal-body">
-                                <div class='window'>
-                                    <div class='order-info'>
-                                        <div class='order-info-content'>
-                                            <h5>Order Summary</h5>
-                                            {{-- <table class='table'>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <span class='thin'>{{ translate('Subtotal') }}</span>
-
-                                                        </td>
-                                                        <td style="max-width: 160px">
-                                                            <div class='price'>{{ single_price($subtotal) }}</div>
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <span class='thin'>{{ translate('Tax') }}</span>
-
-                                                        </td>
-                                                        <td style="max-width: 160px">
-                                                            <div class='price'>{{ single_price($tax) }}</div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <span class='thin'>{{ translate('Total Shipping') }}</span>
-
-                                                        </td>
-                                                        <td style="max-width: 160px">
-                                                            <div class='price'>{{ single_price($shipping) }}</div>
-                                                        </td>
-
-                                                    </tr>
-                                                    @php
-                                                        $total = $subtotal + $tax + $shipping;
-                                                        if (Session::has('club_point')) {
-                                                            $total -= Session::get('club_point');
-                                                        }
-                                                        if ($coupon_discount > 0) {
-                                                            $total -= $coupon_discount;
-                                                        }
-                                                    @endphp
-                                                    <tr>
-                                                        <td>
-                                                            <span class='thin'
-                                                                style="font-weight: bold">{{ translate('Total') }}</span>
-
-                                                        </td>
-                                                        <td style="max-width: 160px">
-                                                            <div class='price' style="font-weight: bold">
-                                                                {{ single_price($total) }}</div>
-                                                        </td>
-
-                                                    </tr>
-                                                </tbody>
-                                            </table> --}}
-
-                                            <div id="summary_modal">
-                                            </div>
-
-                                            <div class='line'></div>
-
-                                            <a type="button" class="btn btn-primary" href="{{ route('my-cards') }}"
-                                                style="width: 100%"> <i class="fa fa-plus"></i>
-                                                {{ translate('Add Card') }} </a>
-                                        </div>
-                                    </div>
-                                    <div class='credit-info'>
-                                        <div class='credit-info-content'>
-                                            <div class="mb-3">
-                                                Please select your card:
-                                            </div>
-                                            <div class="mb-3">
-                                                <select id="mounth">
-                                                    @foreach ($bindCards as $card)
-                                                        <option value="{{ $card->id }}">{{ $card->pan }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <img src='{{ static_asset('assets/img/cards/paymo-transparent.png') }}'
-                                                height='80' class='credit-card-image' />
-                                            @php
-                                                $cardHolder = '';
-                                                $exDate = '';
-                                                if ($bindCards->count() > 0) {
-                                                    $cardHolder = $bindCards[0]->card_holder;
-                                                    $exDate = $bindCards[0]->expiry;
-                                                }
-                                            @endphp
-                                            <div class="row mb-3">
-                                                <div class="col-9">
-                                                    Card Holder <br>
-                                                    <h6 id="cardHolder">{{ $cardHolder }}</h6>
-                                                </div>
-                                                <div class="col-3">
-                                                    Expiry <br>
-                                                    <h6 id="ExpDate">{{ $exDate }}</h6>
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
+                                <div class="form-group">
+                                    <label for="">{{ translate('Verification Code:') }}</label>
+                                    <input type="text" name="" id="verificationCode" class="form-control"
+                                        placeholder="{{ translate('Verification Code ..') }}">
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" data-dismiss="modal"
-                                    class="btn btn-secondary">{{ translate('Cancel') }}</button>
-                                <button type="button" onclick="paymentSubmit()" class="btn btn-primary">
-                                    {{ translate('Complete Order') }} </button>
+                                <button type="button" data-dismiss="modal" class="btn btn-secondary"><i
+                                        class="las la-reply-all"></i> {{ translate('Cancel') }}</button>
+                                <button type="button" class="btn btn-success" id="resendButton"
+                                    onclick="resendSend()"><i class="las la-redo-alt"></i>
+                                    {{ translate('Resend') }}</button>
+                                <button type="button" onclick="onSubmitForm()" class="btn btn-primary"><i
+                                        class="las la-check-circle"></i> {{ translate('Complete Order') }} </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Cart Summary -->
+                <div class="col-lg-4 mt-lg-0 mt-4" id="cart_summary">
+                    @include('frontend.partials.cart_summary')
+                </div>
+
             </div>
         </div>
+
+        <div id="loader" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body c-scrollbar-light position-relative" id="info-modal-content">
+                        <div class="c-preloader text-center absolute-center">
+                            <i class="las la-spinner la-spin la-3x opacity-70"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
 
-    <style lang="scss">
-        .select-hidden {
-            display: none;
-            visibility: hidden;
-            /* padding-right: 10px; */
-        }
-
-        .select {
-            cursor: pointer;
-            display: inline-block;
-            position: relative;
-            font-size: 16px;
-            color: #fff;
-            width: 100%;
-            height: 40px;
-            border-radius: 4px;
-        }
-
-        .select-styled {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            border-radius: 4px;
-            background-color: #5794E0;
-            padding: 8px 15px;
-            -moz-transition: all 0.2s ease-in;
-            -o-transition: all 0.2s ease-in;
-            -webkit-transition: all 0.2s ease-in;
-            transition: all 0.2s ease-in;
-        }
-
-        .select-styled:after {
-            content: "";
-            width: 0;
-            height: 0;
-            border: 7px solid transparent;
-            border-color: #fff transparent transparent transparent;
-            position: absolute;
-            top: 16px;
-            right: 10px;
-        }
-
-        .select-styled:hover {
-            background-color: #5794E0;
-        }
-
-        .select-styled:active,
-        .select-styled.active {
-            background-color: #5794E0;
-        }
-
-        .select-styled:active:after,
-        .select-styled.active:after {
-            top: 9px;
-            border-radius: 4px;
-            border-color: transparent transparent #fff transparent;
-        }
-
-        .select-options {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            left: 0;
-            z-index: 999;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            background-color: #5794E0;
-        }
-
-        .select-options li {
-            margin: 0;
-            padding: 12px 0;
-            text-indent: 15px;
-            border-top: 1px solid #5794E0;
-            -moz-transition: all 0.15s ease-in;
-            -o-transition: all 0.15s ease-in;
-            -webkit-transition: all 0.15s ease-in;
-            transition: all 0.15s ease-in;
-        }
-
-        .select-options li:hover,
-        .select-options li.is-selected {
-            color: #5794E0;
-            background: #fff;
-            border-radius: 4px;
-        }
-
-        .select-options li[rel="hide"] {
-            display: none;
-        }
-
-        .thin {
-            font-weight: 400;
-        }
-
-        .small {
-            font-size: 12px;
-            font-size: .8rem;
-        }
-
-        .half-input-table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        .half-input-table td:first-of-type {
-            border-right: 10px solid #4488dd;
-            width: 50%;
-        }
-
-        .window {
-            /* height: 540px; */
-            /* width: 800px; */
-            /* background: #bab8b8; */
-            display: -webkit-box;
-            display: -webkit-flex;
-            display: -ms-flexbox;
-            display: flex;
-            /* box-shadow: 0px 15px 50px 10px rgba(0, 0, 0, 0.2); */
-            /* border-radius: 30px; */
-            /* z-index: 10; */
-        }
-
-        .order-info {
-            height: 100%;
-            width: 50%;
-            padding-left: 25px;
-            padding-right: 25px;
-            box-sizing: border-box;
-            display: -webkit-box;
-            display: -webkit-flex;
-            display: -ms-flexbox;
-            display: flex;
-            -webkit-box-pack: center;
-            -webkit-justify-content: center;
-            -ms-flex-pack: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .price {
-            bottom: 0px;
-            /* position: absolute; */
-            right: 0px;
-            color: #4488dd;
-        }
-
-        .order-table td:first-of-type {
-            width: 25%;
-        }
-
-        .order-table {
-            position: relative;
-        }
-
-        .line {
-            height: 1px;
-            width: 100%;
-            background: #ddd;
-        }
-
-        .order-table td:last-of-type {
-            vertical-align: top;
-            padding-left: 25px;
-        }
-
-        .order-info-content {
-            table-layout: fixed;
-
-        }
-
-        .full-width {
-            width: 100%;
-        }
-
-        .pay-btn {
-            border: none;
-            background: #22b877;
-            line-height: 2em;
-            border-radius: 10px;
-            font-size: 19px;
-            font-size: 1.2rem;
-            color: #fff;
-            cursor: pointer;
-            position: absolute;
-            bottom: 25px;
-            width: calc(100% - 50px);
-            -webkit-transition: all .2s ease;
-            transition: all .2s ease;
-        }
-
-        .pay-btn:hover {
-            background: #22a877;
-            color: #eee;
-            -webkit-transition: all .2s ease;
-            transition: all .2s ease;
-        }
-
-        .total {
-            margin-top: 25px;
-            font-size: 20px;
-            font-size: 1.3rem;
-            position: absolute;
-            bottom: 30px;
-            right: 27px;
-            left: 35px;
-        }
-
-        .dense {
-            line-height: 1.2em;
-            font-size: 16px;
-            font-size: 1rem;
-        }
-
-        .input-field {
-            background: rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
-            margin-top: 3px;
-            line-height: 1.5em;
-            font-size: 20px;
-            font-size: 1.3rem;
-            border: none;
-            padding: 5px 10px 5px 10px;
-            color: #fff;
-            box-sizing: border-box;
-            width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .credit-info {
-            background: #4488dd;
-            height: 100%;
-            width: 50%;
-            color: #eee;
-            -webkit-box-pack: center;
-            -webkit-justify-content: center;
-            -ms-flex-pack: center;
-            justify-content: center;
-            font-size: 14px;
-            font-size: .9rem;
-            display: -webkit-box;
-            display: -webkit-flex;
-            display: -ms-flexbox;
-            display: flex;
-            box-sizing: border-box;
-            padding-left: 25px;
-            padding-right: 25px;
-            border-top-right-radius: 30px;
-            border-bottom-right-radius: 30px;
-            position: relative;
-        }
-
-        /* .dropdown-btn {
-                                                                                                                                                            background: rgba(255, 255, 255, 0.1);
-                                                                                                                                                            width: 100%;
-                                                                                                                                                            border-radius: 5px;
-                                                                                                                                                            text-align: center;
-                                                                                                                                                            line-height: 1.5em;
-                                                                                                                                                            cursor: pointer;
-                                                                                                                                                            position: relative;
-                                                                                                                                                            -webkit-transition: background .2s ease;
-                                                                                                                                                            transition: background .2s ease;
-                                                                                                                                                        }
-
-                                                                                                                                                        .dropdown-btn:after {
-                                                                                                                                                            content: '\25BE';
-                                                                                                                                                            right: 8px;
-                                                                                                                                                            position: absolute;
-                                                                                                                                                        }
-
-                                                                                                                                                        .dropdown-btn:hover {
-                                                                                                                                                            background: rgba(255, 255, 255, 0.2);
-                                                                                                                                                            -webkit-transition: background .2s ease;
-                                                                                                                                                            transition: background .2s ease;
-                                                                                                                                                        }
-
-                                                                                                                                                        .dropdown-select {
-                                                                                                                                                            display: none;
-                                                                                                                                                        } */
-
-        .credit-card-image {
-            display: block;
-            height: 100px;
-            margin-left: auto;
-            margin-right: auto;
-            /* margin-top: 35px; */
-            /* margin-bottom: 15px; */
-        }
-
-        .credit-info-content {
-            margin-top: 25px;
-            -webkit-flex-flow: column;
-            -ms-flex-flow: column;
-            flex-flow: column;
-            display: -webkit-box;
-            display: -webkit-flex;
-            display: -ms-flexbox;
-            display: flex;
-            width: 100%;
-        }
-
-        @media (max-width: 600px) {
-            .window {
-                width: 100%;
-                height: 100%;
-                display: block;
-                border-radius: 0px;
-            }
-
-            .order-info {
-                width: 100%;
-                height: auto;
-                /* padding-bottom: 100px; */
-                border-radius: 0px;
-            }
-
-            .credit-info {
-                width: 100%;
-                height: auto;
-                /* padding-bottom: 100px; */
-                border-radius: 0px;
-            }
-
-            .pay-btn {
-                border-radius: 0px;
-            }
-        }
-    </style>
 @endsection
 
 @section('script')
@@ -749,7 +351,6 @@
     <script>
         function paymentSubmit() {
             if ({{ $bindCards->count() }}) {
-                $('#new-payment').modal('hide');
                 Swal.fire({
                     title: 'Do you really want to do this?',
                     showCancelButton: true,
@@ -761,7 +362,7 @@
                             url: "{{ route('payment.paySuccess') }}",
                             data: {
                                 "_token": "{{ csrf_token() }}",
-                                "bindID": $('#bindID').val()
+                                "bindID": $('#bindIDselect').val()
                             },
                             success: function(response) {
                                 Swal.fire({
@@ -871,6 +472,89 @@
             }
         }
 
+        function timerResend() {
+            $('#resendButton').prop('disabled', true);
+            let timerOn = true;
+
+            function timer(remaining) {
+                var m = Math.floor(remaining / 60);
+                var s = remaining % 60;
+
+                m = m < 10 ? '0' + m : m;
+                s = s < 10 ? '0' + s : s;
+                document.getElementById('resendButton').innerHTML = '<i class="las la-redo-alt"></i> ' + m + ':' + s;
+                remaining -= 1;
+
+                if (remaining >= 0 && timerOn) {
+                    setTimeout(function() {
+                        timer(remaining);
+                    }, 1000);
+                    return;
+                }
+
+                if (!timerOn) {
+                    return;
+                }
+
+                $('#resendButton').prop('disabled', false);
+
+                document.getElementById('resendButton').innerHTML = '<i class="las la-redo-alt"></i> ' +
+                    '{{ translate('Resend') }}';
+            }
+
+            timer(20);
+        }
+
+        function onSubmitForm() {
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('payment.otpVerify') }}",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "verify_code": $('#verificationCode').val(),
+                    "transaction_id": JSON.parse(localStorage.getItem('trans'))
+                },
+                success: function(response) {
+                    $('#checkout-form')
+                        .submit();
+                },
+                error: function(response) {
+                    Swal.fire({
+                        title: "Error",
+                        text: response
+                            .responseJSON
+                            .message,
+                        icon: "error",
+                        confirmButtonColor: "#1c84ee",
+                    });
+                }
+            });
+        }
+
+        function resendSend() {
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('payment.resend') }}",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "transaction_id": JSON.parse(localStorage.getItem('trans'))
+                },
+                success: function(response) {
+                    timerResend();
+                },
+                error: function(response) {
+                    Swal.fire({
+                        title: "Error",
+                        text: response
+                            .responseJSON
+                            .message,
+                        icon: "error",
+                        confirmButtonColor: "#1c84ee",
+                    });
+                }
+            });
+        }
+
         function submitOrder(el) {
             if ($('#agree_checkbox').is(":checked")) {
 
@@ -881,13 +565,48 @@
                     if (localStorage.getItem('pay_method')) {
 
                         if (localStorage.getItem('pay_method') == 'paymo') {
-                            $('#new-payment').modal('show');
+                            let bindID = $('#bindIDselect').val();
                             if ({{ $bindCards->count() }}) {
+                                if (bindID) {
+                                    $('#loader').modal('show');
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: "{{ route('payment.paySuccess') }}",
+                                        data: {
+                                            "_token": "{{ csrf_token() }}",
+                                            "bindID": $('#bindIDselect').val()
+                                        },
+                                        success: function(response) {
+                                            console.log(response.transaction_id);
+                                            localStorage.setItem('trans', JSON.stringify(response
+                                                .transaction_id));
+                                            $('#loader').modal('hide');
+                                            $('#confirmPayment').modal('show');
+                                            timerResend();
+                                        },
+                                        error: function(response) {
+                                            $('#loader').modal('hide');
+                                            Swal.fire({
+                                                title: "Error",
+                                                text: response
+                                                    .responseJSON
+                                                    .message,
+                                                icon: "error",
+                                                confirmButtonColor: "#1c84ee",
+                                            });
+                                        }
+                                    });
 
+                                } else {
+                                    AIZ.plugins.notify('danger',
+                                        '{{ translate('Please select card for payment !') }}');
+                                }
                             } else {
                                 AIZ.plugins.notify('danger',
                                     '{{ translate('Please Add card to Your profile !') }}');
                             }
+
+
                         } else {
                             var offline_payment_active = '{{ addon_is_activated('offline_payment') }}';
                             if (offline_payment_active == 'true' && $('.offline_payment_option').is(":checked") && $(
@@ -967,63 +686,18 @@
     </script>
     <script>
         function pay_method(method) {
+            if (method == 'cash_on_delivery') {
+                $('#payCard').addClass('d-none');
+            } else if (method == 'paymo') {
+                $('#payCard').removeClass('d-none');
+            }
             localStorage.setItem('pay_method', method);
         }
     </script>
+
     <script>
-        $('select').each(function() {
-            var $this = $(this),
-                numberOfOptions = $(this).children('option').length;
-
-            $this.addClass('select-hidden');
-            $this.wrap('<div class="select"></div>');
-            $this.after('<div class="select-styled"></div>');
-
-            var $styledSelect = $this.next('div.select-styled');
-            $styledSelect.text($this.children('option').eq(0).text());
-
-            var $list = $('<ul />', {
-                'class': 'select-options'
-            }).insertAfter($styledSelect);
-
-            for (var i = 0; i < numberOfOptions; i++) {
-                $('<li />', {
-                    text: $this.children('option').eq(i).text(),
-                    rel: $this.children('option').eq(i).val()
-                }).appendTo($list);
-                //if ($this.children('option').eq(i).is(':selected')){
-                //  $('li[rel="' + $this.children('option').eq(i).val() + '"]').addClass('is-selected')
-                //}
-            }
-
-            var $listItems = $list.children('li');
-
-            $styledSelect.click(function(e) {
-                e.stopPropagation();
-                $('div.select-styled.active').not(this).each(function() {
-                    $(this).removeClass('active').next('ul.select-options').hide();
-                });
-                $(this).toggleClass('active').next('ul.select-options').toggle();
-            });
-
-            $listItems.click(function(e) {
-                e.stopPropagation();
-                $styledSelect.text($(this).text()).removeClass('active');
-                $this.val($(this).attr('rel'));
-                $list.hide();
-
-                let id = $this.val();
-                let card_info = @json($card_info);
-                document.getElementById("cardHolder").innerHTML = card_info[id]['card_holder'];
-                document.getElementById("ExpDate").innerHTML = card_info[id]['expiry'];
-                $('#bindID').val(id);
-            });
-
-            $(document).click(function() {
-                $styledSelect.removeClass('active');
-                $list.hide();
-            });
-
+        $(document).ready(function() {
+            $('#verificationCode').inputmask('999999');
         });
     </script>
 @endsection

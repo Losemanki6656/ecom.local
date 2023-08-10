@@ -227,7 +227,6 @@ class CheckoutController extends Controller
             $confirm_transaction = new ConfirmTransaction($request->transaction_id, $request->verify_code, env('PAYMO_STOREID'));
             $response = $transaction_process->confirmTransaction($confirm_transaction);
 
-
             if ($response['result']['code'] == "OK") {
 
                 return response()->json([
@@ -257,17 +256,26 @@ class CheckoutController extends Controller
             $transaction_process = new TransactionProcess();
             $response = $transaction_process->resendOtpTransaction($request->transaction_id);
 
+            $result = $response['result']['code'] ?? null;
 
-            if ($response['result']['code'] == "OK") {
+            if ($result) {
+                if ($response['result']['code'] == "OK") {
 
-                return response()->json([
-                    'message' => 'Resend OTP code successfully!!'
-                ]);
+                    return response()->json([
+                        'message' => 'Resend OTP code successfully!!'
+                    ]);
+                } else {
+
+                    return response()->json([
+
+                        'message' => $response['result']['description']
+
+                    ], 400);
+                }
             } else {
-
                 return response()->json([
 
-                    'message' => $response['result']['description']
+                    'message' => $response['message']
 
                 ], 400);
             }
@@ -687,6 +695,11 @@ class CheckoutController extends Controller
                     } elseif ($coupon->type == 'product_base') {
                         foreach ($carts as $key => $cartItem) {
                             $product = Product::find($cartItem['product_id']);
+
+                            $subtotal += cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'];
+                            $tax += cart_product_tax($cartItem, $product, false) * $cartItem['quantity'];
+                            $shipping += $cartItem['shipping_cost'];
+
                             foreach ($coupon_details as $key => $coupon_detail) {
                                 if ($coupon_detail->product_id == $cartItem['product_id']) {
                                     if ($coupon->discount_type == 'percent') {
@@ -697,20 +710,27 @@ class CheckoutController extends Controller
                                 }
                             }
                         }
+                        $sum = $subtotal + $tax + $shipping;
                     }
 
                     if ($coupon_discount > 0) {
-                        Cart::where('user_id', Auth::user()->id)
-                            ->where('owner_id', $coupon->user_id)
-                            ->update(
-                                [
-                                    'discount' => $coupon_discount / count($carts),
-                                    'coupon_code' => $request->code,
-                                    'coupon_applied' => 1
-                                ]
-                            );
-                        $response_message['response'] = 'success';
-                        $response_message['message'] = translate('Coupon has been applied');
+                        if ($sum - $coupon_discount <= 5000) {
+                            $response_message['response'] = 'warning';
+                            $response_message['message'] = translate('Coupon discount not completed!');
+                        } else {
+                            Cart::where('user_id', Auth::user()->id)
+                                ->where('owner_id', $coupon->user_id)
+                                ->update(
+                                    [
+                                        'discount' => $coupon_discount / count($carts),
+                                        'coupon_code' => $request->code,
+                                        'coupon_applied' => 1
+                                    ]
+                                );
+                            $response_message['response'] = 'success';
+                            $response_message['message'] = translate('Coupon has been applied');
+                        }
+
                     } else {
                         $response_message['response'] = 'warning';
                         $response_message['message'] = translate('This coupon is not applicable to your cart products!');

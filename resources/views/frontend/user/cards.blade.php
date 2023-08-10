@@ -76,20 +76,43 @@
             <div class="row justify-content-center">
 
                 @foreach ($cards as $card)
-                    <div class="col-xs-12 col-sm-6 mb-2">
-                        <a onclick="delete_card({{ $card->id }}, '{{ $card->card_holder }}')">
-                            <div class="credit-card-s">
-                                <img src="{{ asset('public/assets/img/chip.png') }}" class="logo">
-                                <div class="numbers">{{ $card->pan }}</div>
-                                <div class="name-and-expiry">
-                                    <span>{{ $card->card_holder }}</span>
-                                    <span>{{ $card->expiry }}</span>
+                    <div class="cc">
+                        <div class="cc__front">
+                            <div class="cc__brand">
+                                <span class="cc__brand-text">{{ $card->card_holder }}</span>
+                                <div class="cc__balance-text">{{ translate('Card holder') }}</div>
+                            </div>
+                            <div class="cc__number">
+                                <div class="cc__digits">{{ $card->pan }} </div>
+                                <div class="cc__balance-text">{{ translate('Card number') }}</div>
+                            </div>
+                            <div class="cc__brand-text">{{ $card->expiry }}</div>
+                            <div class="cc__balance-text">{{ translate('Expiry date') }}</div>
+                        </div>
+                        <div class="cc__settings">
+                            <div class="cc__settings-menu">
+                                <div class="cc__settings-menu-item"
+                                    onclick="delete_card({{ $card->id }}, '{{ $card->card_holder }}')">
+                                    <div class="cc__settings-menu-item-icon">
+                                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            width="20" height="20">
+                                            <path
+                                                d="M12 1C8.676 1 6 3.676 6 7v1c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v1H8V7c0-2.276 1.724-4 4-4zm0 10c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
+                                        </svg>
+                                    </div> {{ translate('Delete Card') }}
                                 </div>
                             </div>
-                        </a>
+                            <div class="cc__settings-bar">
+                                <svg class="gear-icon icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    width="24" height="24">
+                                    <path
+                                        d="M9.668 2l-.492 2.523c-.821.31-1.58.744-2.246 1.291L4.506 4.98 2.174 9.02l1.94 1.686A8.012 8.012 0 004 12c0 .441.045.871.113 1.293l-1.94 1.686 2.333 4.042 2.424-.835c.666.547 1.425.98 2.246 1.29L9.668 22h4.664l.492-2.523c.821-.31 1.58-.744 2.246-1.291l2.424.835 2.332-4.042-1.94-1.686c.07-.422.114-.852.114-1.293 0-.441-.045-.871-.113-1.293l1.94-1.686-2.333-4.042-2.424.835a7.983 7.983 0 00-2.246-1.29L14.332 2H9.668zM12 8a4 4 0 110 8 4 4 0 010-8z" />
+                                </svg>
+                                <h6 class="apple-pay-icon icon">Paymo </h6>
+                            </div>
+                        </div>
                     </div>
                 @endforeach
-
             </div>
 
         </div>
@@ -249,62 +272,191 @@
     </style>
 
     <style>
-        .credit-card-s {
+        .cc {
+            height: 220px;
+            width: 386px;
             position: relative;
-            min-height: 270px;
-            border-radius: 20px;
+            background: #6c7cff;
+            border-radius: 30px;
+            color: #fff;
+        }
+
+        .cc__front {
             display: flex;
             flex-direction: column;
-            padding: 24px;
-            box-sizing: border-box;
-            background: linear-gradient(-240deg, #fffc00, #fc00ff, #00fffc);
-            justify-content: space-between;
-            font-family: "Dosis", sans-serif;
-            overflow: hidden;
+            align-items: left;
+            padding: 24px 38px 38px;
         }
 
-        .credit-card-s:after {
-            content: "";
-            position: absolute;
-            height: 100%;
+        .cc__brand {
+            /* display: flex; */
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cc__brand-logo {
+            display: flex;
+        }
+
+        .cc__logo-circle {
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            display: block;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .cc__logo-circle--left {
+            opacity: 0.5;
+        }
+
+        .cc__logo-circle--right {
+            left: -10px;
+            opacity: 0.3;
+        }
+
+        .cc__brand-text {
+            font-size: 17px;
+            /* margin-left: 5px; */
+        }
+
+        .cc__number {
+            /* display: flex; */
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .cc__number-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #fff;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .cc__digits {
+            font-size: 20px;
+            /* margin-left: 10px; */
+        }
+
+        .cc__balance-text {
+            /* font-weight: 600; */
+            font-size: 10px;
+        }
+
+        .cc__settings {
             width: 100%;
-            left: 0;
+            height: 100%;
+            background: #4c5be8;
+            border-radius: 30px;
+            position: absolute;
             top: 0;
-            z-index: 0;
-            color: rgb(249 249 249 / 10%);
-            background: linear-gradient(135deg, currentColor 25%, transparent 25%) -100px 0,
-                linear-gradient(225deg, currentColor 25%, transparent 25%) -100px 0,
-                linear-gradient(315deg, currentColor 25%, transparent 25%),
-                linear-gradient(45deg, currentColor 25%, transparent 25%);
-            background-size: calc(2 * 100px) calc(2 * 100px);
-        }
-
-        .logo {
-            width: 50px;
-            display: flex;
-            align-self: flex-end;
-            filter: drop-shadow(1px 1px 0 #555);
-            z-index: 1;
-        }
-
-        .name-and-expiry {
             display: flex;
             justify-content: space-between;
-            z-index: 1;
-            color: #fff;
-            font-size: 18px;
-            letter-spacing: 3px;
-            filter: drop-shadow(1px 0px 1px #555);
-            text-transform: uppercase;
+            padding: 22px 10px;
+            clip-path: path("M387.118151,-12.6493894 L387.118151,228.834835 L320.261415,228.834835 C320.261415,219.284137 320.261415,209.299312 320.261415,198.880359 C320.261415,186.645109 320.261415,149.508543 320.261415,110 C320.261415,70.4914571 320.261415,43.8454079 320.261415,21.9752985 C320.261415,3.85122438 320.261415,-7.69033824 320.261415,-12.6493894 L387.118151,-12.6493894 Z");
         }
 
-        .numbers {
-            font-size: 24px;
-            letter-spacing: 9px;
-            text-align: center;
-            color: #fff;
-            filter: drop-shadow(1px 0px 1px #555);
-            z-index: 1;
+        .cc__settings--active {
+            animation: showSettings 2s ease-in-out forwards;
+        }
+
+        .cc__settings--hidden {
+            clip-path: path("M387.118151,0.160365095 L387.118151,221.215264 L316.529346,221.215264 C117.007895,237.0198 17.2471697,237.0198 17.2471697,221.215264 C17.2471697,181.988409 17.2471697,133.22115 17.2471697,110 C17.2471697,86.7788496 17.2471697,27.7576259 17.2471697,-6.39488462e-14 C17.2471697,-16.3318577 117.007895,-16.2784027 316.529346,0.160365095 L387.118151,0.160365095 Z");
+            animation: hideSettings 2s ease-in-out forwards;
+        }
+
+        .cc__settings-menu {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-left: 32px;
+        }
+
+        .cc__settings-menu-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .cc__settings-menu-item-icon {
+            display: flex;
+            padding: 4px 6px;
+            background: #5f6ff6;
+            border-radius: 7px;
+            margin-right: 15px;
+        }
+
+        .cc__settings-bar {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .icon {
+            fill: #fff;
+        }
+
+        .apple-pay-icon {
+            transform: rotate(-90deg);
+        }
+
+        .gear-icon {
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 1.5s;
+        }
+
+        .gear-icon.active {
+            opacity: 1;
+        }
+
+        @keyframes showSettings {
+            25% {
+                clip-path: path("M387.118151,-12.6493894 L387.118151,228.834835 L326.156587,228.834835 C316.225565,222.276395 309.894513,217.352564 307.16343,214.063341 C298.576801,203.721899 122.1888,208.462135 122.1888,108.204535 C122.1888,7.94693437 294.206316,25.6769042 315.855488,6.20473783 C320.120314,2.36877547 323.554014,-3.91593359 326.156587,-12.6493894 L387.118151,-12.6493894 Z");
+            }
+
+            50% {
+                clip-path: path("M387.118151,-12.6493894 L387.118151,228.834835 L48.4642624,238.145348 C18.8858367,241.43457 2.73108257,241.43457 6.66133815e-15,238.145348 C-8.58662882,227.803906 18.4317885,204.651574 18.4317885,104.393974 C18.4317885,4.13637332 -13.6376238,0.776583538 8.01154821,-18.6955828 C12.2763746,-22.5315451 25.7606127,-20.5161473 48.4642624,-12.6493894 L387.118151,-12.6493894 Z");
+            }
+
+            65%,
+            100% {
+                clip-path: path("M387.118151,0.160365095 L387.118151,221.215264 L316.529346,221.215264 C117.007895,237.0198 17.2471697,237.0198 17.2471697,221.215264 C17.2471697,181.988409 17.2471697,133.22115 17.2471697,110 C17.2471697,86.7788496 17.2471697,27.7576259 17.2471697,-6.39488462e-14 C17.2471697,-16.3318577 117.007895,-16.2784027 316.529346,0.160365095 L387.118151,0.160365095 Z");
+            }
+        }
+
+        @keyframes hideSettings {
+            25% {
+                clip-path: path("M387.118151,0.160365095 L387.118151,221.215264 L316.529346,221.215264 C100.704923,235.24635 -4.80485907,234.841262 1.15518706e-13,220 C12.4189217,181.640401 18.8873389,174.136909 17.2471697,110 C15.6070006,45.8630911 13.7675117,26.4098973 1.04860565e-13,0.160365095 C-6.27713368,-11.8077978 99.2326483,-11.8077978 316.529346,0.160365095 L387.118151,0.160365095 Z");
+            }
+
+            55% {
+                clip-path: path("M387.118151,-12.6493894 L387.118151,228.834835 L243.77087,228.834835 C216.843505,221.535077 202.014282,216.240588 199.283199,212.951365 C190.69657,202.609923 14.0082036,210.2576 14.0082036,110 C14.0082036,9.74239964 184.417555,28.4484097 208.443623,13.7028253 C213.730293,10.4582224 224.482747,1.6741509 240.700984,-12.6493894 L387.118151,-12.6493894 Z");
+            }
+
+            80% {
+                clip-path: path("M387.118151,-12.6493894 L387.118151,228.834835 L315.554768,228.834835 C317.523992,218.414953 319.092875,208.430128 320.261415,198.880359 C321.744382,186.760968 330.890906,150.167879 333.898886,110 C336.906867,69.8321206 320.261415,43.8454079 320.261415,21.9752985 C320.261415,3.85122438 318.692532,-7.69033824 315.554768,-12.6493894 L387.118151,-12.6493894 Z");
+            }
+
+            100% {
+                clip-path: path("M387.118151,-12.6493894 L387.118151,228.834835 L320.261415,228.834835 C320.261415,219.284137 320.261415,209.299312 320.261415,198.880359 C320.261415,186.645109 320.261415,149.508543 320.261415,110 C320.261415,70.4914571 320.261415,43.8454079 320.261415,21.9752985 C320.261415,3.85122438 320.261415,-7.69033824 320.261415,-12.6493894 L387.118151,-12.6493894 Z");
+            }
+        }
+
+        /* Base Styles */
+        *,
+        *:before,
+        *:after {
+            box-sizing: border-box;
+        }
+
+        .dribbble-link {
+            position: absolute;
+            right: 30px;
+            bottom: 30px;
         }
     </style>
 @endsection
@@ -315,30 +467,21 @@
 @endsection
 
 @push('scripts')
-    {{-- <script>
-        $(document).ready(function() {
-            var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-            $(".add_click").click(function() {
-                $.ajax({
-                    /* the route pointing to the post function */
-                    url: '{{ route('add_card') }}',
-                    type: 'POST',
-                    /* send the csrf-token and the input to the controller */
-                    data: {
-                        _token: CSRF_TOKEN,
-                        cardNum:  $('#cardNum').val(),
-                        ex_date:  $('#ex_date').val(),
-                        message: $(".getinfo").val()
-                    },
-                    dataType: 'JSON',
-                    /* remind that 'data' is the response of the AjaxController */
-                    success: function(data) {
-                        $(".writeinfo").append(data.msg);
-                    }
-                });
-            });
+    <script>
+        const gear = document.querySelector('.gear-icon');
+        const ccSettings = document.querySelector('.cc__settings');
+
+        gear.addEventListener('click', () => {
+            if (gear.classList.contains('active')) {
+                ccSettings.classList.remove('cc__settings--active');
+                ccSettings.classList.add('cc__settings--hidden');
+            } else {
+                ccSettings.classList.remove('cc__settings--hidden');
+                ccSettings.classList.add('cc__settings--active');
+            }
+            gear.classList.toggle('active');
         });
-    </script> --}}
+    </script>
     <script>
         function add_card() {
             Swal.fire({
