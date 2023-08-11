@@ -488,6 +488,7 @@
             src="https://maps.googleapis.com/maps/api/js?key={{ env('MAP_API_KEY') }}&libraries=places&language=en&callback=initialize"
             async defer></script>
     @endif
+
     <script>
         $(document).ready(function() {
             $('input[name="phone"]').inputmask('(99)-999-99-99');

@@ -252,6 +252,12 @@
         }
     </script>
 
+    <script>
+        $(document).ready(function() {
+            $('input[name="phone"]').inputmask('(99)-999-99-99');
+        });
+    </script>
+
 
     @if (get_setting('google_map') == 1)
         @include('frontend.partials.google_map')

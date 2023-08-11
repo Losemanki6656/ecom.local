@@ -240,7 +240,10 @@
                             </div>
 
                             <div class="pt-3 px-4 fs-14" id="payCard">
-                                <label for="">{{ translate('Select Card') }}</label>
+                                <a href="{{ route('my-cards') }}" class="btn btn-link fs-14 fw-700 px-0">
+                                    <i class="las la-plus fs-16"></i>
+                                    {{ translate('Add new card') }}
+                                </a>
                                 <select class="form-control aiz-selectpicker rounded-0" data-live-search="true"
                                     id="bindIDselect">
                                     <option value="">
