@@ -5,6 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\DemoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\Seller\BillzController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
@@ -158,6 +159,9 @@ Route::post('/language', [LanguageController::class, 'changeLanguage'])->name('l
 
 // Currency Switch
 Route::post('/currency', [CurrencyController::class, 'changeCurrency'])->name('currency.change');
+
+
+Route::get('/getToken', [BillzController::class, 'getToken']);
 
 
 Route::get('/sitemap.xml', function () {
