@@ -187,8 +187,6 @@ class BillzController extends Controller
                         $trans->save();
 
                         $x++;
-
-                        break;
                     }
 
                     DB::commit();
