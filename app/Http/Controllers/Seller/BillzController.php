@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ProductTranslation;
 use App\Models\Upload;
+use File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -136,8 +137,8 @@ class BillzController extends Controller
                             $product->photos = implode(',', $b);
 
                         $product->video_provider = 'youtube';
-                        $product->name = 'FFFFaaa'; //$name;
-                        $product->barcode = 123; //$item['barCode'] ?? null;
+                        $product->name = $name;
+                        $product->barcode = $item['barCode'] ?? null;
                         $product->published = false;
                         $product->unit_price = $item['price'] ?? 0;
                         $product->variant_product = 0;
@@ -186,8 +187,6 @@ class BillzController extends Controller
                         $trans->save();
 
                         $x++;
-
-                        break;
 
                     }
 
