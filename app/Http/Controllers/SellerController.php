@@ -15,7 +15,8 @@ use Cache;
 
 class SellerController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         // Staff Permission Check
         $this->middleware(['permission:view_all_seller'])->only('index');
         $this->middleware(['permission:view_seller_profile'])->only('profile_modal');
@@ -36,9 +37,9 @@ class SellerController extends Controller
         $sort_search = null;
         $approved = null;
         $shops = Shop::whereIn('user_id', function ($query) {
-                       $query->select('id')
-                       ->from(with(new User)->getTable());
-                    })->latest();
+            $query->select('id')
+                ->from(with(new User)->getTable());
+        })->latest();
 
         if ($request->has('search')) {
             $sort_search = $request->search;
@@ -137,7 +138,7 @@ class SellerController extends Controller
     {
         $shop = Shop::findOrFail(decrypt($id));
 
-        if($shop->paymo_setting) {
+        if ($shop->paymo_setting) {
             $pay = json_decode($shop->paymo_setting, true);
             $setting[0] = [
                 'id' => $shop->id,
@@ -159,7 +160,7 @@ class SellerController extends Controller
 
     public function paymo_update($id, Request $request)
     {
-        
+
         $setting[0] = [
             'id' => $id,
             'store_id' => $request->store_id,
@@ -298,10 +299,20 @@ class SellerController extends Controller
         return 0;
     }
 
+    public function updatebillzStatus(Request $request)
+    {
+        $shop = Shop::findOrFail($request->id);
+        $shop->billz_status = $request->status;
+        if ($shop->save()) {
+            return 1;
+        }
+        return 0;
+    }
+
     public function login($id)
     {
         $shop = Shop::findOrFail(decrypt($id));
-        $user  = $shop->user;
+        $user = $shop->user;
         auth()->login($user, true);
 
         return redirect()->route('seller.dashboard');

@@ -160,10 +160,6 @@ Route::post('/language', [LanguageController::class, 'changeLanguage'])->name('l
 // Currency Switch
 Route::post('/currency', [CurrencyController::class, 'changeCurrency'])->name('currency.change');
 
-
-Route::get('/getToken', [BillzController::class, 'getToken']);
-
-
 Route::get('/sitemap.xml', function () {
     return base_path('sitemap.xml');
 });

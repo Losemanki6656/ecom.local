@@ -84,26 +84,47 @@ class ProductController extends Controller
         }
 
         $product = $this->productService->store($request->except([
-            '_token', 'sku', 'choice', 'tax_id', 'tax', 'tax_type', 'flash_deal_id', 'flash_discount', 'flash_discount_type'
+            '_token',
+            'sku',
+            'choice',
+            'tax_id',
+            'tax',
+            'tax_type',
+            'flash_deal_id',
+            'flash_discount',
+            'flash_discount_type'
         ]));
         $request->merge(['product_id' => $product->id]);
 
         //VAT & Tax
         if ($request->tax_id) {
             $this->productTaxService->store($request->only([
-                'tax_id', 'tax', 'tax_type', 'product_id'
+                'tax_id',
+                'tax',
+                'tax_type',
+                'product_id'
             ]));
         }
 
         //Product Stock
         $this->productStockService->store($request->only([
-            'colors_active', 'colors', 'choice_no', 'unit_price', 'sku', 'current_stock', 'product_id'
+            'colors_active',
+            'colors',
+            'choice_no',
+            'unit_price',
+            'sku',
+            'current_stock',
+            'product_id'
         ]), $product);
 
         // Product Translations
         $request->merge(['lang' => env('DEFAULT_LANGUAGE')]);
         ProductTranslation::create($request->only([
-            'lang', 'name', 'unit', 'description', 'product_id'
+            'lang',
+            'name',
+            'unit',
+            'description',
+            'product_id'
         ]));
 
         flash(translate('Product has been inserted successfully'))->success();
@@ -136,7 +157,15 @@ class ProductController extends Controller
     {
         //Product
         $product = $this->productService->update($request->except([
-            '_token', 'sku', 'choice', 'tax_id', 'tax', 'tax_type', 'flash_deal_id', 'flash_discount', 'flash_discount_type'
+            '_token',
+            'sku',
+            'choice',
+            'tax_id',
+            'tax',
+            'tax_type',
+            'flash_deal_id',
+            'flash_discount',
+            'flash_discount_type'
         ]), $product);
 
         //Product Stock
@@ -145,7 +174,13 @@ class ProductController extends Controller
         }
         $request->merge(['product_id' => $product->id]);
         $this->productStockService->store($request->only([
-            'colors_active', 'colors', 'choice_no', 'unit_price', 'sku', 'current_stock', 'product_id'
+            'colors_active',
+            'colors',
+            'choice_no',
+            'unit_price',
+            'sku',
+            'current_stock',
+            'product_id'
         ]), $product);
 
         //VAT & Tax
@@ -153,17 +188,23 @@ class ProductController extends Controller
             ProductTax::where('product_id', $product->id)->delete();
             $request->merge(['product_id' => $product->id]);
             $this->productTaxService->store($request->only([
-                'tax_id', 'tax', 'tax_type', 'product_id'
+                'tax_id',
+                'tax',
+                'tax_type',
+                'product_id'
             ]));
         }
 
         // Product Translations
         ProductTranslation::updateOrCreate(
             $request->only([
-                'lang', 'product_id'
+                'lang',
+                'product_id'
             ]),
             $request->only([
-                'name', 'unit', 'description'
+                'name',
+                'unit',
+                'description'
             ])
         );
 
@@ -250,6 +291,9 @@ class ProductController extends Controller
     public function updatePublished(Request $request)
     {
         $product = Product::findOrFail($request->id);
+        if ($product->category_id == 0) {
+            return 3;
+        }
         $product->published = $request->status;
         if (addon_is_activated('seller_subscription') && $request->status == 1) {
             $shop = $product->user->shop;

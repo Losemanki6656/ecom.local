@@ -620,20 +620,21 @@
                 success: function(data) {
                     var obj = JSON.parse(data);
                     $('#customer_choice_options').append('\
-                                                <div class="form-group row">\
-                                                    <div class="col-md-3">\
-                                                        <input type="hidden" name="choice_no[]" value="' + i + '">\
-                                                        <input type="text" class="form-control" name="choice[]" value="' +
+                                                    <div class="form-group row">\
+                                                        <div class="col-md-3">\
+                                                            <input type="hidden" name="choice_no[]" value="' + i +
+                        '">\
+                                                            <input type="text" class="form-control" name="choice[]" value="' +
                         name +
                         '" placeholder="{{ translate('Choice Title') }}" readonly>\
-                                                    </div>\
-                                                    <div class="col-md-8">\
-                                                        <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_' +
+                                                        </div>\
+                                                        <div class="col-md-8">\
+                                                            <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_' +
                         i + '[]" multiple>\
-                                                            ' + obj + '\
-                                                        </select>\
-                                                    </div>\
-                                                </div>');
+                                                                ' + obj + '\
+                                                            </select>\
+                                                        </div>\
+                                                    </div>');
                     AIZ.plugins.bootstrapSelect('refresh');
                 }
             });

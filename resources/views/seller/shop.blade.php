@@ -358,6 +358,38 @@
         </div>
     </div>
 
+    @if ($shop->billz_status)
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 h6">{{ translate('Billz Info') }}</h5>
+            </div>
+            <div class="card-body">
+                <form class="" action="{{ route('seller.shop.update') }}" method="POST">
+                    <input type="hidden" name="shop_id" value="{{ $shop->id }}">
+                    @csrf
+                    <div class="form-box-content p-3">
+                        <div class="row mb-3">
+                            <label class="col-md-2 col-form-label">{{ translate('Sub name') }}</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" name="key" value="{{ $shop->key }}">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-md-2 col-form-label">{{ translate('Secret') }}</label>
+                            <div class="col-md-10">
+                                <textarea type="text" class="form-control" name="secret">{{ $shop->secret }}</textarea>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group mb-0 text-right">
+                        <button type="submit" class="btn btn-sm btn-primary">{{ translate('Save') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
 @endsection
 
 @section('script')

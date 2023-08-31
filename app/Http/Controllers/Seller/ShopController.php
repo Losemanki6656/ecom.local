@@ -88,6 +88,12 @@ class ShopController extends Controller
             $shop->banner_full_width_1 = $request->banner_full_width_1;
             $shop->banners_half_width = $request->banners_half_width;
             $shop->banner_full_width_2 = $request->banner_full_width_2;
+        } elseif (
+            $request->has('secret') ||
+            $request->has('key')
+        ) {
+            $shop->secret = $request->secret;
+            $shop->key = $request->key;
         }
 
         if ($shop->save()) {
