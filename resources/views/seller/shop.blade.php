@@ -390,7 +390,7 @@
         </div>
     @endif
 
-    @if ($shop->billz_status)
+    @if ($shop->billz2_status)
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0 h6">{{ translate('Billz Info (new version)') }}</h5>
