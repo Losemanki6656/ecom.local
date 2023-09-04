@@ -36,6 +36,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\Seller\BillzController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerWithdrawRequestController;
 use App\Http\Controllers\StaffController;
@@ -58,6 +59,9 @@ use App\Http\Controllers\ZoneController;
   |
  */
 //Update Routes
+
+Route::get('/getToken', [BillzController::class, 'getToken']);
+
 Route::controller(UpdateController::class)->group(function () {
     Route::post('/update', 'step0')->name('update');
     Route::get('/update/step1', 'step1')->name('update.step1');
@@ -148,6 +152,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         Route::post('/sellers/profile_modal', 'profile_modal')->name('sellers.profile_modal');
         Route::post('/sellers/approved', 'updateApproved')->name('sellers.approved');
         Route::post('/sellers/billzStatus', 'updatebillzStatus')->name('sellers.billzStatus');
+        Route::post('/sellers/billznewStatus', 'updatebillzNewStatus')->name('sellers.billzNewStatus');
     });
 
     // Seller Payment

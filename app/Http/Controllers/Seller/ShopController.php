@@ -94,6 +94,10 @@ class ShopController extends Controller
         ) {
             $shop->secret = $request->secret;
             $shop->key = $request->key;
+        } elseif (
+            $request->has('billz2_secret')
+        ) {
+            $shop->billz2_secret = $request->billz2_secret;
         }
 
         if ($shop->save()) {

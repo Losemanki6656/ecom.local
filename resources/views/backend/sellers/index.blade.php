@@ -74,6 +74,7 @@
                             <th data-breakpoints="lg">{{ translate('Verification Info') }}</th>
                             <th data-breakpoints="lg">{{ translate('Approval') }}</th>
                             <th data-breakpoints="lg">{{ translate('Billz') }}</th>
+                            <th data-breakpoints="lg">{{ translate('BillzNew') }}</th>
                             <th data-breakpoints="lg">{{ translate('Num. of Products') }}</th>
                             <th data-breakpoints="lg">{{ translate('Due to seller') }}</th>
                             <th width="10%">{{ translate('Options') }}</th>
@@ -133,6 +134,17 @@
                         <span class="slider round"></span>
                     </label>
                 </td>
+
+                <td>
+                    <label class="aiz-switch aiz-switch-success mb-0">
+                        <input onchange="update_billz_new_status(this)"
+                            value="{{ $shop->id }}" type="checkbox" <?php if ($shop->billz2_status == 1) {
+                                echo 'checked';
+                            } ?>
+                >
+                <span class="slider round"></span>
+            </label>
+        </td>
 
                         <td>{{ $shop->user->products->count() }}</td>
                         <td>
@@ -333,6 +345,27 @@
             }
         });
     }
+
+
+    function update_billz_new_status(el) {
+        if (el.checked) {
+            var status = 1;
+        } else {
+            var status = 0;
+        }
+        $.post('{{ route('sellers.billzNewStatus') }}', {
+            _token: '{{ csrf_token() }}',
+            id: el.value,
+            status: status
+        }, function(data) {
+            if (data == 1) {
+                AIZ.plugins.notify('success', '{{ translate('Billz New status updated successfully') }}');
+            } else {
+                AIZ.plugins.notify('danger', '{{ translate('Something went wrong') }}');
+            }
+        });
+    }
+
 
     function update_approved(el) {
         if (el.checked) {

@@ -309,6 +309,16 @@ class SellerController extends Controller
         return 0;
     }
 
+    public function updatebillzNewStatus(Request $request)
+    {
+        $shop = Shop::findOrFail($request->id);
+        $shop->billz2_status = $request->status;
+        if ($shop->save()) {
+            return 1;
+        }
+        return 0;
+    }
+
     public function login($id)
     {
         $shop = Shop::findOrFail(decrypt($id));

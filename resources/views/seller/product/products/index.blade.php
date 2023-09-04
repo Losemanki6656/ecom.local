@@ -32,7 +32,7 @@
             <a href="{{ route('seller.products.create') }}">
                 <div class="p-3 rounded mb-3 c-pointer text-center bg-white shadow-sm hov-shadow-lg has-transition">
                     <span
-                        class="size-60px rounded-circle mx-auto bg-secondary d-flex align-items-center justify-content-center mb-3">
+                        class="size-60px rounded-circle mx-auto bg-primary d-flex align-items-center justify-content-center mb-3">
                         <i class="las la-plus la-3x text-white"></i>
                     </span>
                     <div class="fs-18 text-primary">{{ translate('Add New Product') }}</div>
@@ -48,15 +48,70 @@
                             class="size-60px rounded-circle mx-auto bg-warning d-flex align-items-center justify-content-center mb-3">
                             <i class="las la-sync la-3x text-white"></i>
                         </span>
-                        <div class="fs-18 text-primary">{{ translate('Upload Billz producs') }}</div>
+                        <div class="fs-18 text-primary">{{ translate('Upload Billz products') }}</div>
                     </div>
                 </a>
+            </div>
+
+            <div class="modal fade" id="confirmBillz">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title h6">{{ translate('Confirmation') }}</h5>
+                            <button type="button" class="close" data-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>{{ translate('Do you agree to download the goods from the Billiz system? It may take some time!') }}
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light"
+                                data-dismiss="modal">{{ translate('Cancel') }}</button>
+                            <a type="button" id="confirmation" onclick="downloadBillz()"
+                                class="btn btn-warning">{{ translate('Confirm!') }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if (auth()->user()->shop->billz2_status)
+            <div class="col-md-4 mx-auto mb-3">
+                <a data-toggle="modal" data-target="#confirmBillz2">
+                    <div class="p-3 rounded mb-3 c-pointer text-center bg-white shadow-sm hov-shadow-lg has-transition">
+                        <span
+                            class="size-60px rounded-circle mx-auto bg-success d-flex align-items-center justify-content-center mb-3">
+                            <i class="las la-sync la-3x text-white"></i>
+                        </span>
+                        <div class="fs-18 text-primary">{{ translate('Upload Billz2 products') }}</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="modal fade" id="confirmBillz2">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title h6">{{ translate('Confirmation') }}</h5>
+                            <button type="button" class="close" data-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>{{ translate('Do you agree to download the goods from the Billiz system? It may take some time!') }}
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light"
+                                data-dismiss="modal">{{ translate('Cancel') }}</button>
+                            <a type="button" id="confirmation" onclick="downloadBillz2()"
+                                class="btn btn-success">{{ translate('Confirm!') }}</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         @endif
 
 
-        <div id="loader" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div id="loader" class="modal fade" data-backdrop="static">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-body c-scrollbar-light position-relative" id="info-modal-content">
@@ -68,25 +123,7 @@
             </div>
         </div>
 
-        <div class="modal fade" id="confirmBillz">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title h6">{{ translate('Confirmation') }}</h5>
-                        <button type="button" class="close" data-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>{{ translate('Do you agree to download the goods from the Billiz system? It may take some time!') }}
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-dismiss="modal">{{ translate('Cancel') }}</button>
-                        <a type="button" id="confirmation" onclick="downloadBillz()"
-                            class="btn btn-success">{{ translate('Confirm!') }}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         @if (addon_is_activated('seller_subscription'))
             @php
@@ -229,6 +266,32 @@
 
 @section('script')
     <script type="text/javascript">
+        function downloadBillz2() {
+            $('#confirmBillz2').modal('hide');
+            $('#loader').modal('show');
+
+            $.ajax({
+                url: "{{ route('seller.productsNewUpload') }}",
+                method: "GET",
+                data: {
+                    "_token": "{{ csrf_token() }}"
+                },
+                success: function(res) {
+                    $('#loader').modal('hide');
+                    AIZ.plugins.notify('success', res.message);
+                    location.reload();
+                },
+                error: function(error) {
+                    $('#loader').modal('hide');
+                    AIZ.plugins.notify('warning', error.responseJSON.message);
+                },
+                complete: function(data) {
+                    $('#loader').modal('hide');
+                }
+            });
+
+        }
+
         function downloadBillz() {
             $('#confirmBillz').modal('hide');
             $('#loader').modal('show');
