@@ -66,8 +66,8 @@
             @endif
         </div>
     </div>
-    
-    
+
+
     <!-- Brand Logo & Name -->
     @if ($detailedProduct->brand != null)
         <div class="d-flex flex-wrap align-items-center mb-3">
@@ -76,7 +76,7 @@
                     class="text-reset hov-text-primary fs-14 fw-700">{{ $detailedProduct->brand->name }}</a>
         </div>
     @endif
-    
+
     <!-- Seller Info -->
     <div class="d-flex flex-wrap align-items-center">
         <div class="d-flex align-items-center mr-4">
@@ -102,7 +102,7 @@
                         <path id="Path_3015" data-name="Path 3015" d="M131.349,99.312h5a.5.5,0,1,1,0,1h-5a.5.5,0,1,1,0-1" transform="translate(-1181 -346.5)" fill="#f4b650"/>
                         </g>
                     </svg>
-                    
+
                     {{ translate('Message Seller') }}
                 </button>
             </div>
@@ -271,7 +271,7 @@
             @endif
         @endif
     @endif
-    
+
     @if ($detailedProduct->auction_product != 1)
         <form id="option-choice-form">
             @csrf
@@ -342,12 +342,12 @@
                     <div class="col-sm-10">
                         <div class="product-quantity d-flex align-items-center">
                             <div class="row no-gutters align-items-center aiz-plus-minus mr-3" style="width: 130px;">
-                                <button class="btn col-auto btn-icon btn-sm btn-light rounded-0" 
+                                <button class="btn col-auto btn-icon btn-sm btn-light rounded-0"
                                     type="button" data-type="minus" data-field="quantity" disabled="">
                                     <i class="las la-minus"></i>
                                 </button>
-                                <input type="number" name="quantity" 
-                                    class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" 
+                                <input type="number" name="quantity"
+                                    class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1"
                                     value="{{ $detailedProduct->min_qty }}" min="{{ $detailedProduct->min_qty }}" max="10" lang="en">
                                 <button class="btn col-auto btn-icon btn-sm btn-light rounded-0" type="button" data-type="plus" data-field="quantity">
                                     <i class="las la-plus"></i>
@@ -371,7 +371,7 @@
                 </div>
 
             @endif
-            
+
             <!-- Total Price -->
             <div class="row no-gutters pb-3 d-none" id="chosen_price_div">
                 <div class="col-sm-2">
@@ -388,11 +388,11 @@
 
         </form>
     @endif
-    
+
     @if ($detailedProduct->auction_product)
-        @php 
+        @php
             $highest_bid = $detailedProduct->bids->max('amount');
-            $min_bid_amount = $highest_bid != null ? $highest_bid+1 : $detailedProduct->starting_bid; 
+            $min_bid_amount = $highest_bid != null ? $highest_bid+1 : $detailedProduct->starting_bid;
         @endphp
         @if($detailedProduct->auction_end_date >= strtotime("now"))
             <div class="mt-4">
@@ -420,12 +420,12 @@
                         <i class="la la-share"></i> {{ translate($detailedProduct->external_link_btn) }}
                     </a>
                 @else
-                    <button type="button" class="btn btn-warning mr-2 add-to-cart fw-600 w-150px rounded-0 text-white"
+                    <button type="button" class="btn btn-warning mr-2 add-to-cart fw-600 rounded-0 text-white"
                         onclick="addToCart()">
                         <i class="las la-shopping-bag"></i>
                         <span class="d-none d-md-inline-block"> {{ translate('Add to cart') }}</span>
                     </button>
-                    <button type="button" class="btn btn-primary buy-now fw-600 add-to-cart w-150px rounded-0" onclick="buyNow()">
+                    <button type="button" class="btn btn-primary buy-now fw-600 add-to-cart rounded-0" onclick="buyNow()">
                         <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
                     </button>
                 @endif
@@ -433,11 +433,11 @@
                     <i class="la la-cart-arrow-down"></i> {{ translate('Out of Stock') }}
                 </button>
             @elseif ($detailedProduct->digital == 1)
-                <button type="button" class="btn btn-warning mr-2 add-to-cart fw-600 w-150px rounded-0 text-white" onclick="addToCart()">
+                <button type="button" class="btn btn-warning mr-2 add-to-cart fw-600 rounded-0 text-white" onclick="addToCart()">
                     <i class="las la-shopping-bag"></i>
                     <span class="d-none d-md-inline-block"> {{ translate('Add to cart')}}</span>
                 </button>
-                <button type="button" class="btn btn-primary buy-now fw-600 add-to-cart w-150px rounded-0" onclick="buyNow()">
+                <button type="button" class="btn btn-primary buy-now fw-600 add-to-cart rounded-0" onclick="buyNow()">
                     <i class="la la-shopping-cart"></i> {{ translate('Buy Now')}}
                 </button>
             @endif

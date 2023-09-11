@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Requests\SellerProfileRequest;
+use App\Models\ShopDetail;
 use App\Models\User;
 use Auth;
+use File;
 use Hash;
+use Illuminate\Http\Request;
+use Storage;
 
 class ProfileController extends Controller
 {
@@ -17,7 +21,7 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $addresses = $user->addresses; 
+        $addresses = $user->addresses;
         return view('seller.profile.index', compact('user','addresses'));
     }
 
@@ -42,7 +46,7 @@ class ProfileController extends Controller
         if($request->new_password != null && ($request->new_password == $request->confirm_password)){
             $user->password = Hash::make($request->new_password);
         }
-        
+
         $user->avatar_original = $request->photo;
 
         $shop = $user->shop;
@@ -62,5 +66,30 @@ class ProfileController extends Controller
 
         flash(translate('Your Profile has been updated successfully!'))->success();
         return back();
+    }
+
+    public function bankSetting(Request $request)
+    {
+        $shop = ShopDetail::where('shop_id', auth()->user()->shop->id)->first();
+        if($shop) return back();
+
+        $fileName = time() . $request->d_file->getClientOriginalName();
+        Storage::disk('public')->put('shop-details/' . $fileName, File::get($request->d_file));
+        $filePath = 'storage/shop-details/' . $fileName;
+
+        $shopDetail = new ShopDetail();
+        $shopDetail->shop_id = auth()->user()->shop->id;
+        $shopDetail->name = $request->name;
+        $shopDetail->director = $request->director;
+        $shopDetail->inn = $request->inn;
+        $shopDetail->bank = $request->bank;
+        $shopDetail->mfo = $request->mfo;
+        $shopDetail->b_number = $request->b_number;
+        $shopDetail->d_file = $filePath;
+        $shopDetail->save();
+
+        flash(translate('Your Profile has been updated successfully!'))->success();
+        return back();
+
     }
 }

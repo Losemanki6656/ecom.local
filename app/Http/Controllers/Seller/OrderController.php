@@ -11,6 +11,8 @@ use App\Utility\SmsUtility;
 use Illuminate\Http\Request;
 use Auth;
 use DB;
+use Illuminate\Support\Facades\Http;
+use Mtownsend\XmlToArray\XmlToArray;
 
 class OrderController extends Controller
 {
@@ -64,7 +66,22 @@ class OrderController extends Controller
 
         $order->viewed = 1;
         $order->save();
-        return view('seller.orders.show', compact('order', 'delivery_boys'));
+
+        $response = Http::withHeaders([
+            "Content-Type" => "text/xml;charset=utf-8"
+        ])->send("POST", "https://home.courierexe.ru/api/", [
+            "body" => '<?xml version="1.0" encoding="UTF-8" ?>
+                           <statusreq>
+                              <auth extra="245" login="UNIMART" pass="Cabinet_post"></auth>
+                              <orderno>' . $order->code . '</orderno>
+                           </statusreq>'
+        ]);
+
+        $res = XmlToArray::convert($response->body());
+
+        $delivery_status_emu = $res['order']['status']['@content'] ?? 'Not Found';
+
+        return view('seller.orders.show', compact('order', 'delivery_boys', 'delivery_status_emu'));
     }
 
     // Update Delivery Status
@@ -81,7 +98,7 @@ class OrderController extends Controller
             $user->save();
         }
 
-        
+
         foreach ($order->orderDetails->where('seller_id', Auth::user()->id) as $key => $orderDetail) {
             $orderDetail->delivery_status = $request->status;
             $orderDetail->save();
@@ -148,7 +165,7 @@ class OrderController extends Controller
             $orderDetail->payment_status = $request->status;
             $orderDetail->save();
         }
-        
+
         $status = 'paid';
         foreach ($order->orderDetails as $key => $orderDetail) {
             if ($orderDetail->payment_status != 'paid') {

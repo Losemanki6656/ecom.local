@@ -239,6 +239,8 @@
                             class="text-muted">{{ translate('We had to limit height to maintian consistancy. In some device both side of the banner might be cropped for height limitation.') }}</small>
                     </div>
                 </div>
+
+
                 <!-- Banner Full width 1 -->
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label">{{ translate('Banner Full width 1') }}</label>
@@ -299,6 +301,7 @@
         </div>
     </div>
 
+
     <!-- Social Media Link -->
     <div class="card">
         <div class="card-header">
@@ -349,6 +352,55 @@
                                 name="youtube" value="{{ $shop->youtube }}">
                             <small class="text-muted">{{ translate('Insert link with https ') }}</small>
                         </div>
+                    </div>
+                </div>
+                <div class="form-group mb-0 text-right">
+                    <button type="submit" class="btn btn-sm btn-primary">{{ translate('Save') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0 h6">{{ translate('Bank Info') }}</h5>
+        </div>
+        <div class="card-body">
+            <form class="" action="{{ route('seller.shop.update') }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="shop_id" value="{{ $shop->id }}">
+                @csrf
+                <div class="form-box-content p-3">
+                    <div class="mb-3">
+                        <label class="mb-0">{{ translate('Kompaniya nomi') }}</label>
+                        <input class="form-control" name="shop_name" value="{{$shop->details->name}}" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="mb-0">{{ translate('Direktor') }}</label>
+                            <input class="form-control" name="shop_director" value="{{$shop->details->director}}" required>
+                        </div>
+                        <div class="col">
+                            <label class="mb-0">{{ translate('INN') }}</label>
+                            <input class="form-control" name="inn" value="{{$shop->details->inn}}" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="mb-0">{{ translate('Bank') }}</label>
+                            <input class="form-control" name="bank" value="{{$shop->details->bank}}" required>
+                        </div>
+                        <div class="col">
+                            <label class="mb-0">{{ translate('MFO') }}</label>
+                            <input class="form-control" name="mfo" value="{{$shop->details->mfo}}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="mb-0">{{ translate('Xisob raqami') }}</label>
+                        <input class="form-control" name="b_number" value="{{$shop->details->b_number}}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="mb-0">{{ translate("Direktor tayinlanganlik to'grisidagi hujjat") }}</label>
+                        <input class="form-control" type="file" name="d_file" required>
                     </div>
                 </div>
                 <div class="form-group mb-0 text-right">

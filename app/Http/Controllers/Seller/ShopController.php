@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Models\BusinessSetting;
+use App\Models\ShopDetail;
+use File;
 use Illuminate\Http\Request;
 use App\Models\Shop;
 use Auth;
 use Illuminate\Support\Facades\Http;
 use Mtownsend\XmlToArray\XmlToArray;
+use Storage;
 
 class ShopController extends Controller
 {
@@ -98,6 +101,23 @@ class ShopController extends Controller
             $request->has('billz2_secret')
         ) {
             $shop->billz2_secret = $request->billz2_secret;
+        } elseif (
+            $request->has('shop_name')
+        ) {
+            $shopDetail = ShopDetail::where('shop_id', $shop->id)->first();
+
+            $fileName = time() . $request->d_file->getClientOriginalName();
+            Storage::disk('public')->put('shop-details/' . $fileName, File::get($request->d_file));
+            $filePath = 'storage/shop-details/' . $fileName;
+
+            $shopDetail->name = $request->shop_name;
+            $shopDetail->director = $request->shop_director;
+            $shopDetail->inn = $request->inn;
+            $shopDetail->bank = $request->bank;
+            $shopDetail->mfo = $request->mfo;
+            $shopDetail->b_number = $request->b_number;
+            $shopDetail->d_file = $filePath;
+            $shopDetail->save();
         }
 
         if ($shop->save()) {

@@ -86,7 +86,7 @@ class AuctionProductBidController extends Controller
         return back();
     }
 
-   
+
     public function product_bids_admin($id)
     {
         $product = Product::where('id', $id)->first();

@@ -1,23 +1,31 @@
 <?php
 
-namespace App\Models;
+    namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+    use Illuminate\Database\Eloquent\Model;
 
-class Shop extends Model
-{
+    class Shop extends Model
+    {
 
-  protected $with = ['user'];
+        protected $with = ['user'];
 
-  public function user()
-  {
-    return $this->belongsTo(User::class);
-  }
-  
-  public function seller_package(){
-    return $this->belongsTo(SellerPackage::class);
-  }
-  public function followers(){
-    return $this->hasMany(FollowSeller::class);
-  }
-}
+        public function user()
+        {
+            return $this->belongsTo(User::class);
+        }
+
+        public function seller_package()
+        {
+            return $this->belongsTo(SellerPackage::class);
+        }
+
+        public function followers()
+        {
+            return $this->hasMany(FollowSeller::class);
+        }
+
+        public function details()
+        {
+            return $this->hasOne(ShopDetail::class);
+        }
+    }

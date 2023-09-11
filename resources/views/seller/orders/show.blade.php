@@ -31,26 +31,28 @@
                         @endif
                     </div>
                     <div class="col-md-3 ml-auto">
-                        <label for="update_delivery_status">{{ translate('Delivery Status') }}</label>
-                        @if ($delivery_status != 'delivered' && $delivery_status != 'cancelled')
-                            <select class="form-control aiz-selectpicker" data-minimum-results-for-search="Infinity"
-                                id="update_delivery_status">
-                                <option value="pending" @if ($delivery_status == 'pending') selected @endif>
-                                    {{ translate('Pending') }}</option>
-                                <option value="confirmed" @if ($delivery_status == 'confirmed') selected @endif>
-                                    {{ translate('Confirmed') }}</option>
-                                <option value="picked_up" @if ($delivery_status == 'picked_up') selected @endif>
-                                    {{ translate('Picked Up') }}</option>
-                                <option value="on_the_way" @if ($delivery_status == 'on_the_way') selected @endif>
-                                    {{ translate('On The Way') }}</option>
-                                <option value="delivered" @if ($delivery_status == 'delivered') selected @endif>
-                                    {{ translate('Delivered') }}</option>
-                                <option value="cancelled" @if ($delivery_status == 'cancelled') selected @endif>
-                                    {{ translate('Cancel') }}</option>
-                            </select>
-                        @else
-                            <input type="text" class="form-control" value="{{ $delivery_status }}" disabled>
-                        @endif
+                        <label for="update_delivery_status">{{ translate('Delivery Status EMU') }}</label>
+{{--                        @if ($delivery_status != 'delivered' && $delivery_status != 'cancelled')--}}
+{{--                            <select class="form-control aiz-selectpicker" data-minimum-results-for-search="Infinity"--}}
+{{--                                id="update_delivery_status">--}}
+{{--                                <option value="pending" @if ($delivery_status == 'pending') selected @endif>--}}
+{{--                                    {{ translate('Pending') }}</option>--}}
+{{--                                <option value="confirmed" @if ($delivery_status == 'confirmed') selected @endif>--}}
+{{--                                    {{ translate('Confirmed') }}</option>--}}
+{{--                                <option value="picked_up" @if ($delivery_status == 'picked_up') selected @endif>--}}
+{{--                                    {{ translate('Picked Up') }}</option>--}}
+{{--                                <option value="on_the_way" @if ($delivery_status == 'on_the_way') selected @endif>--}}
+{{--                                    {{ translate('On The Way') }}</option>--}}
+{{--                                <option value="delivered" @if ($delivery_status == 'delivered') selected @endif>--}}
+{{--                                    {{ translate('Delivered') }}</option>--}}
+{{--                                <option value="cancelled" @if ($delivery_status == 'cancelled') selected @endif>--}}
+{{--                                    {{ translate('Cancel') }}</option>--}}
+{{--                            </select>--}}
+{{--                        @else--}}
+{{--                            <input type="text" class="form-control" value="{{ $delivery_status }}" disabled>--}}
+{{--                        @endif--}}
+
+                        <input type="text" class="form-control" value="{{ $delivery_status_emu }}" disabled>
                     </div>
                 @endif
             </div>

@@ -45,7 +45,7 @@
                                     $photos = explode(',',$detailedProduct->photos);
                                 @endphp
                                 <div class="col order-1 order-md-2">
-                                    <div class="aiz-carousel product-gallery" data-nav-for='.product-gallery-thumb' 
+                                    <div class="aiz-carousel product-gallery" data-nav-for='.product-gallery-thumb'
                                         data-fade='true' data-auto-height='true'>
                                         @foreach ($photos as $key => $photo)
                                         <div class="carousel-box img-zoom rounded">
@@ -74,7 +74,7 @@
 
                         </div>
                     </div>
-                    
+
                     <!-- Product Details -->
                     <div class="col-xl-7 col-lg-6">
                         <div class="text-left">
@@ -164,7 +164,7 @@
                                                   <path id="Path_3015" data-name="Path 3015" d="M131.349,99.312h5a.5.5,0,1,1,0,1h-5a.5.5,0,1,1,0-1" transform="translate(-1181 -346.5)" fill="#f4b650"/>
                                                 </g>
                                               </svg>
-                                              
+
                                             {{ translate('Message Seller') }}
                                         </button>
                                     </div>
@@ -193,7 +193,7 @@
                             <hr>
 
                             @if(home_price($detailedProduct) != home_discounted_price($detailedProduct))
-                                
+
                                 <div class="row no-gutters mb-3">
                                     <div class="col-sm-2">
                                         <div class="text-secondary fs-14 fw-400">{{ translate('Price')}}</div>
@@ -296,7 +296,7 @@
                             <div class="mt-3">
                                 <button type="button" class="btn btn-warning mr-2 add-to-cart fw-600 w-150px rounded-0 text-white" onclick="addToCart()">
                                     <i class="las la-shopping-bag"></i>
-                                    <span class="d-none d-md-inline-block"> {{ translate('Add to cart')}}</span>
+                                    <span class="d-none d-md-inline-block"> {{ translate('Add to cart')}}</span>a
                                 </button>
                                 <button type="button" class="btn btn-primary buy-now fw-600 add-to-cart w-150px rounded-0" onclick="buyNow()">
                                     <i class="la la-shopping-cart"></i> {{ translate('Buy Now')}}
@@ -364,7 +364,7 @@
                                     </div>
                                 </div>
                             @endif
-                            
+
                             <!-- Share -->
                             <div class="row no-gutters mt-4">
                                 <div class="col-sm-2">
@@ -385,7 +385,7 @@
     <section class="mb-4">
         <div class="container">
             <div class="row gutters-16">
-                
+
                 <!-- Left side -->
                 <div class="col-xl-3 order-1 order-xl-0">
 
@@ -576,7 +576,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Download -->
                             <div class="tab-pane fade" id="tab_default_3">
                                 <div class="py-5 text-center ">
@@ -584,7 +584,7 @@
                                         class="btn btn-primary">{{ translate('Download') }}</a>
                                 </div>
                             </div>
-                            
+
                             <!-- Review -->
                             <div class="tab-pane fade" id="tab_default_4">
                                 <div class="py-5">
@@ -633,7 +633,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Related products -->
                     <div class="bg-white border">
                         <div class="p-4">
@@ -714,7 +714,7 @@
                                         <div class="form-group">
                                             <textarea class="form-control rounded-0" rows="3" cols="40" name="question"
                                                 placeholder="{{ translate('Write your question here...') }}" style="resize: none;"></textarea>
-                                            
+
                                         </div>
                                         <button type="submit" class="btn btn-sm w-150px btn-primary rounded-0">{{ translate('Submit') }}</button>
                                     </form>
@@ -725,7 +725,7 @@
                                     $own_product_queries = Auth::user()->product_queries->where('product_id',$detailedProduct->id);
                                 @endphp
                                 @if ($own_product_queries->count() > 0)
-                                
+
                                     <div class="question-area my-4 mb-0 px-4">
 
                                         <div class="py-3">
@@ -777,10 +777,10 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                
+
                                 @endif
                             @endauth
-                                    
+
                             <!-- Others Queries -->
                             <div class="pagination-area my-4 mb-0 px-4">
                                 @include('frontend.partials.product_query_pagination')

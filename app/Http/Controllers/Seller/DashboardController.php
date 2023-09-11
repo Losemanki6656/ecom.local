@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Seller;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Shop;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -18,8 +19,16 @@ class DashboardController extends Controller
                                 ->where('delivery_status', '=', 'delivered')
                                 ->select(DB::raw("sum(grand_total) as total, DATE_FORMAT(created_at, '%d %b') as date"))
                                 ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d')"))
-                                ->get()->pluck('total', 'date');  
+                                ->get()->pluck('total', 'date');
 
-        return view('seller.dashboard', $data);
+        $shop = Shop::where('user_id', auth()->user()->id)->with('details')->first();
+
+        $status = false;
+        if(!$shop->details) $status = true;
+
+        return view('seller.dashboard', [
+            'data' => $data,
+            'status' => $status
+        ]);
     }
 }

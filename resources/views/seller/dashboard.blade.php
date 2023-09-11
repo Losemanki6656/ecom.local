@@ -9,6 +9,72 @@
         </div>
     </div>
 
+    <div class="modal fade" data-backdrop="static" id="confirmBankInfo">
+        <div class="modal-dialog modal-dialog-centered modal-lg" >
+            <div class="modal-content">
+                <form action="{{route('seller.profile.bank_update')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title h6">{{ translate("Bank ma'lumotlarini tasdiqlash") }}</h5>
+                        <button type="button" class="close" data-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="mb-0">{{ translate('Kompaniya nomi') }}</label>
+                            <input class="form-control" name="name"  required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="mb-0">{{ translate('Direktor') }}</label>
+                                <input class="form-control" name="director"  required>
+                            </div>
+                            <div class="col">
+                                <label class="mb-0">{{ translate('INN') }}</label>
+                                <input class="form-control" name="inn"  required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="mb-0">{{ translate('Bank') }}</label>
+                                <input class="form-control" name="bank"  required>
+                            </div>
+                            <div class="col">
+                                <label class="mb-0">{{ translate('MFO') }}</label>
+                                <input class="form-control" name="mfo"  required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="mb-0">{{ translate('Xisob raqami') }}</label>
+                            <input class="form-control" name="b_number"  required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="mb-0">{{ translate("Direktor tayinlanganlik to'grisidagi hujjat") }}</label>
+                            <input class="form-control" type="file" name="d_file" required>
+                        </div>
+
+                       <div class="mb-3">
+                           <label class="aiz-checkbox">
+                               <input type="checkbox" name="remember" checked>
+                               <span class=opacity-60>{{ translate("Ikkilamchi xisob raqam uchun onlayn shartnoma olishga roziman!") }}</span>
+                               <span class="aiz-square-check"></span>
+                           </label>
+                       </div>
+
+                        <div class="mb-3 text-center">
+                            <label class="mb-0">{{ translate("Shartnoma Didox.uz orqali taqdim etiladi. Shartnoma imzolangandan so'ng
+                        3-5 bank ish kuni ichida to'lovlarni qabul qilish faollashadi!") }} </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">{{ translate('Cancel') }}</button>
+                        <button type="submit" class="btn btn-success">{{ translate('Tasdiqlash!') }}</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-sm-6 col-md-6 col-xxl-3">
             <div class="card shadow-none mb-4 bg-primary py-4">
@@ -179,7 +245,7 @@
                     $date = date('Y-m-d');
                     $days_ago_30 = date('Y-m-d', strtotime('-30 days', strtotime($date)));
                     $days_ago_60 = date('Y-m-d', strtotime('-60 days', strtotime($date)));
-                    
+
                     $orderTotal = \App\Models\Order::where('seller_id', Auth::user()->id)
                         ->where('payment_status', 'paid')
                         ->where('created_at', '>=', $days_ago_30)
@@ -541,7 +607,7 @@
             </div>
             <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="5" data-lg-items="4"
                 data-md-items="3" data-sm-items="2" data-arrows='true'>
-                @foreach ($products as $key => $product)
+                @foreach ($data['products'] as $key => $product)
                     <div class="carousel-box">
                         <div
                             class="aiz-card-box border border-light rounded shadow-sm hov-shadow-md mb-2 has-transition bg-white">
@@ -580,18 +646,25 @@
 
 @section('script')
     <script type="text/javascript">
+
+        var status = @json($status);
+
+        if(status == 'true'){
+            $('#confirmBankInfo').modal('show');
+        }
+
         AIZ.plugins.chart('#graph-1', {
             type: 'bar',
             data: {
                 labels: [
-                    @foreach ($last_7_days_sales as $key => $last_7_days_sale)
+                    @foreach ($data['last_7_days_sales'] as $key => $last_7_days_sale)
                         '{{ $key }}',
                     @endforeach
                 ],
                 datasets: [{
                     label: 'Sales ($)',
                     data: [
-                        @foreach ($last_7_days_sales as $key => $last_7_days_sale)
+                        @foreach ($data['last_7_days_sales'] as $key => $last_7_days_sale)
                             '{{ $last_7_days_sale }}',
                         @endforeach
                     ],
