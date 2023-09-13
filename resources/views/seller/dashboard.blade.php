@@ -16,7 +16,6 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title h6">{{ translate("Bank ma'lumotlarini tasdiqlash") }}</h5>
-                        <button type="button" class="close" data-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -25,7 +24,7 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col">
-                                <label class="mb-0">{{ translate('Direktor') }}</label>
+                                <label class="mb-0">{{ translate('FIO') }}</label>
                                 <input class="form-control" name="director"  required>
                             </div>
                             <div class="col">
@@ -645,8 +644,15 @@
 @endsection
 
 @section('script')
-    <script type="text/javascript">
+    <script>
+        $(document).ready(function() {
+            $('input[name="inn"]').inputmask('999999999');
+            $('input[name="mfo"]').inputmask('99999');
+            $('input[name="b_number"]').inputmask('99999999999999999999');
+        });
+    </script>
 
+    <script type="text/javascript">
         var status = @json($status);
 
         if(status == 'true'){

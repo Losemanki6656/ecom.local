@@ -471,6 +471,13 @@
 @endsection
 
 @section('script')
+    <script>
+        $(document).ready(function() {
+            $('input[name="inn"]').inputmask('999999999');
+            $('input[name="mfo"]').inputmask('99999');
+            $('input[name="b_number"]').inputmask('99999999999999999999');
+        });
+    </script>
     @if (addon_is_activated('delivery_boy') && get_setting('google_map') == 1)
         <script>
             function initialize(id_format = '') {

@@ -184,15 +184,15 @@ if (!function_exists('format_price')) {
     {
         if (get_setting('decimal_separator') == 1) {
             if(session('currency_code') == "USD")
-                $fomated_price = number_format($price, 2 , ',', ' '); 
-            else 
-                $fomated_price = number_format($price, get_setting('no_of_decimals')); 
+                $fomated_price = number_format($price, 2 , ',', ' ');
+            else
+                $fomated_price = number_format($price, get_setting('no_of_decimals'));
         } else {
             $fomated_price = number_format($price, get_setting('no_of_decimals'), ',', '.');
         }
 
 
-        // Minimize the price 
+        // Minimize the price
         if ($isMinimize) {
             $temp = number_format($price / 1000000000, get_setting('no_of_decimals'), ".", "");
 
@@ -325,7 +325,7 @@ if (!function_exists('cart_product_tax')) {
             }
         }
 
-        //calculation of taxes 
+        //calculation of taxes
         $tax = 0;
         foreach ($product->taxes as $product_tax) {
             if ($product_tax->tax_type == 'percent') {
@@ -608,7 +608,7 @@ if (!function_exists('home_discounted_price')) {
             } else {
                 return format_price(convert_price($lowest_price)) . ' - ' . format_price(convert_price($highest_price));
             }
-            
+
         } else {
             return $lowest_price . ' - ' . $highest_price;
         }
@@ -704,7 +704,7 @@ if (!function_exists('home_base_price')) {
         }
         $price += $tax;
 
-        return $formatted ? number_format(convert_price($price), 0, '.', ' ') : $price;
+        return $formatted ? format_price(convert_price($price)) : $price;
     }
 }
 

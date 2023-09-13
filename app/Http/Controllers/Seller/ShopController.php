@@ -104,6 +104,16 @@ class ShopController extends Controller
         } elseif (
             $request->has('shop_name')
         ) {
+
+            $mfo = str_replace('_','', $request->mfo);
+            $inn = str_replace('_','', $request->inn);
+            $b_number = str_replace('_','', $request->b_number);
+
+            if(strlen($mfo) <> 5 || strlen($inn) <> 9 || strlen($b_number) <> 20) {
+                flash(translate('Sorry! Valdidate wrong.'))->error();
+                return back();
+            }
+
             $shopDetail = ShopDetail::where('shop_id', $shop->id)->first();
 
             $fileName = time() . $request->d_file->getClientOriginalName();

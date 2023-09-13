@@ -73,6 +73,15 @@ class ProfileController extends Controller
         $shop = ShopDetail::where('shop_id', auth()->user()->shop->id)->first();
         if($shop) return back();
 
+        $mfo = str_replace('_','', $request->mfo);
+        $inn = str_replace('_','', $request->inn);
+        $b_number = str_replace('_','', $request->b_number);
+
+        if(strlen($mfo) <> 5 || strlen($inn) <> 9 || strlen($b_number) <> 20) {
+            flash(translate('Sorry! Valdidate wrong.'))->error();
+            return back();
+        }
+
         $fileName = time() . $request->d_file->getClientOriginalName();
         Storage::disk('public')->put('shop-details/' . $fileName, File::get($request->d_file));
         $filePath = 'storage/shop-details/' . $fileName;

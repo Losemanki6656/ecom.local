@@ -101,7 +101,7 @@
             @if($product->auction_product == 1)
                 <!-- Bid Amount -->
                 <div class="">
-                    <span class="fw-700 text-primary">{{ single_price($product->starting_bid) }}</span>
+                    <span class="fw-700 text-primary">{{ single_price($product->starting_bid) }} </span>
                 </div>
             @endif
         </div>
