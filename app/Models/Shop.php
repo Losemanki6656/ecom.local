@@ -14,6 +14,11 @@
             return $this->belongsTo(User::class);
         }
 
+        public function example_comission()
+        {
+            return $this->belongsTo(ExampleComission::class, 'example_comission_id');
+        }
+
         public function seller_package()
         {
             return $this->belongsTo(SellerPackage::class);

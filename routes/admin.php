@@ -155,6 +155,13 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         Route::post('/sellers/billznewStatus', 'updatebillzNewStatus')->name('sellers.billzNewStatus');
     });
 
+    Route::controller(\App\Http\Controllers\ExampleComissionController::class)->group(function () {
+        Route::get('example-comissions', 'index')->name('comission.index');
+        Route::post('example-comissions/store', 'store')->name('comission.store');
+        Route::get('example-comissions/delete/{id}', 'delete')->name('comission.delete');
+        Route::post('shop-commission/update/{id}', 'update_shop')->name('comission.update_shop');
+    });
+
     // Seller Payment
     Route::controller(PaymentController::class)->group(function () {
         Route::get('/seller/payments', 'payment_histories')->name('sellers.payment_histories');

@@ -128,6 +128,8 @@ class CheckoutController extends Controller
             $sum_pay_sellers = 0;
             $adminTotal = 0;
 
+            $shop = Shop::where('user_id', $key)->first();
+
             foreach ($seller_product as $cartItem) {
 
                 $product = Product::find($cartItem['product_id']);
@@ -139,10 +141,18 @@ class CheckoutController extends Controller
 
                 $summm = (int) cart_product_price($cartItem, $product, false, false) * $cartItem['quantity'] - $coupon_discount;
 
-                if ($category && $category->commision_rate != 0) {
+                if ($shop->example_comission) {
 
-                    $subtotal += $summm * (100 - $category->commision_rate) / 100;
-                    $adminTotal += $summm * ($category->commision_rate) / 100;
+                    $arr = json_decode($shop->example_comission->description, true) ?? [];
+                    foreach ($arr as $item)
+                    {
+                        if($summm >= (int) $item['from_price'] && $summm <= (int) $item['to_price']) {
+                            $subtotal += $summm * (100 - ((int) $item['percent'])) / 100;
+                            $adminTotal += $summm * ((int) $item['percent']) / 100;
+                            break;
+                        }
+                    }
+
                 } else {
 
                     $subtotal += $summm;
@@ -153,8 +163,6 @@ class CheckoutController extends Controller
 
             $sum_pay_sellers = $subtotal + $tax;
             $sum_pay_admin += $adminTotal;
-
-            $shop = Shop::where('user_id', $key)->first();
 
             if ($shop && $shop->paymo_setting != null) {
                 $paymo_setting = json_decode($shop->paymo_setting, true);

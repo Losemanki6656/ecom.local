@@ -10,7 +10,7 @@
     </div>
 
     <div class="card">
-        <form class="" id="sort_sellers" action="" method="GET">
+{{--        <form class="" id="sort_sellers" action="" method="GET">--}}
             <div class="card-header row gutters-5">
                 <div class="col">
                     <h5 class="mb-md-0 h6">{{ translate('Sellers') }}</h5>
@@ -217,8 +217,14 @@
                                                 {{ translate('Paymo Setting') }}
                                             </a>
                                         @endcan
-                                        <a href="#" data-toggle="modal" data-target="#bankInfo{{$shop->id}}" class="dropdown-item">
+                                        <a href="#" data-toggle="modal" data-target="#bankInfo{{$shop->id}}"
+                                           class="dropdown-item">
                                             {{ translate('Bank info') }}
+                                        </a>
+
+                                        <a href="#" data-toggle="modal" data-target="#commission{{$shop->id}}"
+                                           class="dropdown-item">
+                                            {{ translate('Commission info') }}
                                         </a>
                                         @can('delete_seller')
                                             <a href="#" class="dropdown-item confirm-delete"
@@ -241,38 +247,78 @@
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <label class="mb-0">{{ translate('Kompaniya nomi') }}</label>
-                                            <input class="form-control" name="shop_name" value="{{$shop->details?->name}}" disabled>
+                                            <input class="form-control" name="shop_name"
+                                                   value="{{$shop->details?->name}}" disabled>
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col">
                                                 <label class="mb-0">{{ translate('Direktor') }}</label>
-                                                <input class="form-control" name="shop_director" value="{{$shop->details?->director}}" disabled>
+                                                <input class="form-control" name="shop_director"
+                                                       value="{{$shop->details?->director}}" disabled>
                                             </div>
                                             <div class="col">
                                                 <label class="mb-0">{{ translate('INN') }}</label>
-                                                <input class="form-control" name="inn" value="{{$shop->details?->inn}}" disabled>
+                                                <input class="form-control" name="inn" value="{{$shop->details?->inn}}"
+                                                       disabled>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col">
                                                 <label class="mb-0">{{ translate('Bank') }}</label>
-                                                <input class="form-control" name="bank" value="{{$shop->details?->bank}}" disabled>
+                                                <input class="form-control" name="bank"
+                                                       value="{{$shop->details?->bank}}" disabled>
                                             </div>
                                             <div class="col">
                                                 <label class="mb-0">{{ translate('MFO') }}</label>
-                                                <input class="form-control" name="mfo" value="{{$shop->details?->mfo}}" disabled>
+                                                <input class="form-control" name="mfo" value="{{$shop->details?->mfo}}"
+                                                       disabled>
                                             </div>
                                         </div>
                                         <div class="mb-3">
                                             <label class="mb-0">{{ translate('Xisob raqami') }}</label>
-                                            <input class="form-control" name="b_number" value="{{$shop->details?->b_number}}" disabled>
+                                            <input class="form-control" name="b_number"
+                                                   value="{{$shop->details?->b_number}}" disabled>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="mb-0">{{ translate("Direktor tayinlanganlik to'grisidagi hujjat") }}</label>
-                                            <a href="{{url(asset($shop->details?->d_file))}}" target="_blank"> Yuklash </a>
+                                            <label
+                                                class="mb-0">{{ translate("Direktor tayinlanganlik to'grisidagi hujjat") }}</label>
+                                            <a href="{{url(asset($shop->details?->d_file))}}" target="_blank">
+                                                Yuklash </a>
                                         </div>
                                     </div>
 
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="commission{{$shop->id}}">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content">
+                                    <form action="{{route('comission.update_shop', $shop->id)}}" method="post">
+                                        @csrf
+                                        <div class="modal-header">
+                                            <h5 class="modal-title h6">{{ translate("Info commission") }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="mb-0">{{ translate('Select commission') }}</label>
+                                                <select class="form-control" name="example_comission_id" required>
+                                                    <option value="">{{ translate('Select commission') }}</option>
+                                                    @foreach($commissions as $com)
+                                                        <option value="{{$com->id}}"
+                                                                @if($shop->example_comission_id == $com->id) selected @endif> {{$com->title}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light"
+                                                    data-dismiss="modal">{{ translate('Cancel') }}</button>
+                                            <button class="btn btn-primary" type="submit"><i
+                                                    class="la la-save me-2"></i> {{ translate('Save') }}</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -284,7 +330,7 @@
                     {{ $shops->appends(request()->input())->links() }}
                 </div>
             </div>
-        </form>
+{{--        </form>--}}
     </div>
 @endsection
 
@@ -393,7 +439,7 @@
         }
 
         function bankinfo(id) {
-           $('#bankinfo' + id).modal('show');
+            $('#bankinfo' + id).modal('show');
         }
 
         function update_billz_status(el) {

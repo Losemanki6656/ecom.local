@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ExampleComission;
 use Illuminate\Http\Request;
 use App\Models\Seller;
 use App\Models\User;
@@ -55,7 +56,10 @@ class SellerController extends Controller
             $shops = $shops->where('verification_status', $approved);
         }
         $shops = $shops->paginate(15);
-        return view('backend.sellers.index', compact('shops', 'sort_search', 'approved'));
+
+        $commissions = ExampleComission::all();
+
+        return view('backend.sellers.index', compact('shops', 'sort_search', 'approved', 'commissions'));
     }
 
     /**
