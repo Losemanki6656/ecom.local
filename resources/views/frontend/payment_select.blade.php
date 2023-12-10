@@ -37,7 +37,7 @@
                         <div class="col active">
                             <div class="text-center border border-bottom-6px p-2 text-primary">
                                 <i class="la-3x mb-2 las la-credit-card cart-animate"
-                                    style="margin-right: -100px; transition: 2s;"></i>
+                                   style="margin-right: -100px; transition: 2s;"></i>
                                 <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('4. Payment') }}</h3>
                             </div>
                         </div>
@@ -60,7 +60,7 @@
             <div class="row">
                 <div class="col-lg-8">
                     <form action="{{ route('payment.checkout') }}" class="form-default" role="form" method="POST"
-                        id="checkout-form">
+                          id="checkout-form">
                         @csrf
                         <input type="hidden" name="owner_id" value="{{ $carts[0]['owner_id'] }}">
 
@@ -77,7 +77,7 @@
                             </div>
                             <div class="form-group px-4">
                                 <textarea name="additional_info" rows="5" class="form-control rounded-0"
-                                    placeholder="{{ translate('Type your text...') }}"></textarea>
+                                          placeholder="{{ translate('Type your text...') }}"></textarea>
                             </div>
 
                             <div class="card-header p-4 border-bottom-0">
@@ -107,11 +107,11 @@
                                             <div class="col-6 col-xl-3 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="cash_on_delivery" class="online_payment"
-                                                        onclick="pay_method('cash_on_delivery')" type="radio"
-                                                        name="payment_option">
+                                                           onclick="pay_method('cash_on_delivery')" type="radio"
+                                                           name="payment_option">
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
                                                         <img src="{{ static_asset('assets/img/cards/cod.png') }}"
-                                                            class="img-fit mb-2">
+                                                             class="img-fit mb-2">
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('Cash on Delivery') }}</span>
@@ -128,12 +128,12 @@
                                                 <div class="col-6 col-xl-3 col-md-4">
                                                     <label class="aiz-megabox d-block mb-3">
                                                         <input value="{{ $method->heading }}" type="radio"
-                                                            name="payment_option" class="offline_payment_option"
-                                                            onchange="toggleManualPaymentData({{ $method->id }})"
-                                                            data-id="{{ $method->id }}" checked>
+                                                               name="payment_option" class="offline_payment_option"
+                                                               onchange="toggleManualPaymentData({{ $method->id }})"
+                                                               data-id="{{ $method->id }}" checked>
                                                         <span class="d-block aiz-megabox-elem rounded-0 p-3">
                                                             <img src="{{ uploaded_asset($method->photo) }}"
-                                                                class="img-fit mb-2">
+                                                                 class="img-fit mb-2">
                                                             <span class="d-block text-center">
                                                                 <span
                                                                     class="d-block fw-600 fs-15">{{ $method->heading }}</span>
@@ -168,10 +168,10 @@
                                     <div class="col-6 col-xl-3 col-md-4">
                                         <label class="aiz-megabox d-block mb-3">
                                             <input value="paymo" class="online_payment" type="radio"
-                                                onclick="pay_method('paymo')" name="payment_option" checked>
+                                                   onclick="pay_method('paymo')" name="payment_option" checked>
                                             <span class="d-block aiz-megabox-elem rounded-0 p-3">
                                                 <img src="{{ static_asset('assets/img/cards/paymo.png') }}"
-                                                    class="img-fit mb-2">
+                                                     class="img-fit mb-2">
                                                 <span class="d-block text-center">
                                                     <span class="d-block fw-600 fs-15">{{ translate('Paymo') }}</span>
                                                 </span>
@@ -195,8 +195,8 @@
                                             </div>
                                             <div class="col-md-9">
                                                 <input type="text" class="form-control mb-3" name="trx_id"
-                                                    id="trx_id" placeholder="{{ translate('Transaction ID') }}"
-                                                    required>
+                                                       id="trx_id" placeholder="{{ translate('Transaction ID') }}"
+                                                       required>
                                             </div>
                                         </div>
                                         <div class="form-group row">
@@ -204,10 +204,12 @@
                                             <div class="col-md-9">
                                                 <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                     <div class="input-group-prepend">
-                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">
+                                                        <div
+                                                            class="input-group-text bg-soft-secondary font-weight-medium">
                                                             {{ translate('Browse') }}</div>
                                                     </div>
-                                                    <div class="form-control file-amount">{{ translate('Choose image') }}
+                                                    <div
+                                                        class="form-control file-amount">{{ translate('Choose image') }}
                                                     </div>
                                                     <input type="hidden" name="photo" class="selected-files">
                                                 </div>
@@ -231,7 +233,7 @@
                                             </button>
                                         @else
                                             <button type="button" onclick="use_wallet()"
-                                                class="btn btn-primary fs-14 fw-700 px-5 rounded-0">
+                                                    class="btn btn-primary fs-14 fw-700 px-5 rounded-0">
                                                 {{ translate('Pay with wallet') }}
                                             </button>
                                         @endif
@@ -245,13 +247,13 @@
                                     {{ translate('Add new card') }}
                                 </a>
                                 <select class="form-control aiz-selectpicker rounded-0" data-live-search="true"
-                                    id="bindIDselect">
+                                        id="bindIDselect">
                                     <option value="">
                                         {{ translate('Select your card for payment ') }}
                                     </option>
                                     @foreach ($bindCards as $card)
                                         <option value="{{ $card->id }}"
-                                            data-content="<span class='d-block'>
+                                                data-content="<span class='d-block'>
                                                         <span class='d-block fs-16 fw-600 mb-2'> {{ $card->pan }}</span>
                                                         <span class='d-block opacity-50 fs-12'><i class='las la-user'></i> {{ $card->card_holder }}</span>
                                                         <span class='d-block opacity-50 fs-12'><i class='las la-hourglass'></i> {{ $card->expiry }}</span>
@@ -269,11 +271,11 @@
                                     <span>{{ translate('I agree to the') }}</span>
                                 </label>
                                 <a href="{{ route('terms') }}"
-                                    class="fw-700">{{ translate('terms and conditions') }}</a>,
+                                   class="fw-700">{{ translate('terms and conditions') }}</a>,
                                 <a href="{{ route('returnpolicy') }}"
-                                    class="fw-700">{{ translate('return policy') }}</a> &
+                                   class="fw-700">{{ translate('return policy') }}</a> &
                                 <a href="{{ route('privacypolicy') }}"
-                                    class="fw-700">{{ translate('privacy policy') }}</a>
+                                   class="fw-700">{{ translate('privacy policy') }}</a>
                             </div>
 
                             <div class="row align-items-center pt-3 px-4 mb-4">
@@ -287,7 +289,7 @@
                                 <!-- Complete Ordert -->
                                 <div class="col-6 text-right">
                                     <button type="button" onclick="submitOrder(this)"
-                                        class="btn btn-primary fs-14 fw-700 rounded-0 px-4">{{ translate('Complete Order') }}</button>
+                                            class="btn btn-primary fs-14 fw-700 rounded-0 px-4">{{ translate('Complete Order') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -295,7 +297,7 @@
                 </div>
 
                 <div class="modal fade" id="confirmPayment" tabindex="-1" role="dialog"
-                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                     aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -305,14 +307,14 @@
                                 <div class="form-group">
                                     <label for="">{{ translate('Verification Code:') }}</label>
                                     <input type="text" name="" id="verificationCode" class="form-control"
-                                        placeholder="{{ translate('Verification Code ..') }}">
+                                           placeholder="{{ translate('Verification Code ..') }}">
                                 </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" data-dismiss="modal" class="btn btn-secondary"><i
                                         class="las la-reply-all"></i> {{ translate('Cancel') }}</button>
                                 <button type="button" class="btn btn-success" id="resendButton"
-                                    onclick="resendSend()"><i class="las la-redo-alt"></i>
+                                        onclick="resendSend()"><i class="las la-redo-alt"></i>
                                     {{ translate('Resend') }}</button>
                                 <button type="button" onclick="onSubmitForm()" class="btn btn-primary"><i
                                         class="las la-check-circle"></i> {{ translate('Complete Order') }} </button>
@@ -330,7 +332,7 @@
         </div>
 
         <div id="loader" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-body c-scrollbar-light position-relative" id="info-modal-content">
@@ -367,7 +369,7 @@
                                 "_token": "{{ csrf_token() }}",
                                 "bindID": $('#bindIDselect').val()
                             },
-                            success: function(response) {
+                            success: function (response) {
                                 Swal.fire({
                                     title: 'Your verification code has been sent to phone number +' +
                                         response.phone,
@@ -392,11 +394,11 @@
                                                 "transaction_id": response
                                                     .transaction_id
                                             },
-                                            success: function(response) {
+                                            success: function (response) {
                                                 $('#checkout-form')
                                                     .submit();
                                             },
-                                            error: function(response) {
+                                            error: function (response) {
                                                 Swal.fire({
                                                     title: "Error",
                                                     text: response
@@ -417,7 +419,7 @@
                                                 "transaction_id": response
                                                     .transaction_id
                                             },
-                                            success: function(response) {
+                                            success: function (response) {
 
                                             }
                                         });
@@ -425,7 +427,7 @@
                                     allowOutsideClick: () => !Swal.isLoading()
                                 })
                             },
-                            error: function(response) {
+                            error: function (response) {
                                 console.log(response);
                                 Swal.fire({
                                     title: "Error",
@@ -449,8 +451,8 @@
     <script type="text/javascript">
         localStorage.setItem('pay_method', 'paymo');
 
-        $(document).ready(function() {
-            $(".online_payment").click(function() {
+        $(document).ready(function () {
+            $(".online_payment").click(function () {
                 $('#manual_payment_description').parent().addClass('d-none');
             });
             toggleManualPaymentData($('input[name=payment_option]:checked').data('id'));
@@ -489,7 +491,7 @@
                 remaining -= 1;
 
                 if (remaining >= 0 && timerOn) {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         timer(remaining);
                     }, 1000);
                     return;
@@ -509,6 +511,7 @@
         }
 
         function onSubmitForm() {
+            $('#loader').modal('show');
             $.ajax({
                 type: 'POST',
                 url: "{{ route('payment.otpVerify') }}",
@@ -517,11 +520,12 @@
                     "verify_code": $('#verificationCode').val(),
                     "transaction_id": JSON.parse(localStorage.getItem('trans'))
                 },
-                success: function(response) {
+                success: function (response) {
                     $('#checkout-form')
                         .submit();
                 },
-                error: function(response) {
+                error: function (response) {
+                    $('#loader').modal('hide');
                     Swal.fire({
                         title: "Error",
                         text: response
@@ -542,10 +546,10 @@
                     "_token": "{{ csrf_token() }}",
                     "transaction_id": JSON.parse(localStorage.getItem('trans'))
                 },
-                success: function(response) {
+                success: function (response) {
                     timerResend();
                 },
-                error: function(response) {
+                error: function (response) {
                     Swal.fire({
                         title: "Error",
                         text: response
@@ -579,7 +583,7 @@
                                             "_token": "{{ csrf_token() }}",
                                             "bindID": $('#bindIDselect').val()
                                         },
-                                        success: function(response) {
+                                        success: function (response) {
                                             console.log(response.transaction_id);
                                             localStorage.setItem('trans', JSON.stringify(response
                                                 .transaction_id));
@@ -587,7 +591,7 @@
                                             $('#confirmPayment').modal('show');
                                             timerResend();
                                         },
-                                        error: function(response) {
+                                        error: function (response) {
                                             $('#loader').modal('hide');
                                             Swal.fire({
                                                 title: "Error",
@@ -613,7 +617,7 @@
                         } else {
                             var offline_payment_active = '{{ addon_is_activated('offline_payment') }}';
                             if (offline_payment_active == 'true' && $('.offline_payment_option').is(":checked") && $(
-                                    '#trx_id')
+                                '#trx_id')
                                 .val() == '') {
                                 AIZ.plugins.notify('danger',
                                     '{{ translate('You need to put Transaction id') }}');
@@ -644,7 +648,7 @@
             }
         }
 
-        $(document).on("click", "#coupon-apply", function() {
+        $(document).on("click", "#coupon-apply", function () {
             var data = new FormData($('#apply-coupon-form')[0]);
 
             $.ajax({
@@ -657,7 +661,7 @@
                 cache: false,
                 contentType: false,
                 processData: false,
-                success: function(data, textStatus, jqXHR) {
+                success: function (data, textStatus, jqXHR) {
                     AIZ.plugins.notify(data.response_message.response, data.response_message.message);
                     $("#cart_summary").html(data.html);
                     let html = document.getElementById("summary").innerHTML;
@@ -666,7 +670,7 @@
             })
         });
 
-        $(document).on("click", "#coupon-remove", function() {
+        $(document).on("click", "#coupon-remove", function () {
             var data = new FormData($('#remove-coupon-form')[0]);
 
             $.ajax({
@@ -679,7 +683,7 @@
                 cache: false,
                 contentType: false,
                 processData: false,
-                success: function(data, textStatus, jqXHR) {
+                success: function (data, textStatus, jqXHR) {
                     $("#cart_summary").html(data);
                     let html = document.getElementById("summary").innerHTML;
                     document.getElementById("summary_modal").innerHTML = html;
@@ -699,7 +703,7 @@
     </script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#verificationCode').inputmask('999999');
         });
     </script>
